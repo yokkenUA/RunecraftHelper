@@ -37,6 +37,12 @@ namespace RunecraftHelper
 
         private readonly object gate = new();
         private Dictionary<string, double> pricesExalted = new(StringComparer.Ordinal);
+        // Same prices keyed by the item's internal art id (icon filename, e.g. "CurrencyUpgradeToRare").
+        // Language-independent — used to match items read off a non-English game client.
+        private Dictionary<string, double> pricesByArt = new(StringComparer.Ordinal);
+        // art-id → poe.ninja English display name. Lets the overlay show a readable English label for
+        // items read off a non-English client (whose localized name the ImGui font may not render).
+        private Dictionary<string, string> namesByArt = new(StringComparer.Ordinal);
 
         public PriceSyncStatus Status { get; private set; } = PriceSyncStatus.Idle;
         public DateTime LastSyncUtc { get; private set; } = DateTime.MinValue;
@@ -60,6 +66,35 @@ namespace RunecraftHelper
             }
         }
 
+        // Match by internal art id (icon filename without extension), e.g. "CurrencyUpgradeToRare".
+        // Works regardless of game-client language. Caller should try this first, then fall back
+        // to TryGetExaltedPrice(displayName) for English clients / unmapped items.
+        public bool TryGetPriceByArtId(string artId, out double exaltedPrice)
+        {
+            exaltedPrice = 0;
+            if (string.IsNullOrEmpty(artId)) return false;
+            var key = Normalize(artId);
+            if (key.Length == 0) return false;
+            lock (this.gate)
+            {
+                return this.pricesByArt.TryGetValue(key, out exaltedPrice);
+            }
+        }
+
+        // poe.ninja English display name for an internal art id, e.g. "ColdRune" → "...". Used only to
+        // show a readable label on non-English clients; matching/pricing is still by art id.
+        public bool TryGetNameByArtId(string artId, out string name)
+        {
+            name = string.Empty;
+            if (string.IsNullOrEmpty(artId)) return false;
+            var key = Normalize(artId);
+            if (key.Length == 0) return false;
+            lock (this.gate)
+            {
+                return this.namesByArt.TryGetValue(key, out name!);
+            }
+        }
+
         // Load a previously-saved snapshot. Returns true if the file existed AND its data is
         // within the TTL — caller skips a network refresh in that case. A return of false with
         // a populated Status (Ready) means stale data is loaded and usable while a refresh runs.
@@ -75,6 +110,12 @@ namespace RunecraftHelper
                 lock (this.gate)
                 {
                     this.pricesExalted = new Dictionary<string, double>(dto.Prices, StringComparer.Ordinal);
+                    this.pricesByArt = dto.ArtPrices != null
+                        ? new Dictionary<string, double>(dto.ArtPrices, StringComparer.Ordinal)
+                        : new Dictionary<string, double>(StringComparer.Ordinal);
+                    this.namesByArt = dto.ArtNames != null
+                        ? new Dictionary<string, string>(dto.ArtNames, StringComparer.Ordinal)
+                        : new Dictionary<string, string>(StringComparer.Ordinal);
                     this.DivineToExaltedRate = dto.DivineToExaltedRate;
                     this.LastSyncUtc = dto.LastSyncUtc;
                     this.Status = PriceSyncStatus.Ready;
@@ -110,6 +151,8 @@ namespace RunecraftHelper
                     throw new InvalidOperationException("League name is empty.");
 
                 var aggregated = new Dictionary<string, double>(StringComparer.Ordinal);
+                var aggregatedArt = new Dictionary<string, double>(StringComparer.Ordinal);
+                var aggregatedArtNames = new Dictionary<string, string>(StringComparer.Ordinal);
                 double divToEx = 0;
 
                 var leagueParam = Uri.EscapeDataString(league.Trim()).Replace("%20", "+");
@@ -131,14 +174,26 @@ namespace RunecraftHelper
                         if (localRate > 0) divToEx = localRate;
 
                         var nameById = new Dictionary<string, string>(StringComparer.Ordinal);
+                        var artById = new Dictionary<string, string>(StringComparer.Ordinal);
                         if (parsed["items"] is JArray itemsArr)
                         {
                             foreach (var it in itemsArr)
                             {
                                 var id = it["id"]?.Value<string>();
+                                if (string.IsNullOrEmpty(id)) continue;
                                 var name = it["name"]?.Value<string>();
-                                if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(name))
-                                    nameById[id!] = name!;
+                                if (!string.IsNullOrEmpty(name)) nameById[id!] = name!;
+                                // image filename (no extension) is the game's internal art id, e.g.
+                                // ".../CurrencyUpgradeToRare.png" → "CurrencyUpgradeToRare".
+                                var art = ExtractArtId(it["image"]?.Value<string>());
+                                if (!string.IsNullOrEmpty(art)) artById[id!] = art!;
+                                // art-id → English name, for ALL items (even unpriced ones), so the
+                                // overlay can show a readable label regardless of client language.
+                                if (!string.IsNullOrEmpty(art) && !string.IsNullOrEmpty(name))
+                                {
+                                    var ak = Normalize(art!);
+                                    if (ak.Length > 0) aggregatedArtNames[ak] = name!;
+                                }
                             }
                         }
 
@@ -149,10 +204,18 @@ namespace RunecraftHelper
                                 var id = ln["id"]?.Value<string>();
                                 var primary = ln["primaryValue"]?.Value<double?>() ?? 0;
                                 if (string.IsNullOrEmpty(id) || primary <= 0) continue;
-                                if (!nameById.TryGetValue(id!, out var name)) continue;
-                                var key = Normalize(name);
-                                if (key.Length == 0) continue;
-                                aggregated[key] = primary * localRate;
+                                var price = primary * localRate;
+
+                                if (nameById.TryGetValue(id!, out var name))
+                                {
+                                    var key = Normalize(name);
+                                    if (key.Length > 0) aggregated[key] = price;
+                                }
+                                if (artById.TryGetValue(id!, out var art))
+                                {
+                                    var artKey = Normalize(art);
+                                    if (artKey.Length > 0) aggregatedArt[artKey] = price;
+                                }
                             }
                         }
                     }
@@ -178,6 +241,8 @@ namespace RunecraftHelper
                 lock (this.gate)
                 {
                     this.pricesExalted = aggregated;
+                    this.pricesByArt = aggregatedArt;
+                    this.namesByArt = aggregatedArtNames;
                     this.DivineToExaltedRate = divToEx;
                     this.LastSyncUtc = DateTime.UtcNow;
                     this.Status = PriceSyncStatus.Ready;
@@ -191,6 +256,8 @@ namespace RunecraftHelper
                     LastSyncUtc = this.LastSyncUtc,
                     DivineToExaltedRate = divToEx,
                     Prices = aggregated,
+                    ArtPrices = aggregatedArt,
+                    ArtNames = aggregatedArtNames,
                 };
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
                 File.WriteAllText(filePath, JsonConvert.SerializeObject(dto, Formatting.Indented));
@@ -219,11 +286,29 @@ namespace RunecraftHelper
             return sb.ToString();
         }
 
+        // poe.ninja image URLs end with the item's art asset, e.g.
+        //   "/gen/image/<base64>/<hash>/CurrencyUpgradeToRare.png"
+        // The filename (without extension) is the game's language-independent internal art id.
+        public static string ExtractArtId(string? imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl)) return string.Empty;
+            var s = imageUrl;
+            int q = s.IndexOf('?');
+            if (q >= 0) s = s.Substring(0, q);
+            int slash = s.LastIndexOf('/');
+            if (slash >= 0) s = s.Substring(slash + 1);
+            int dot = s.LastIndexOf('.');
+            if (dot > 0) s = s.Substring(0, dot);
+            return s;
+        }
+
         private sealed class PriceCacheDto
         {
             public DateTime LastSyncUtc { get; set; }
             public double DivineToExaltedRate { get; set; }
             public Dictionary<string, double> Prices { get; set; } = new();
+            public Dictionary<string, double> ArtPrices { get; set; } = new();
+            public Dictionary<string, string> ArtNames { get; set; } = new();
         }
     }
 }
