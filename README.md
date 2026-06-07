@@ -12,6 +12,14 @@ total value. This lets you compare combination outcomes at a glance without leav
 - Reads the visible Runeshape reward rows directly from UI (no screen OCR).
 - Resolves the panel by **UI Flags fingerprint with backtracking**, so it survives child-index
   shuffles between game restarts and patches instead of breaking on a fixed path.
+- **Language-independent reward matching.** The panel only shows the reward as *localized* text, so
+  matching that text to poe.ninja (English) breaks on non-English clients. Instead the plugin
+  translates the localized name → the item's internal **art-id** via the game's own `BaseItemTypes`
+  data, then prices/labels by that art-id. Works on any client language (EN / RU / KR / …), and the
+  quantity prefix/suffix (`"6x …"` vs `"… (6)"`) is parsed for both locale styles.
+- **Readable labels regardless of font.** Shows poe.ninja's English name for each reward (falling
+  back to the art-id, then the localized name), so labels stay legible even when the overlay font
+  can't render the client's glyphs.
 - Pulls currency/item prices from poe.ninja and caches them on disk with a configurable TTL.
 - Shows per-reward total value in Exalted Orbs (uses the live Divine→Exalted rate).
 
@@ -59,9 +67,8 @@ This plugin is meant to live inside a GH source tree, because it references
 | **League** | `Runes of Aldur` | poe.ninja PoE2 league slug; update each league launch. |
 | **Refresh interval (min)** | `60` | How long cached prices stay valid before a re-fetch (5–60). |
 
-The settings panel also has a **Debug → last panel-resolve trace** section that shows how the
-plugin walked the UI tree on the most recent frame — useful if a game patch moves the panel and
-the fingerprints need updating.
+The settings panel also shows the price-cache status (last sync, items cached, Divine→Exalted rate)
+and a **Refresh now** button.
 
 ## Credits
 
