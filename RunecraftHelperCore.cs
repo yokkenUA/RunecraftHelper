@@ -51,12 +51,32 @@ namespace RunecraftHelper
         private const int IsVisibleBit = 0x0B;
         private const uint IsVisibleMask = 1u << IsVisibleBit; // = 0x800
 
+        // ── Language-independent reward matching (offsets verified live on PoE2 0.5.x, see GHIDRA.md §8) ──
+        // The visible reward is shown only as LOCALIZED text, so matching that text to poe.ninja
+        // (English) fails on non-English clients. Instead we translate the localized name → the
+        // item's language-independent art-id via the game's own BaseItemTypes table:
+        //   BaseItemType row (stride 0x168):  +0x20 → localized name buffer,  +0x7C → +0x08 → art ".dds".
+        // We reach BaseItemTypes through the loaded Expedition2Recipes table (recipe row +0x34 holds the
+        // shared BaseItemTypes table object), found by walking the recipe panel's pointer graph to the
+        // dat-file handle (vtable at +0x00, "…Expedition2Recipes.dat" path at +0x08, rows-vector at +0x28).
+        private const int RecipeStride = 0xBA;
+        private const int RecipeRewardTableOffset = 0x34;  // recipe row → BaseItemTypes table object
+        private const int TableRowsVectorOffset = 0x28;    // table object → ptr to {begin,end} rows vector
+        private const int DatPathOffset = 0x08;            // dat-file handle/table object → path string ptr
+        private const int BaseItemTypeStride = 0x168;
+        private const int BaseItemTypeNameOffset = 0x20;   // → localized display-name buffer
+        private const int BaseItemTypeVisualOffset = 0x7C; // → visual-identity obj; its +0x08 → art ".dds"
+        private const int VisualArtOffset = 0x08;
+
         private IntPtr processHandle = IntPtr.Zero;
         private int handlePid;
 
         private readonly List<Recipe> recipes = new();
         private readonly PriceCache priceCache = new();
         private DateTime nextAutoRefreshCheckUtc = DateTime.MinValue;
+
+        // {Normalize(localizedName) → art-id}, built once per game session from BaseItemTypes.
+        private Dictionary<string, string> nameToArtId = new(StringComparer.Ordinal);
 
         private string SettingPathname => Path.Join(this.DllDirectory, "config", "settings.txt");
         private string PriceCachePathname => Path.Join(this.DllDirectory, "config", "prices.json");
@@ -139,6 +159,7 @@ namespace RunecraftHelper
                 return;
             }
 
+            this.BuildNameToArtIfNeeded(panel);
             this.ReadVisibleRecipes(panel);
             if (this.recipes.Count == 0) return;
 
@@ -250,9 +271,124 @@ namespace RunecraftHelper
                 var raw = this.ReadStdWString(label + NameWStringOffset);
                 if (string.IsNullOrEmpty(raw)) continue;
 
-                SplitCountAndName(raw, out var count, out var name);
-                this.recipes.Add(new Recipe(count, name));
+                ParseNameAndCount(raw, out var count, out var name);
+                this.nameToArtId.TryGetValue(name.Trim(), out var artId);
+                this.recipes.Add(new Recipe(count, name, artId ?? string.Empty));
             }
+        }
+
+        // ── Reward art-id dictionary (localized name → language-independent art-id) ──────────
+
+        // Build {Normalize(localizedName) → artId} from the game's BaseItemTypes table, once per
+        // session (the table is loaded globally and stable until the game restarts). Reached via the
+        // Expedition2Recipes table found by walking the open panel's pointer graph.
+        private void BuildNameToArtIfNeeded(IntPtr panel)
+        {
+            if (this.nameToArtId.Count > 0) return;
+
+            var handle = this.FindRecipeTableHandle(panel);
+            if (handle == IntPtr.Zero) return;
+
+            // Expedition2Recipes rows: handle+0x28 → vecObj{begin,end}.
+            var recVec = this.ReadPtr(handle + TableRowsVectorOffset);
+            var recBegin = this.ReadPtr(recVec);
+            var recEnd = this.ReadPtr(recVec + 8);
+            if (recBegin == IntPtr.Zero || (long)recEnd <= (long)recBegin) return;
+            long recCount = ((long)recEnd - (long)recBegin) / RecipeStride;
+            if (recCount <= 0 || recCount > 5000) return;
+
+            // BaseItemTypes table object = first recipe's reward-FK table ptr (recipe+0x34), shared by all.
+            IntPtr bitTable = IntPtr.Zero;
+            for (long k = 0; k < recCount && bitTable == IntPtr.Zero; k++)
+                bitTable = this.ReadPtr(recBegin + (nint)(k * RecipeStride) + RecipeRewardTableOffset);
+            if (bitTable == IntPtr.Zero) return;
+
+            var bitVec = this.ReadPtr(bitTable + TableRowsVectorOffset);
+            var bitBegin = this.ReadPtr(bitVec);
+            var bitEnd = this.ReadPtr(bitVec + 8);
+            if (bitBegin == IntPtr.Zero || (long)bitEnd <= (long)bitBegin) return;
+            long bitCount = ((long)bitEnd - (long)bitBegin) / BaseItemTypeStride;
+            if (bitCount <= 0 || bitCount > 200000) return;
+
+            var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+            for (long j = 0; j < bitCount; j++)
+            {
+                var row = bitBegin + (nint)(j * BaseItemTypeStride);
+                var name = this.ReadUtf16Z(this.ReadPtr(row + BaseItemTypeNameOffset), 64);
+                if (name.Length < 2) continue;
+                var vis = this.ReadPtr(row + BaseItemTypeVisualOffset);
+                if (vis == IntPtr.Zero) continue;
+                var art = ArtIdFromPath(this.ReadUtf16Z(this.ReadPtr(vis + VisualArtOffset), 128));
+                if (art.Length == 0) continue;
+                // Key by the RAW localized name (trimmed). NOT PriceCache.Normalize — that keeps only
+                // a-z0-9 and would collapse every Cyrillic/CJK name to the empty string.
+                dict[name.Trim()] = art; // name variants share an art-id; last wins
+            }
+
+            if (dict.Count > 0) this.nameToArtId = dict;
+        }
+
+        // Walk the open panel's pointer graph (BFS) to the loaded Expedition2Recipes dat-file handle:
+        // a heap object whose +0x00 is an in-module vtable and whose +0x08 points to a path string
+        // containing "Expedition2Recipes". The vtable gate keeps the (remote) string read off the
+        // vast majority of nodes. Bounded by visited count + depth so it can't run away.
+        private IntPtr FindRecipeTableHandle(IntPtr panel)
+        {
+            var seen = new HashSet<long> { (long)panel };
+            var queue = new Queue<(IntPtr addr, int depth)>();
+            queue.Enqueue((panel, 0));
+            int visited = 0;
+            while (queue.Count > 0 && visited < 40000)
+            {
+                var (addr, depth) = queue.Dequeue();
+                visited++;
+
+                if (IsExeAddr(this.ReadPtr(addr)))
+                {
+                    var pathPtr = this.ReadPtr(addr + DatPathOffset);
+                    if (pathPtr != IntPtr.Zero)
+                    {
+                        var s = this.ReadUtf16Z(pathPtr, 80);
+                        if (s.Contains("Expedition2Recipes", StringComparison.Ordinal))
+                            return addr;
+                    }
+                }
+
+                if (depth >= 7) continue;
+                var buf = new byte[0x180];
+                if (!ReadProcessMemory(this.processHandle, addr, buf, (uint)buf.Length, out var got)) continue;
+                for (int o = 0; o + 8 <= got; o += 8)
+                {
+                    long v = BitConverter.ToInt64(buf, o);
+                    if ((ulong)v < 0x10000 || (ulong)v > 0x7FFFFFFFFFFF) continue;
+                    if (seen.Add(v)) queue.Enqueue(((IntPtr)v, depth + 1));
+                }
+            }
+            return IntPtr.Zero;
+        }
+
+        // True for addresses inside a loaded module (exe/dll) — user-mode module region is ≥ ~0x7FF0…,
+        // far above heap allocations (~0x000002…). Cheap gate for "looks like a vtable".
+        private static bool IsExeAddr(IntPtr p) => (ulong)p >= 0x7FF000000000ul && (ulong)p < 0x800000000000ul;
+
+        // Read a NUL-terminated UTF-16 string from a raw buffer pointer (the .dat string-column layout
+        // — a direct char* into the file's string heap, not an MSVC std::wstring).
+        private string ReadUtf16Z(IntPtr ptr, int maxChars)
+        {
+            if (ptr == IntPtr.Zero) return string.Empty;
+            ulong u = (ulong)ptr;
+            if (u < 0x10000 || u > 0x7FFFFFFFFFFF) return string.Empty;
+            var buf = new byte[maxChars * 2];
+            if (!ReadProcessMemory(this.processHandle, ptr, buf, (uint)buf.Length, out var read)) return string.Empty;
+            int n = read / 2;
+            var sb = new StringBuilder(n);
+            for (int i = 0; i < n; i++)
+            {
+                char c = (char)BitConverter.ToUInt16(buf, i * 2);
+                if (c == '\0') break;
+                sb.Append(c);
+            }
+            return sb.ToString();
         }
 
         // ── Price refresh polling ─────────────────────────────────────────
@@ -300,9 +436,33 @@ namespace RunecraftHelper
                     ImGui.TableSetColumnIndex(0);
                     ImGui.TextDisabled($"{r.Count}x");
                     ImGui.TableSetColumnIndex(1);
-                    ImGui.TextUnformatted(r.Name);
+                    // Display name priority (the ImGui font may not render the localized name):
+                    //   1) poe.ninja English name (by art-id)
+                    //   2) the art-id itself (readable ASCII, e.g. "ColdRune")
+                    //   3) the in-game localized name (last resort)
+                    string display;
+                    if (!string.IsNullOrEmpty(r.ArtId)
+                        && this.priceCache.TryGetNameByArtId(r.ArtId, out var enName)
+                        && !string.IsNullOrEmpty(enName))
+                    {
+                        display = enName;
+                    }
+                    else if (!string.IsNullOrEmpty(r.ArtId))
+                    {
+                        display = r.ArtId;
+                    }
+                    else
+                    {
+                        display = r.Name;
+                    }
+                    ImGui.TextUnformatted(display);
                     ImGui.TableSetColumnIndex(2);
-                    if (this.priceCache.TryGetExaltedPrice(r.Name, out var unit) && unit > 0)
+                    // Prefer the language-independent art-id match; fall back to the localized name
+                    // (works on English clients / when the art-id dict couldn't be built).
+                    bool havePrice =
+                        (!string.IsNullOrEmpty(r.ArtId) && this.priceCache.TryGetPriceByArtId(r.ArtId, out var unit) && unit > 0)
+                        || (this.priceCache.TryGetExaltedPrice(r.Name, out unit) && unit > 0);
+                    if (havePrice)
                     {
                         var total = unit * Math.Max(1, r.Count);
                         ImGui.TextUnformatted(FormatExalted(total));
@@ -321,18 +481,53 @@ namespace RunecraftHelper
 
         // ── Parsing / formatting ─────────────────────────────────────────
 
-        private static void SplitCountAndName(string raw, out int count, out string name)
+        // The reward label embeds the quantity in a locale-dependent way:
+        //   "<name> (<count>)"  — e.g. ru "Деталь доспеха (6)"
+        //   "<count>x <name>"   — e.g. ko/en "6x 방어구 장인의 고철" / "6x Armourer's Scrap"
+        // We strip whichever form is present so `name` is just the localized reward item name.
+        private static void ParseNameAndCount(string raw, out int count, out string name)
         {
-            count = 0;
-            name = raw;
-            if (string.IsNullOrEmpty(raw)) return;
+            count = 1;
+            name = raw?.Trim() ?? string.Empty;
+            if (name.Length == 0) return;
 
+            // leading "<N>x " (count first)
             int i = 0;
-            while (i < raw.Length && char.IsDigit(raw[i])) i++;
-            if (i == 0 || i >= raw.Length || raw[i] != 'x' || i + 1 >= raw.Length || raw[i + 1] != ' ') return;
+            while (i < name.Length && char.IsDigit(name[i])) i++;
+            if (i > 0 && i < name.Length && (name[i] == 'x' || name[i] == 'X'))
+            {
+                if (int.TryParse(name.AsSpan(0, i), out var c) && c > 0)
+                {
+                    count = c;
+                    name = name[(i + 1)..].TrimStart();
+                    return;
+                }
+            }
 
-            if (!int.TryParse(raw.AsSpan(0, i), out count)) count = 0;
-            name = raw[(i + 2)..];
+            // trailing "(<N>)" (count last)
+            if (name[^1] == ')')
+            {
+                int open = name.LastIndexOf('(');
+                if (open > 0)
+                {
+                    var inner = name.Substring(open + 1, name.Length - open - 2).Trim();
+                    if (int.TryParse(inner, out var c) && c > 0)
+                    {
+                        count = c;
+                        name = name[..open].TrimEnd();
+                    }
+                }
+            }
+        }
+
+        // "Art/2DItems/Currency/CurrencyArmourQuality.dds" → "CurrencyArmourQuality" (poe.ninja art-id).
+        private static string ArtIdFromPath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return string.Empty;
+            int slash = path.LastIndexOf('/');
+            var seg = slash >= 0 ? path[(slash + 1)..] : path;
+            int dot = seg.IndexOf('.');
+            return dot > 0 ? seg[..dot] : seg;
         }
 
         private static string FormatExalted(double value)
@@ -386,6 +581,9 @@ namespace RunecraftHelper
             }
 
             this.handlePid = 0;
+            // The name→art-id dict is built from the client's localized BaseItemTypes names, so it's
+            // language-specific. Drop it on process change so it rebuilds (e.g. after a language switch).
+            this.nameToArtId = new Dictionary<string, string>(StringComparer.Ordinal);
         }
 
         private bool IsUiElementVisible(IntPtr addr)
@@ -465,6 +663,6 @@ namespace RunecraftHelper
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint dwSize, out int lpNumberOfBytesRead);
 
-        private readonly record struct Recipe(int Count, string Name);
+        private readonly record struct Recipe(int Count, string Name, string ArtId);
     }
 }
