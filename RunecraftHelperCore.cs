@@ -9,6 +9,7 @@ namespace RunecraftHelper
     using GameHelper;
     using GameHelper.Plugin;
     using GameHelper.RemoteEnums;
+    using GameOffsets.Objects.UiElement;
     using ImGuiNET;
     using Newtonsoft.Json;
 
@@ -53,9 +54,15 @@ namespace RunecraftHelper
 
         // ── Language-independent reward matching (offsets verified live on PoE2 0.5.x, see GHIDRA.md §8) ──
         // The visible reward is shown only as LOCALIZED text, so matching that text to poe.ninja
-        // (English) fails on non-English clients. Instead we translate the localized name → the
-        // item's language-independent art-id via the game's own BaseItemTypes table:
-        //   BaseItemType row (stride 0x168):  +0x20 → localized name buffer,  +0x7C → +0x08 → art ".dds".
+        // (English) fails on non-English clients. We translate the localized name → the item's
+        // language-independent BaseItemType.Id via the game's own BaseItemTypes table:
+        //   BaseItemType row (stride 0x168):
+        //     +0x00 → meta-path "Metadata/Items/.../<Id>" (Id last segment is the canonical key
+        //             — its trailing digit, when present, encodes the currency tier:
+        //             Regal=CurrencyUpgradeMagicToRare, Greater=…2, Perfect=…3).
+        //     +0x20 → localized display-name buffer.
+        //     +0x7C → +0x08 → art ".dds" path (used to NOT be enough on its own — 3 currency tiers
+        //             share one .dds icon, so we now use +0x00's tiered Id instead).
         // We reach BaseItemTypes through the loaded Expedition2Recipes table (recipe row +0x34 holds the
         // shared BaseItemTypes table object), found by walking the recipe panel's pointer graph to the
         // dat-file handle (vtable at +0x00, "…Expedition2Recipes.dat" path at +0x08, rows-vector at +0x28).
@@ -64,9 +71,10 @@ namespace RunecraftHelper
         private const int TableRowsVectorOffset = 0x28;    // table object → ptr to {begin,end} rows vector
         private const int DatPathOffset = 0x08;            // dat-file handle/table object → path string ptr
         private const int BaseItemTypeStride = 0x168;
+        private const int BaseItemTypeIdOffset = 0x00;     // → meta-path "Metadata/Items/.../<Id>"
         private const int BaseItemTypeNameOffset = 0x20;   // → localized display-name buffer
-        private const int BaseItemTypeVisualOffset = 0x7C; // → visual-identity obj; its +0x08 → art ".dds"
-        private const int VisualArtOffset = 0x08;
+        private const int BaseItemTypeArtOffset = 0x7C;    // → sub-object; +0x08 → ".dds" art path
+        private const int ArtSubPathOffset = 0x08;         //   art path = poe.ninja image-id (see GHIDRA.md §8)
 
         private IntPtr processHandle = IntPtr.Zero;
         private int handlePid;
@@ -75,8 +83,13 @@ namespace RunecraftHelper
         private readonly PriceCache priceCache = new();
         private DateTime nextAutoRefreshCheckUtc = DateTime.MinValue;
 
-        // {Normalize(localizedName) → art-id}, built once per game session from BaseItemTypes.
-        private Dictionary<string, string> nameToArtId = new(StringComparer.Ordinal);
+        // {localizedName → (metaId, ddsArt)}, built once per game session from BaseItemTypes.
+        // metaId  = BaseItemType.Id last segment  — matches poe.ninja's tiered key for shared-icon
+        //           families (Regal: …/…2/…3).
+        // ddsArt  = .dds art filename             — matches poe.ninja's image-id for distinct-icon
+        //           families (Jeweller's: …01/02/03) where the game's BaseItemType.Id diverges.
+        // The price lookup tries metaId first, then ddsArt (see TryGetRecipePrice).
+        private Dictionary<string, (string MetaId, string DdsArt)> nameToArtId = new(StringComparer.Ordinal);
 
         private string SettingPathname => Path.Join(this.DllDirectory, "config", "settings.txt");
         private string PriceCachePathname => Path.Join(this.DllDirectory, "config", "prices.json");
@@ -106,14 +119,23 @@ namespace RunecraftHelper
 
         public override void DrawSettings()
         {
-            ImGui.TextWrapped("RunecraftHelper: window appears while the in-game Runeshape Combinations panel " +
-                              "is open, listing the rewards currently visible. Prices come from poe.ninja.");
+            ImGui.TextWrapped("RunecraftHelper: while the in-game Runeshape Combinations panel is open, the " +
+                              "poe.ninja Exalted price is drawn on the right edge of each visible reward row. " +
+                              "The reward name shown is the game's own (any client language).");
 
             ImGui.Spacing();
             ImGui.Separator();
 
             ImGui.InputText("League", ref this.Settings.League, 64);
             ImGui.SliderInt("Refresh interval (min)", ref this.Settings.CacheTtlMinutes, 5, 60);
+
+            int colorMode = (int)this.Settings.ColorMode;
+            if (ImGui.Combo("Price color", ref colorMode,
+                    "Off\0Relative (vs. median on screen)\0Absolute (Exalted thresholds)\0"))
+                this.Settings.ColorMode = (RewardColorMode)colorMode;
+
+            ImGui.SliderFloat("Price X offset", ref this.Settings.OverlayXOffset, -400f, 400f, "%.0f px");
+            ImGui.Checkbox("Show debug list window", ref this.Settings.ShowWindow);
 
             ImGui.Spacing();
 
@@ -150,6 +172,16 @@ namespace RunecraftHelper
 
             this.MaybeAutoRefreshPrices();
 
+            // When neither the game nor GameHelper is the foreground window the game hides its
+            // panels; our overlay must follow suit, otherwise the price text floats over the
+            // desktop / other apps (the game stays InGameState while alt-tabbed out).
+            if (!Core.Process.Foreground &&
+                System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle != GetForegroundWindow())
+            {
+                this.recipes.Clear();
+                return;
+            }
+
             if (!this.EnsureProcess()) return;
 
             var panel = this.ResolvePanel();
@@ -163,7 +195,8 @@ namespace RunecraftHelper
             this.ReadVisibleRecipes(panel);
             if (this.recipes.Count == 0) return;
 
-            this.DrawWindow();
+            this.DrawOverlay();
+            if (this.Settings.ShowWindow) this.DrawWindow();
         }
 
         // ── Panel resolution ──────────────────────────────────────────────
@@ -272,8 +305,11 @@ namespace RunecraftHelper
                 if (string.IsNullOrEmpty(raw)) continue;
 
                 ParseNameAndCount(raw, out var count, out var name);
-                this.nameToArtId.TryGetValue(name.Trim(), out var artId);
-                this.recipes.Add(new Recipe(count, name, artId ?? string.Empty));
+                this.nameToArtId.TryGetValue(name.Trim(), out var keys);
+                // RowAddress is the visible row UiElement — re-resolved every frame here, so the
+                // overlay always draws against fresh (post-scroll) screen coordinates. Name is kept
+                // only as a localized-name price fallback for English clients; it is never displayed.
+                this.recipes.Add(new Recipe(count, row, keys.MetaId ?? string.Empty, keys.DdsArt ?? string.Empty, name));
             }
         }
 
@@ -310,19 +346,26 @@ namespace RunecraftHelper
             long bitCount = ((long)bitEnd - (long)bitBegin) / BaseItemTypeStride;
             if (bitCount <= 0 || bitCount > 200000) return;
 
-            var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+            var dict = new Dictionary<string, (string, string)>(StringComparer.Ordinal);
             for (long j = 0; j < bitCount; j++)
             {
                 var row = bitBegin + (nint)(j * BaseItemTypeStride);
                 var name = this.ReadUtf16Z(this.ReadPtr(row + BaseItemTypeNameOffset), 64);
                 if (name.Length < 2) continue;
-                var vis = this.ReadPtr(row + BaseItemTypeVisualOffset);
-                if (vis == IntPtr.Zero) continue;
-                var art = ArtIdFromPath(this.ReadUtf16Z(this.ReadPtr(vis + VisualArtOffset), 128));
-                if (art.Length == 0) continue;
+                // metaId: BaseItemType.Id's last meta-path segment (e.g. "CurrencyUpgradeMagicToRare2").
+                // Its trailing digit encodes the currency tier for shared-icon families (Regal …/…2/…3).
+                var metaId = LastMetaSegment(this.ReadUtf16Z(this.ReadPtr(row + BaseItemTypeIdOffset), 128));
+                // ddsArt: the .dds art filename (= poe.ninja's image-id). Distinct per tier for families
+                // whose BaseItemType.Id diverges from the art name (Jeweller's "…01/02/03"). row+0x7C →
+                // sub-object, +0x08 → "Art/2DItems/.../<ArtId>.dds".
+                var artSub = this.ReadPtr(row + BaseItemTypeArtOffset);
+                var ddsArt = artSub == IntPtr.Zero
+                    ? string.Empty
+                    : ArtIdFromDdsPath(this.ReadUtf16Z(this.ReadPtr(artSub + ArtSubPathOffset), 128));
+                if (metaId.Length == 0 && ddsArt.Length == 0) continue;
                 // Key by the RAW localized name (trimmed). NOT PriceCache.Normalize — that keeps only
                 // a-z0-9 and would collapse every Cyrillic/CJK name to the empty string.
-                dict[name.Trim()] = art; // name variants share an art-id; last wins
+                dict[name.Trim()] = (metaId, ddsArt);
             }
 
             if (dict.Count > 0) this.nameToArtId = dict;
@@ -409,74 +452,249 @@ namespace RunecraftHelper
             this.priceCache.StartRefresh(this.Settings.League, this.PriceCachePathname);
         }
 
-        // ── Drawing ───────────────────────────────────────────────────────
+        // ── Drawing (overlay) ─────────────────────────────────────────────
+        //
+        // Instead of a separate ImGui window, the reward NAME the player already reads off the
+        // game's own panel (in their client language) is left untouched, and we paint just the
+        // PRICE onto the right edge of each visible row via the foreground draw list. Row screen
+        // rects are computed from each row UiElement's RelativePosition / scale chain — the exact
+        // arithmetic GameHelper's UiElementBase.Position uses (those APIs are internal to the GH
+        // assembly, so the math is mirrored here over the public UiElementBaseOffset struct).
+        // The horizontal letterbox cull offset (Core.GameCull) is also GH-internal and omitted;
+        // it is 0 on non-letterboxed displays (the common case).
 
+        // Per-frame cache of ancestor UiElementBaseOffsets. All visible rows share the same parent
+        // chain up to GameUi, so without this each row would re-read the whole chain. Cleared at the
+        // top of every DrawOverlay.
+        private readonly Dictionary<long, UiElementBaseOffset> frameBaseCache = new();
+
+        // Scratch list of resolved rows, rebuilt each frame (kept as a field to avoid per-frame allocs).
+        private readonly List<(Vector2 Pos, Vector2 Size, double Total)> overlayRows = new();
+
+        private const uint ColorWhite = 0xFFFFFFFFu;
+        private const uint ColorGreen = 0xFF55FF55u;
+        private const uint ColorYellow = 0xFF55FFFFu;
+        private const uint ColorRed = 0xFF4040FFu;
+        private const uint ColorShadow = 0xCC000000u;
+
+        // Debug list window: one row per visible reward showing the language-independent metaId we
+        // resolved, the price we found for it (or "—"), and the raw in-game name. Lets the user see
+        // exactly which reward failed to map to a price and what key it tried.
         private void DrawWindow()
         {
-            ImGui.SetNextWindowSize(new Vector2(360, 400), ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(new Vector2(460, 340), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin($"Runeshape Rewards ({this.recipes.Count})###RunecraftHelper"))
             {
                 ImGui.End();
                 return;
             }
 
-            if (ImGui.BeginTable("recipes", 3,
-                    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit))
+            if (ImGui.BeginTable("recipes", 5,
+                    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit |
+                    ImGuiTableFlags.Resizable))
             {
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 32f);
-                ImGui.TableSetupColumn("Reward", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("ex", ImGuiTableColumnFlags.WidthFixed, 80f);
+                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, 30f);
+                ImGui.TableSetupColumn("metaId", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("dds art", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("ex", ImGuiTableColumnFlags.WidthFixed, 72f);
+                ImGui.TableSetupColumn("name (poe.ninja)", ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
 
-                for (int i = 0; i < this.recipes.Count; i++)
+                var red = new Vector4(1f, 0.45f, 0.45f, 1f);
+                foreach (var r in this.recipes)
                 {
-                    var r = this.recipes[i];
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(0);
                     ImGui.TextDisabled($"{r.Count}x");
+
                     ImGui.TableSetColumnIndex(1);
-                    // Display name priority (the ImGui font may not render the localized name):
-                    //   1) poe.ninja English name (by art-id)
-                    //   2) the art-id itself (readable ASCII, e.g. "ColdRune")
-                    //   3) the in-game localized name (last resort)
-                    string display;
-                    if (!string.IsNullOrEmpty(r.ArtId)
-                        && this.priceCache.TryGetNameByArtId(r.ArtId, out var enName)
-                        && !string.IsNullOrEmpty(enName))
-                    {
-                        display = enName;
-                    }
-                    else if (!string.IsNullOrEmpty(r.ArtId))
-                    {
-                        display = r.ArtId;
-                    }
-                    else
-                    {
-                        display = r.Name;
-                    }
-                    ImGui.TextUnformatted(display);
+                    if (string.IsNullOrEmpty(r.MetaId)) ImGui.TextColored(red, "(none)");
+                    else ImGui.TextUnformatted(r.MetaId);
+
                     ImGui.TableSetColumnIndex(2);
-                    // Prefer the language-independent art-id match; fall back to the localized name
-                    // (works on English clients / when the art-id dict couldn't be built).
-                    bool havePrice =
-                        (!string.IsNullOrEmpty(r.ArtId) && this.priceCache.TryGetPriceByArtId(r.ArtId, out var unit) && unit > 0)
-                        || (this.priceCache.TryGetExaltedPrice(r.Name, out unit) && unit > 0);
-                    if (havePrice)
-                    {
-                        var total = unit * Math.Max(1, r.Count);
-                        ImGui.TextUnformatted(FormatExalted(total));
-                    }
+                    if (string.IsNullOrEmpty(r.DdsArt)) ImGui.TextColored(red, "(none)");
+                    else ImGui.TextUnformatted(r.DdsArt);
+
+                    ImGui.TableSetColumnIndex(3);
+                    if (this.TryGetRecipePrice(in r, out var unit))
+                        ImGui.TextUnformatted(FormatExalted(unit * Math.Max(1, r.Count)));
                     else
-                    {
                         ImGui.TextDisabled("—");
-                    }
+
+                    // Readable English label from poe.ninja (the game name is non-Latin and GH's font
+                    // can't render it). Same key priority as the price lookup.
+                    ImGui.TableSetColumnIndex(4);
+                    if (this.TryGetRecipeName(in r, out var en))
+                        ImGui.TextUnformatted(en);
+                    else
+                        ImGui.TextDisabled("—");
                 }
 
                 ImGui.EndTable();
             }
 
             ImGui.End();
+        }
+
+        private void DrawOverlay()
+        {
+            this.frameBaseCache.Clear();
+            this.overlayRows.Clear();
+
+            foreach (var r in this.recipes)
+            {
+                if (!this.TryGetRecipePrice(in r, out var unit)) continue;
+
+                if (r.RowAddress == IntPtr.Zero || !this.TryReadUiBase(r.RowAddress, out var el)) continue;
+                if ((el.Flags & IsVisibleMask) == 0) continue;
+
+                var size = this.ScaledSize(in el);
+                if (size.X <= 1f || size.Y <= 1f) continue;
+                var pos = this.ScreenPosition(in el);
+                if (float.IsNaN(pos.X) || float.IsNaN(pos.Y)) continue;
+
+                this.overlayRows.Add((pos, size, unit * Math.Max(1, r.Count)));
+            }
+
+            if (this.overlayRows.Count == 0) return;
+
+            double median = 0;
+            if (this.Settings.ColorMode == RewardColorMode.Relative)
+                median = MedianTotal(this.overlayRows);
+
+            // Draw at an explicit per-row pixel size via the font-size AddText overload, rather than
+            // mutating the shared font's global Scale per iteration (that leaks ImGui font state
+            // between rows and makes the size flip-flop). The ambient font size is read once and used
+            // only to scale the measured text width.
+            var drawList = ImGui.GetForegroundDrawList();
+            var font = ImGui.GetFont();
+            float ambient = ImGui.GetFontSize();
+            foreach (var row in this.overlayRows)
+            {
+                var text = FormatExalted(row.Total);
+                uint color = this.PickColor(row.Total, median);
+
+                // Scale the price text to the row height so it reads at any UI scale.
+                float fontPx = Math.Clamp(row.Size.Y * 0.5f, 12f, 40f);
+                float k = fontPx / ambient;
+                var ts = ImGui.CalcTextSize(text) * k;
+                float padding = 6f * k;
+                float x = row.Pos.X + row.Size.X - ts.X - padding + this.Settings.OverlayXOffset;
+                float y = row.Pos.Y + (row.Size.Y - ts.Y) * 0.5f;
+                var at = new Vector2(x, y);
+                drawList.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
+                drawList.AddText(font, fontPx, at, color, text);
+            }
+        }
+
+        private uint PickColor(double total, double median)
+        {
+            switch (this.Settings.ColorMode)
+            {
+                case RewardColorMode.Absolute:
+                    if (total >= 5.0) return ColorGreen;
+                    if (total < 0.5) return ColorRed;
+                    return ColorYellow;
+                case RewardColorMode.Relative:
+                    if (median <= 0) return ColorWhite;
+                    double ratio = total / median;
+                    if (ratio >= 1.3) return ColorGreen;
+                    if (ratio <= 0.7) return ColorRed;
+                    return ColorYellow;
+                default:
+                    return ColorWhite;
+            }
+        }
+
+        private static double MedianTotal(List<(Vector2 Pos, Vector2 Size, double Total)> rows)
+        {
+            var arr = new double[rows.Count];
+            for (int i = 0; i < arr.Length; i++) arr[i] = rows[i].Total;
+            Array.Sort(arr);
+            int n = arr.Length;
+            return n % 2 == 1 ? arr[n / 2] : (arr[n / 2 - 1] + arr[n / 2]) * 0.5;
+        }
+
+        // ── UiElement screen geometry (mirrors GameHelper.UiElementBase.Position / Size) ──────
+
+        // The game's per-axis window scale, replicated from GameHelper.GameWindowScale.GetScaleValue
+        // (which is internal). v1 is the width ratio, v2 the height ratio vs. the 2560×1600 base UI
+        // resolution; ScaleIndex selects which pair applies. The letterbox cull term is omitted (0
+        // on non-letterboxed displays).
+        private static (float W, float H) ScaleValue(byte index, float multiplier)
+        {
+            var io = ImGui.GetIO();
+            float v1 = io.DisplaySize.X / (float)UiElementBaseFuncs.BaseResolution.X;
+            float v2 = io.DisplaySize.Y / (float)UiElementBaseFuncs.BaseResolution.Y;
+            float w = multiplier, h = multiplier;
+            switch (index)
+            {
+                case 1: w *= v1; h *= v1; break;
+                case 2: w *= v2; h *= v2; break;
+                case 3: w *= v1; h *= v2; break;
+            }
+            return (w, h);
+        }
+
+        private Vector2 ScaledSize(in UiElementBaseOffset el)
+        {
+            var (w, h) = ScaleValue(el.ScaleIndex, el.LocalScaleMultiplier);
+            return new Vector2(el.UnscaledSize.X * w, el.UnscaledSize.Y * h);
+        }
+
+        private Vector2 ScreenPosition(in UiElementBaseOffset el)
+        {
+            var (w, h) = ScaleValue(el.ScaleIndex, el.LocalScaleMultiplier);
+            var p = this.GetUnscaledPosition(in el, 0);
+            return new Vector2(p.X * w, p.Y * h);
+        }
+
+        // Recursive parent-chain walk — the exact arithmetic of UiElementBase.GetUnScaledPosition.
+        private Vector2 GetUnscaledPosition(in UiElementBaseOffset el, int depth)
+        {
+            var local = new Vector2(el.RelativePosition.X, el.RelativePosition.Y);
+            if (depth >= 64 || el.ParentPtr == IntPtr.Zero ||
+                !this.TryReadBaseCached(el.ParentPtr, out var parent))
+                return local;
+
+            var parentPos = this.GetUnscaledPosition(in parent, depth + 1);
+            if (UiElementBaseFuncs.ShouldModifyPos(el.Flags))
+                parentPos += new Vector2(parent.PositionModifier.X, parent.PositionModifier.Y);
+
+            if (parent.ScaleIndex == el.ScaleIndex &&
+                parent.LocalScaleMultiplier == el.LocalScaleMultiplier)
+                return parentPos + local;
+
+            var (psw, psh) = ScaleValue(parent.ScaleIndex, parent.LocalScaleMultiplier);
+            var (msw, msh) = ScaleValue(el.ScaleIndex, el.LocalScaleMultiplier);
+            return new Vector2(
+                parentPos.X * psw / msw + local.X,
+                parentPos.Y * psh / msh + local.Y);
+        }
+
+        private bool TryReadBaseCached(IntPtr addr, out UiElementBaseOffset ui)
+        {
+            if (this.frameBaseCache.TryGetValue((long)addr, out ui)) return true;
+            if (!this.TryReadUiBase(addr, out ui)) return false;
+            this.frameBaseCache[(long)addr] = ui;
+            return true;
+        }
+
+        private static readonly int UiBaseSize =
+            System.Runtime.CompilerServices.Unsafe.SizeOf<UiElementBaseOffset>();
+        private readonly byte[] uiBaseBuf = new byte[UiBaseSize];
+
+        private bool TryReadUiBase(IntPtr addr, out UiElementBaseOffset ui)
+        {
+            ui = default;
+            ulong u = (ulong)addr;
+            if (u < 0x10000 || u > 0x7FFFFFFFFFFF) return false;
+            if (!ReadProcessMemory(this.processHandle, addr, this.uiBaseBuf, (uint)UiBaseSize, out var got)
+                || got < UiBaseSize)
+                return false;
+            ui = System.Runtime.InteropServices.MemoryMarshal.Read<UiElementBaseOffset>(this.uiBaseBuf);
+            return true;
         }
 
         // ── Parsing / formatting ─────────────────────────────────────────
@@ -520,14 +738,132 @@ namespace RunecraftHelper
             }
         }
 
-        // "Art/2DItems/Currency/CurrencyArmourQuality.dds" → "CurrencyArmourQuality" (poe.ninja art-id).
-        private static string ArtIdFromPath(string path)
+        // "Metadata/Items/Currency/CurrencyUpgradeMagicToRare2" → "CurrencyUpgradeMagicToRare2"
+        // — keeps any trailing digit that encodes the currency tier (Greater / Perfect).
+        private static string LastMetaSegment(string path)
         {
             if (string.IsNullOrEmpty(path)) return string.Empty;
             int slash = path.LastIndexOf('/');
-            var seg = slash >= 0 ? path[(slash + 1)..] : path;
-            int dot = seg.IndexOf('.');
+            return slash >= 0 ? path[(slash + 1)..] : path;
+        }
+
+        // "Art/2DItems/Currency/CurrencyRerollSocketNumbers02.dds" → "CurrencyRerollSocketNumbers02".
+        private static string ArtIdFromDdsPath(string path)
+        {
+            var seg = LastMetaSegment(path);
+            int dot = seg.LastIndexOf('.');
             return dot > 0 ? seg[..dot] : seg;
+        }
+
+        // Price for a reward, by priority:
+        //   0) uncut gems        — handled separately (see below): strictly dds-art + level, where
+        //        the level is the metaId's trailing digits ("SkillGemUncut19" → 19). No fall-through.
+        //   1) metaId            — exact BaseItemType.Id (Regal tier families: …/…2/…3).
+        //   2a) dds-art + level  — for leveled shared-icon currency (Thaumaturgic Flux): the icon is
+        //        shared across levels, so we must pin the level (parsed from "…Level<n>"); we do NOT
+        //        fall through to the bare dds-art here — it would return some arbitrary level's price.
+        //   2b) dds-art          — for non-leveled distinct-icon families (Jeweller's …01/02/03).
+        //   3) localized name    — English clients / unmapped.
+        private bool TryGetRecipePrice(in Recipe r, out double unit)
+        {
+            // Uncut gems (Skill/Support/Spirit) reuse ONE icon per family; the level is the metaId's
+            // trailing digits with no "Level" marker. Match ONLY on dds-art + level (e.g.
+            // "SkillGemUncut19" + art "UncutSkillGem" → "UncutSkillGem19"). Never fall through: the
+            // bare dds-art key holds an arbitrary level's price, and base/quest variants (no digit)
+            // aren't tradable at all.
+            if (IsUncutGem(r.MetaId))
+            {
+                int gemLevel = UncutGemLevel(r.MetaId);
+                if (gemLevel >= 0 && !string.IsNullOrEmpty(r.DdsArt) &&
+                    this.priceCache.TryGetPriceByArtId(r.DdsArt + gemLevel.ToString(), out unit) && unit > 0)
+                    return true;
+                unit = 0;
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(r.MetaId) && this.priceCache.TryGetPriceByArtId(r.MetaId, out unit) && unit > 0)
+                return true;
+
+            int level = LevelFromMetaId(r.MetaId);
+            if (level >= 0)
+            {
+                if (!string.IsNullOrEmpty(r.DdsArt) &&
+                    this.priceCache.TryGetPriceByArtId(r.DdsArt + level.ToString(), out unit) && unit > 0)
+                    return true;
+            }
+            else if (!string.IsNullOrEmpty(r.DdsArt) && this.priceCache.TryGetPriceByArtId(r.DdsArt, out unit) && unit > 0)
+            {
+                return true;
+            }
+
+            if (this.priceCache.TryGetExaltedPrice(r.Name, out unit) && unit > 0)
+                return true;
+            unit = 0;
+            return false;
+        }
+
+        // Same key priority as TryGetRecipePrice, but resolves the readable poe.ninja English name
+        // (for the debug window — the in-game name is non-Latin and GH's font can't render it).
+        private bool TryGetRecipeName(in Recipe r, out string name)
+        {
+            if (IsUncutGem(r.MetaId))
+            {
+                int gemLevel = UncutGemLevel(r.MetaId);
+                if (gemLevel >= 0 && !string.IsNullOrEmpty(r.DdsArt) &&
+                    this.priceCache.TryGetNameByArtId(r.DdsArt + gemLevel.ToString(), out name) && !string.IsNullOrEmpty(name))
+                    return true;
+                name = string.Empty;
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(r.MetaId) && this.priceCache.TryGetNameByArtId(r.MetaId, out name) && !string.IsNullOrEmpty(name))
+                return true;
+
+            int level = LevelFromMetaId(r.MetaId);
+            string? artKey = string.IsNullOrEmpty(r.DdsArt)
+                ? null
+                : (level >= 0 ? r.DdsArt + level.ToString() : r.DdsArt);
+            if (artKey != null && this.priceCache.TryGetNameByArtId(artKey, out name) && !string.IsNullOrEmpty(name))
+                return true;
+
+            name = string.Empty;
+            return false;
+        }
+
+        // BaseItemType.Id ending in "Level<n>" → n (leveled gem currency, e.g. Thaumaturgic Flux's
+        // "CurrencySetKalguuranSkillGemLevel9" → 9), else -1. The literal "Level" guard keeps
+        // tier-suffixed ids like "…Socket4" / "…ToRare2" out — those use metaId / dds-art directly.
+        private static int LevelFromMetaId(string metaId)
+        {
+            if (string.IsNullOrEmpty(metaId)) return -1;
+            int i = metaId.Length;
+            while (i > 0 && char.IsDigit(metaId[i - 1])) i--;
+            if (i == metaId.Length) return -1;
+            const string marker = "Level";
+            if (i < marker.Length || !metaId.AsSpan(i - marker.Length, marker.Length).SequenceEqual(marker))
+                return -1;
+            return int.TryParse(metaId.AsSpan(i), out var n) ? n : -1;
+        }
+
+        // True for the uncut-gem families (Uncut Skill / Support / Spirit gems). Each family shares
+        // one .dds icon across all levels; the level is the metaId's trailing digits (NO "Level"
+        // marker, so LevelFromMetaId misses them on purpose). Priced strictly as dds-art + level.
+        private static bool IsUncutGem(string metaId) =>
+            !string.IsNullOrEmpty(metaId) &&
+            (metaId.StartsWith("SkillGemUncut", StringComparison.Ordinal)
+             || metaId.StartsWith("SupportGemUncut", StringComparison.Ordinal)
+             || metaId.StartsWith("ReservationGemUncut", StringComparison.Ordinal));
+
+        // Uncut-gem level = trailing digits of the metaId ("SkillGemUncut19" → 19,
+        // "ReservationGemUncut8" → 8). Base/quest variants carry no digit
+        // ("SkillGemUncutQuest", "ReservationGemUncut", "SupportGemUncut") → -1 → not tradable.
+        private static int UncutGemLevel(string metaId)
+        {
+            if (string.IsNullOrEmpty(metaId)) return -1;
+            int i = metaId.Length;
+            while (i > 0 && char.IsDigit(metaId[i - 1])) i--;
+            if (i == metaId.Length) return -1;
+            return int.TryParse(metaId.AsSpan(i), out var n) ? n : -1;
         }
 
         private static string FormatExalted(double value)
@@ -581,9 +917,9 @@ namespace RunecraftHelper
             }
 
             this.handlePid = 0;
-            // The name→art-id dict is built from the client's localized BaseItemTypes names, so it's
+            // The name→keys dict is built from the client's localized BaseItemTypes names, so it's
             // language-specific. Drop it on process change so it rebuilds (e.g. after a language switch).
-            this.nameToArtId = new Dictionary<string, string>(StringComparer.Ordinal);
+            this.nameToArtId = new Dictionary<string, (string, string)>(StringComparer.Ordinal);
         }
 
         private bool IsUiElementVisible(IntPtr addr)
@@ -663,6 +999,13 @@ namespace RunecraftHelper
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint dwSize, out int lpNumberOfBytesRead);
 
-        private readonly record struct Recipe(int Count, string Name, string ArtId);
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        // RowAddress: the visible row UiElement (for overlay placement).
+        // MetaId: BaseItemType.Id last segment (primary price key).
+        // DdsArt: .dds art filename = poe.ninja image-id (fallback price key).
+        // Name: localized reward name — kept only as an English-client price fallback, never shown.
+        private readonly record struct Recipe(int Count, IntPtr RowAddress, string MetaId, string DdsArt, string Name);
     }
 }

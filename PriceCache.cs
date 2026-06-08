@@ -174,7 +174,16 @@ namespace RunecraftHelper
                         if (localRate > 0) divToEx = localRate;
 
                         var nameById = new Dictionary<string, string>(StringComparer.Ordinal);
+                        // {ninjaId → composite key (art-id + grade suffix when grade>1)}. The composite
+                        // key matches the game's BaseItemType.Id last segment (e.g. Greater Regal Orb
+                        // = "CurrencyUpgradeMagicToRare2"), so 3 currency tiers that share one .dds icon
+                        // get 3 distinct keys instead of all overwriting each other.
                         var artById = new Dictionary<string, string>(StringComparer.Ordinal);
+                        // {ninjaId → art-id + level}. Leveled items (UncutGems / Thaumaturgic Flux)
+                        // reuse ONE icon across all levels; poe.ninja encodes the level as a trailing
+                        // "-<n>" in its id. Pairing art + level gives each level its own key, matched
+                        // game-side by dds-art + the level parsed from BaseItemType.Id "…Level<n>".
+                        var levelKeyById = new Dictionary<string, string>(StringComparer.Ordinal);
                         if (parsed["items"] is JArray itemsArr)
                         {
                             foreach (var it in itemsArr)
@@ -186,13 +195,34 @@ namespace RunecraftHelper
                                 // image filename (no extension) is the game's internal art id, e.g.
                                 // ".../CurrencyUpgradeToRare.png" → "CurrencyUpgradeToRare".
                                 var art = ExtractArtId(it["image"]?.Value<string>());
-                                if (!string.IsNullOrEmpty(art)) artById[id!] = art!;
-                                // art-id → English name, for ALL items (even unpriced ones), so the
-                                // overlay can show a readable label regardless of client language.
-                                if (!string.IsNullOrEmpty(art) && !string.IsNullOrEmpty(name))
+                                if (string.IsNullOrEmpty(art)) continue;
+                                var grade = DetectCurrencyGrade(id!);
+                                // The game's BaseItemType.Id (our lookup key) equals the art-asset name,
+                                // EXCEPT for shared-icon tier families (Regal/Transmute/Augment: every tier
+                                // reuses one icon with no tier digit) where the game appends a single tier
+                                // digit. So append the grade digit only when the art filename doesn't
+                                // already carry its own tier digit — e.g. Jeweller's "...01/02/03" already
+                                // match the game id verbatim, and appending would corrupt them ("...022").
+                                var artKey = (grade == 1 || EndsWithDigit(art!)) ? art! : art! + grade.ToString();
+                                artById[id!] = artKey;
+                                // art-id → English name for ALL items (priced or not), so the overlay
+                                // can show a readable label regardless of client language.
+                                if (!string.IsNullOrEmpty(name))
                                 {
-                                    var ak = Normalize(art!);
-                                    if (ak.Length > 0) aggregatedArtNames[ak] = name!;
+                                    var nk = Normalize(artKey);
+                                    if (nk.Length > 0) aggregatedArtNames[nk] = name!;
+                                }
+
+                                var level = TrailingLevel(id!);
+                                if (level >= 0)
+                                {
+                                    var levelKey = art! + level.ToString();
+                                    levelKeyById[id!] = levelKey;
+                                    if (!string.IsNullOrEmpty(name))
+                                    {
+                                        var lnk = Normalize(levelKey);
+                                        if (lnk.Length > 0) aggregatedArtNames[lnk] = name!;
+                                    }
                                 }
                             }
                         }
@@ -211,10 +241,15 @@ namespace RunecraftHelper
                                     var key = Normalize(name);
                                     if (key.Length > 0) aggregated[key] = price;
                                 }
-                                if (artById.TryGetValue(id!, out var art))
+                                if (artById.TryGetValue(id!, out var artKey))
                                 {
-                                    var artKey = Normalize(art);
-                                    if (artKey.Length > 0) aggregatedArt[artKey] = price;
+                                    var k = Normalize(artKey);
+                                    if (k.Length > 0) aggregatedArt[k] = price;
+                                }
+                                if (levelKeyById.TryGetValue(id!, out var levelKey))
+                                {
+                                    var lk = Normalize(levelKey);
+                                    if (lk.Length > 0) aggregatedArt[lk] = price;
                                 }
                             }
                         }
@@ -284,6 +319,36 @@ namespace RunecraftHelper
                 else if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) sb.Append(c);
             }
             return sb.ToString();
+        }
+
+        // PoE2 currencies have up to 3 tiers — base, Greater, Perfect — that all reuse the same
+        // .dds icon (Regal / Greater Regal / Perfect Regal → "CurrencyUpgradeMagicToRare.png").
+        // poe.ninja encodes the tier in its `id` slug ("regal", "greater-regal-orb",
+        // "perfect-regal-orb"); the game encodes it in BaseItemType.Id's trailing digit
+        // ("CurrencyUpgradeMagicToRare", "...2", "...3"). Recover the tier from poe.ninja so we
+        // can mirror the game's key format on both sides.
+        // NB: this does NOT cover Uncut Gem level variants ("uncut-skill-gem-15") or Thaumaturgic
+        // Flux levels — those need a different keying scheme (level is stored on the item
+        // instance, not in BaseItemType).
+        private static bool EndsWithDigit(string s) => s.Length > 0 && char.IsDigit(s[^1]);
+
+        // poe.ninja id slug → trailing "-<n>" level (e.g. "thaumaturgic-flux-9" → 9), or -1 if none.
+        // Requires the digits be preceded by '-' so "greater-regal-orb" / "perfect-flux" stay -1.
+        private static int TrailingLevel(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return -1;
+            int i = id.Length;
+            while (i > 0 && char.IsDigit(id[i - 1])) i--;
+            if (i == id.Length || i == 0 || id[i - 1] != '-') return -1;
+            return int.TryParse(id.AsSpan(i), out var n) ? n : -1;
+        }
+
+        public static int DetectCurrencyGrade(string ninjaId)
+        {
+            if (string.IsNullOrEmpty(ninjaId)) return 1;
+            if (ninjaId.StartsWith("perfect-", StringComparison.Ordinal)) return 3;
+            if (ninjaId.StartsWith("greater-", StringComparison.Ordinal)) return 2;
+            return 1;
         }
 
         // poe.ninja image URLs end with the item's art asset, e.g.
