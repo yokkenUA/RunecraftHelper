@@ -476,6 +476,7 @@ namespace RunecraftHelper
         private const uint ColorYellow = 0xFF55FFFFu;
         private const uint ColorRed = 0xFF4040FFu;
         private const uint ColorShadow = 0xCC000000u;
+        private const uint ColorPriceBg = 0xE6000000u; // 90%-opaque black plate behind the price text
 
         // Debug list window: one row per visible reward showing the language-independent metaId we
         // resolved, the price we found for it (or "—"), and the raw in-game name. Lets the user see
@@ -583,6 +584,8 @@ namespace RunecraftHelper
                 float x = row.Pos.X + row.Size.X - ts.X - padding + this.Settings.OverlayXOffset;
                 float y = row.Pos.Y + (row.Size.Y - ts.Y) * 0.5f;
                 var at = new Vector2(x, y);
+                var bgPad = new Vector2(4f * k, 2f * k);
+                drawList.AddRectFilled(at - bgPad, at + ts + bgPad, ColorPriceBg, 3f * k);
                 drawList.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
                 drawList.AddText(font, fontPx, at, color, text);
             }
