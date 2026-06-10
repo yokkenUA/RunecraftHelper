@@ -52,7 +52,7 @@ namespace RunecraftHelper
         private const int IsVisibleBit = 0x0B;
         private const uint IsVisibleMask = 1u << IsVisibleBit; // = 0x800
 
-        // ── Language-independent reward matching (offsets verified live on PoE2 0.5.x, see GHIDRA.md §8) ──
+        // ── Language-independent reward matching (offsets verified live on PoE2 0.5.x, see docs/re-findings.md §8) ──
         // The visible reward is shown only as LOCALIZED text, so matching that text to poe.ninja
         // (English) fails on non-English clients. We translate the localized name → the item's
         // language-independent BaseItemType.Id via the game's own BaseItemTypes table:
@@ -74,7 +74,7 @@ namespace RunecraftHelper
         private const int BaseItemTypeIdOffset = 0x00;     // → meta-path "Metadata/Items/.../<Id>"
         private const int BaseItemTypeNameOffset = 0x20;   // → localized display-name buffer
         private const int BaseItemTypeArtOffset = 0x7C;    // → sub-object; +0x08 → ".dds" art path
-        private const int ArtSubPathOffset = 0x08;         //   art path = poe.ninja image-id (see GHIDRA.md §8)
+        private const int ArtSubPathOffset = 0x08;         //   art path = poe.ninja image-id (see docs/re-findings.md §8)
 
         private IntPtr processHandle = IntPtr.Zero;
         private int handlePid;
