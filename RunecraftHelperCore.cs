@@ -471,6 +471,18 @@ namespace RunecraftHelper
         // Scratch list of resolved rows, rebuilt each frame (kept as a field to avoid per-frame allocs).
         private readonly List<(Vector2 Pos, Vector2 Size, double Total)> overlayRows = new();
 
+        // Priced rows for the current frame (RowAddress + total), built BEFORE geometry is resolved so
+        // the Relative-mode median is computed over the full priced set, independent of whether any
+        // individual row's screen geometry read succeeds this frame.
+        private readonly List<(IntPtr Addr, double Total)> pricedScratch = new();
+
+        // Last-good screen geometry per row UiElement. A single ReadProcessMemory miss on a live client
+        // would otherwise blank or teleport that row's price for a frame; instead we reuse the previous
+        // good (pos, size) for up to MaxStaleGeomFrames frames. Reused ONLY on a read failure — a row
+        // the game reports hidden is dropped at once, so a scrolled-off row never ghosts.
+        private readonly Dictionary<long, (Vector2 Pos, Vector2 Size, int StaleFrames)> lastGoodGeom = new();
+        private const int MaxStaleGeomFrames = 6;
+
         private const uint ColorWhite = 0xFFFFFFFFu;
         private const uint ColorGreen = 0xFF55FF55u;
         private const uint ColorYellow = 0xFF55FFFFu;
@@ -543,26 +555,28 @@ namespace RunecraftHelper
             this.frameBaseCache.Clear();
             this.overlayRows.Clear();
 
+            // 1) Resolve prices first (lock-guarded, stable). The Relative-mode median is computed over
+            //    this full priced set — NOT over the rows whose geometry happens to resolve this frame —
+            //    so a transient geometry read miss can't shift the colour thresholds and flip every
+            //    row green/yellow/red.
+            this.pricedScratch.Clear();
             foreach (var r in this.recipes)
-            {
-                if (!this.TryGetRecipePrice(in r, out var unit)) continue;
-
-                if (r.RowAddress == IntPtr.Zero || !this.TryReadUiBase(r.RowAddress, out var el)) continue;
-                if ((el.Flags & IsVisibleMask) == 0) continue;
-
-                var size = this.ScaledSize(in el);
-                if (size.X <= 1f || size.Y <= 1f) continue;
-                var pos = this.ScreenPosition(in el);
-                if (float.IsNaN(pos.X) || float.IsNaN(pos.Y)) continue;
-
-                this.overlayRows.Add((pos, size, unit * Math.Max(1, r.Count)));
-            }
-
-            if (this.overlayRows.Count == 0) return;
+                if (this.TryGetRecipePrice(in r, out var unit))
+                    this.pricedScratch.Add((r.RowAddress, unit * Math.Max(1, r.Count)));
+            if (this.pricedScratch.Count == 0) return;
 
             double median = 0;
             if (this.Settings.ColorMode == RewardColorMode.Relative)
-                median = MedianTotal(this.overlayRows);
+                median = MedianOf(this.pricedScratch);
+
+            // 2) Resolve each row's screen geometry, falling back to its last-good (pos, size) for a few
+            //    frames on a read miss so the price doesn't blink out or teleport on a single bad read.
+            foreach (var (addr, total) in this.pricedScratch)
+            {
+                if (!this.TryResolveRowGeometry(addr, out var pos, out var size)) continue;
+                this.overlayRows.Add((pos, size, total));
+            }
+            if (this.overlayRows.Count == 0) return;
 
             // Draw at an explicit per-row pixel size via the font-size AddText overload, rather than
             // mutating the shared font's global Scale per iteration (that leaks ImGui font state
@@ -591,6 +605,45 @@ namespace RunecraftHelper
             }
         }
 
+        // Resolve a row's screen geometry with a short-lived last-good fallback. Returns false (row not
+        // drawn) only when the read fails AND there is no fresh last-good to reuse, or when the game
+        // reports the row hidden (read succeeded) — the latter is dropped at once so a scrolled-off row
+        // never ghosts.
+        private bool TryResolveRowGeometry(IntPtr addr, out Vector2 pos, out Vector2 size)
+        {
+            pos = default;
+            size = default;
+            if (addr == IntPtr.Zero) return false;
+            long key = (long)addr;
+
+            if (this.TryReadUiBase(addr, out var el))
+            {
+                if ((el.Flags & IsVisibleMask) == 0) { this.lastGoodGeom.Remove(key); return false; }
+
+                var s = this.ScaledSize(in el);
+                if (s.X > 1f && s.Y > 1f &&
+                    this.TryScreenPosition(in el, out var p) && !float.IsNaN(p.X) && !float.IsNaN(p.Y))
+                {
+                    pos = p;
+                    size = s;
+                    this.lastGoodGeom[key] = (p, s, 0);
+                    return true;
+                }
+                // read OK but geometry invalid (e.g. an ancestor read failed mid-chain) → reuse last-good
+            }
+
+            if (this.lastGoodGeom.TryGetValue(key, out var lg) && lg.StaleFrames < MaxStaleGeomFrames)
+            {
+                pos = lg.Pos;
+                size = lg.Size;
+                this.lastGoodGeom[key] = (lg.Pos, lg.Size, lg.StaleFrames + 1);
+                return true;
+            }
+
+            this.lastGoodGeom.Remove(key);
+            return false;
+        }
+
         private uint PickColor(double total, double median)
         {
             switch (this.Settings.ColorMode)
@@ -610,7 +663,7 @@ namespace RunecraftHelper
             }
         }
 
-        private static double MedianTotal(List<(Vector2 Pos, Vector2 Size, double Total)> rows)
+        private static double MedianOf(List<(IntPtr Addr, double Total)> rows)
         {
             var arr = new double[rows.Count];
             for (int i = 0; i < arr.Length; i++) arr[i] = rows[i].Total;
@@ -646,34 +699,60 @@ namespace RunecraftHelper
             return new Vector2(el.UnscaledSize.X * w, el.UnscaledSize.Y * h);
         }
 
-        private Vector2 ScreenPosition(in UiElementBaseOffset el)
+        private bool TryScreenPosition(in UiElementBaseOffset el, out Vector2 screen)
         {
+            if (!this.TryGetUnscaledPosition(in el, 0, out var p))
+            {
+                screen = default;
+                return false;
+            }
+
             var (w, h) = ScaleValue(el.ScaleIndex, el.LocalScaleMultiplier);
-            var p = this.GetUnscaledPosition(in el, 0);
-            return new Vector2(p.X * w, p.Y * h);
+            screen = new Vector2(p.X * w, p.Y * h);
+            return true;
         }
 
         // Recursive parent-chain walk — the exact arithmetic of UiElementBase.GetUnScaledPosition.
-        private Vector2 GetUnscaledPosition(in UiElementBaseOffset el, int depth)
+        // Returns false when an ancestor read FAILS, so the caller keeps the last-good position instead
+        // of drawing the half-resolved local coordinate (which would teleport the price to the wrong
+        // spot for a frame). Reaching the root (ParentPtr == 0) is success, not failure.
+        private bool TryGetUnscaledPosition(in UiElementBaseOffset el, int depth, out Vector2 pos)
         {
             var local = new Vector2(el.RelativePosition.X, el.RelativePosition.Y);
-            if (depth >= 64 || el.ParentPtr == IntPtr.Zero ||
-                !this.TryReadBaseCached(el.ParentPtr, out var parent))
-                return local;
+            if (el.ParentPtr == IntPtr.Zero || depth >= 64)
+            {
+                pos = local;
+                return true;
+            }
 
-            var parentPos = this.GetUnscaledPosition(in parent, depth + 1);
+            if (!this.TryReadBaseCached(el.ParentPtr, out var parent))
+            {
+                pos = local;
+                return false;
+            }
+
+            if (!this.TryGetUnscaledPosition(in parent, depth + 1, out var parentPos))
+            {
+                pos = local;
+                return false;
+            }
+
             if (UiElementBaseFuncs.ShouldModifyPos(el.Flags))
                 parentPos += new Vector2(parent.PositionModifier.X, parent.PositionModifier.Y);
 
             if (parent.ScaleIndex == el.ScaleIndex &&
                 parent.LocalScaleMultiplier == el.LocalScaleMultiplier)
-                return parentPos + local;
+            {
+                pos = parentPos + local;
+                return true;
+            }
 
             var (psw, psh) = ScaleValue(parent.ScaleIndex, parent.LocalScaleMultiplier);
             var (msw, msh) = ScaleValue(el.ScaleIndex, el.LocalScaleMultiplier);
-            return new Vector2(
+            pos = new Vector2(
                 parentPos.X * psw / msw + local.X,
                 parentPos.Y * psh / msh + local.Y);
+            return true;
         }
 
         private bool TryReadBaseCached(IntPtr addr, out UiElementBaseOffset ui)
@@ -920,6 +999,7 @@ namespace RunecraftHelper
             }
 
             this.handlePid = 0;
+            this.lastGoodGeom.Clear();
             // The name→keys dict is built from the client's localized BaseItemTypes names, so it's
             // language-specific. Drop it on process change so it rebuilds (e.g. after a language switch).
             this.nameToArtId = new Dictionary<string, (string, string)>(StringComparer.Ordinal);
