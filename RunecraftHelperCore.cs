@@ -46,6 +46,25 @@ namespace RunecraftHelper
         };
         private const int GateStep = 0;
 
+        // The scroll viewport (the fixed-size clip window) is the element matched at this fp step —
+        // PanelFlagFingerprints[2] = 0x00502EF7, the recipes-container's grandparent. Live reads
+        // (docs/re-findings.md §3) show it has a FIXED UnscaledSize (~770×800) while the container
+        // below it is the full ~7990px-tall content that slides under it. Rows scrolled out of this
+        // window keep their IsVisible bit set (the game clips them with a scissor rect, NOT the flag),
+        // so the overlay must clip prices to this viewport's screen rect instead of trusting IsVisible.
+        private const int ViewportStep = 2;
+        private IntPtr resolvedViewport;
+
+        // Scroll content offset of a UiElement, at +0x120 (StdTuple2D<float>, just past RelativePosition
+        // @ +0x118). On a scroll-viewport (mask) element this is the translation applied to its content
+        // child as the list scrolls (Y goes negative scrolling down); it is NOT reflected in the content
+        // child's RelativePosition/PositionModifier. Read directly here (not via GameOffsets) so the
+        // plugin stays self-contained across GH versions. Verified live on PoE2 0.5.x (docs/re-findings.md §3).
+        private const int ScrollOffsetFieldOffset = 0x120;
+        // The resolved viewport's scroll offset, re-read once per frame in DrawOverlay and added to the
+        // content rows' positions (see TryGetUnscaledPosition).
+        private Vector2 viewportScrollOffset;
+
         private const int NameWStringOffset = 0x390;
         private const int UiElementChildrenOffset = 0x10;
         private const int UiElementFlagsOffset = 0x180;
@@ -206,6 +225,7 @@ namespace RunecraftHelper
         private IntPtr ResolvePanel()
         {
             var gameUi = Core.States.InGameStateObject.GameUi.Address;
+            this.resolvedViewport = IntPtr.Zero;
             if (gameUi == IntPtr.Zero) return IntPtr.Zero;
             return this.WalkFp(gameUi, PanelFlagFingerprints, GateStep, 0);
         }
@@ -244,7 +264,13 @@ namespace RunecraftHelper
 
                     var deeper = this.WalkFp(childAddr, fps, gateStep, step + 1);
                     if (deeper != IntPtr.Zero)
+                    {
+                        // On the successful branch, the child matched at ViewportStep IS the scroll
+                        // viewport (the fixed clip window) — remember it for DrawOverlay's clipping.
+                        if (step == ViewportStep)
+                            this.resolvedViewport = childAddr;
                         return deeper;
+                    }
                 }
             }
             return IntPtr.Zero;
@@ -555,6 +581,10 @@ namespace RunecraftHelper
             this.frameBaseCache.Clear();
             this.overlayRows.Clear();
 
+            // Re-read the viewport's scroll offset once per frame; it's added to each content row's
+            // position in TryGetUnscaledPosition so the rows (and their prices) track the scroll.
+            this.viewportScrollOffset = this.ReadScrollOffset(this.resolvedViewport);
+
             // 1) Resolve prices first (lock-guarded, stable). The Relative-mode median is computed over
             //    this full priced set — NOT over the rows whose geometry happens to resolve this frame —
             //    so a transient geometry read miss can't shift the colour thresholds and flip every
@@ -585,8 +615,28 @@ namespace RunecraftHelper
             var drawList = ImGui.GetForegroundDrawList();
             var font = ImGui.GetFont();
             float ambient = ImGui.GetFontSize();
+
+            // Resolve the scroll viewport's screen rect — the fixed clip window (fp 0x00502EF7, the
+            // recipes-container's grandparent; see docs/re-findings.md §3). Rows scrolled out of this
+            // window still report IsVisible=true (the game clips them with a scissor rect, not the
+            // flag), so we drop any row whose vertical centre falls outside it. We clip only vertically:
+            // the X position is the user's to set via Price X offset, so it may intentionally sit
+            // outside the frame. If the viewport can't be resolved this frame, fall back to no clip.
+            Vector2 vpPos = default, vpSize = default;
+            bool haveClip = this.resolvedViewport != IntPtr.Zero &&
+                            this.TryResolveRowGeometry(this.resolvedViewport, out vpPos, out vpSize);
+            float clipTop = haveClip ? vpPos.Y : 0f;
+            float clipBottom = haveClip ? vpPos.Y + vpSize.Y : 0f;
+
             foreach (var row in this.overlayRows)
             {
+                // Vertical clip: drop rows whose centre is outside the viewport (scrolled off-list).
+                if (haveClip)
+                {
+                    float centreY = row.Pos.Y + row.Size.Y * 0.5f;
+                    if (centreY < clipTop || centreY > clipBottom) continue;
+                }
+
                 var text = FormatExalted(row.Total);
                 uint color = this.PickColor(row.Total, median);
 
@@ -740,6 +790,13 @@ namespace RunecraftHelper
             if (UiElementBaseFuncs.ShouldModifyPos(el.Flags))
                 parentPos += new Vector2(parent.PositionModifier.X, parent.PositionModifier.Y);
 
+            // Scroll: the recipes list is a fixed-size mask (the resolved viewport) whose content child
+            // is translated by a scroll offset at +0x120 — NOT by RelativePosition/PositionModifier
+            // (verified live, docs/re-findings.md §3). Add it ONLY for the viewport's direct content
+            // child; without it every row sits at its unscrolled position and prices freeze on scroll.
+            if (el.ParentPtr == this.resolvedViewport)
+                parentPos += this.viewportScrollOffset;
+
             if (parent.ScaleIndex == el.ScaleIndex &&
                 parent.LocalScaleMultiplier == el.LocalScaleMultiplier)
             {
@@ -777,6 +834,18 @@ namespace RunecraftHelper
                 return false;
             ui = System.Runtime.InteropServices.MemoryMarshal.Read<UiElementBaseOffset>(this.uiBaseBuf);
             return true;
+        }
+
+        // Read a UiElement's scroll content offset (+0x120, two floats). Read directly off the element
+        // rather than through the marshalled UiElementBaseOffset so the plugin doesn't depend on that
+        // GameHelper struct carrying the field — keeps it working across GH versions.
+        private Vector2 ReadScrollOffset(IntPtr addr)
+        {
+            if (addr == IntPtr.Zero) return Vector2.Zero;
+            var buf = new byte[8];
+            if (!ReadProcessMemory(this.processHandle, addr + ScrollOffsetFieldOffset, buf, (uint)buf.Length, out _))
+                return Vector2.Zero;
+            return new Vector2(BitConverter.ToSingle(buf, 0), BitConverter.ToSingle(buf, 4));
         }
 
         // ── Parsing / formatting ─────────────────────────────────────────
