@@ -34,8 +34,18 @@ namespace RunecraftHelper
         // to clear long reward names or sit it wherever reads best. Negative = left, positive = right.
         public float OverlayXOffset = 0f;
 
-        // Show the (debug) list window alongside the overlay: count / resolved metaId / price / game
-        // name per visible row — handy to see which reward name failed to resolve to a price.
-        public bool ShowWindow = true;
+        // Show the per-monolith debug window: pick a nearby monolith and dump everything the offer
+        // rule uses (anchor/p/N, sockets-vs-station N, area level, addresses, and the full offered
+        // recipe list). Used to report game-vs-plugin recipe mismatches. Off by default.
+        public bool ShowWindow = false;
+
+        // ── Monolith reward window (Runeshape Encounter) ─────────────────────
+        // Show a window listing, per nearby monolith, the candidate recipes (filtered by the
+        // monolith's anchor rune + hole position) and their poe.ninja Exalted prices. The anchor is
+        // read off the persistent Expedition2Encounter device, so it works out of the network bubble.
+        public bool ShowMonolithRewards = false;
+
+        // Hide candidate rewards whose unit Exalted price is below this (0 = show all, incl. unpriced).
+        public float MonolithRewardsMinExalted = 0f;
     }
 }

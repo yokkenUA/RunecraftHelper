@@ -1,0 +1,9736 @@
+{
+ "runes": {
+  "0": "Fire",
+  "1": "Cold",
+  "2": "Lightning",
+  "3": "Tempest",
+  "4": "Momentum",
+  "5": "Bloodletting",
+  "6": "Stone",
+  "7": "Adaptive",
+  "8": "Arcane",
+  "9": "Toxic",
+  "10": "Electrocuting",
+  "11": "Protective",
+  "12": "Cyclonic",
+  "13": "Vision",
+  "14": "Tidal",
+  "15": "Rebirth",
+  "16": "Prismatic",
+  "17": "Gasp",
+  "18": "Moon",
+  "19": "Celestial",
+  "20": "Opulent",
+  "21": "Rage",
+  "22": "Wisdom",
+  "23": "Sky",
+  "24": "Earth",
+  "25": "Life",
+  "26": "Bond",
+  "27": "Ward",
+  "28": "Soul",
+  "29": "Death",
+  "30": "Oath",
+  "31": "Time",
+  "32": "Power",
+  "33": "Bait"
+ },
+ "recipes": [
+  {
+   "row": 0,
+   "id": "10SlotBait",
+   "size": 10,
+   "runeIdx": [
+    33,
+    33,
+    33,
+    33,
+    33,
+    33,
+    33,
+    33,
+    33,
+    33
+   ],
+   "runes": [
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait",
+    "Bait"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Krillson's Bay Key",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 1,
+   "id": "2SlotOrbofAugmentation1",
+   "size": 2,
+   "runeIdx": [
+    3,
+    2
+   ],
+   "runes": [
+    "Tempest",
+    "Lightning"
+   ],
+   "reward": {
+    "idx": 24,
+    "id": "Metadata/Items/Currency/CurrencyAddModToMagic",
+    "name": "Orb of Augmentation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 2,
+   "id": "2SlotOrbofTransmutation1",
+   "size": 2,
+   "runeIdx": [
+    3,
+    1
+   ],
+   "runes": [
+    "Tempest",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 13,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToMagic",
+    "name": "Orb of Transmutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 3,
+   "id": "2SlotUncutSkillGem1",
+   "size": 2,
+   "runeIdx": [
+    4,
+    0
+   ],
+   "runes": [
+    "Momentum",
+    "Fire"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Uncut Skill Gem",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 4,
+   "id": "2SlotUncutSupportGem1",
+   "size": 2,
+   "runeIdx": [
+    4,
+    6
+   ],
+   "runes": [
+    "Momentum",
+    "Stone"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Uncut Support Gem",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 5,
+   "id": "2SlotArtificersOrb1",
+   "size": 2,
+   "runeIdx": [
+    8,
+    3
+   ],
+   "runes": [
+    "Arcane",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 35,
+    "id": "Metadata/Items/Currency/CurrencyAddEquipmentSocket",
+    "name": "Artificer's Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 6,
+   "id": "2SlotExaltedOrb1",
+   "size": 2,
+   "runeIdx": [
+    7,
+    11
+   ],
+   "runes": [
+    "Adaptive",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 18,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare",
+    "name": "Exalted Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 7,
+   "id": "2SlotArmourersScrap2",
+   "size": 2,
+   "runeIdx": [
+    1,
+    6
+   ],
+   "runes": [
+    "Cold",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 6,
+    "id": "Metadata/Items/Currency/CurrencyArmourQuality",
+    "name": "Armourer's Scrap"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 8,
+   "id": "2SlotArcanistsEtcher2",
+   "size": 2,
+   "runeIdx": [
+    2,
+    8
+   ],
+   "runes": [
+    "Lightning",
+    "Arcane"
+   ],
+   "reward": {
+    "idx": 1,
+    "id": "Metadata/Items/Currency/CurrencyMagicQuality",
+    "name": "Arcanist's Etcher"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 9,
+   "id": "2SlotRegalOrb1",
+   "size": 2,
+   "runeIdx": [
+    7,
+    18
+   ],
+   "runes": [
+    "Adaptive",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 21,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare",
+    "name": "Regal Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 10,
+   "id": "2SlotBlacksmithsWhetstone2",
+   "size": 2,
+   "runeIdx": [
+    0,
+    6
+   ],
+   "runes": [
+    "Fire",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 0,
+    "id": "Metadata/Items/Currency/CurrencyWeaponQuality",
+    "name": "Blacksmith's Whetstone"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 11,
+   "id": "2SlotLesserVisionRune1",
+   "size": 2,
+   "runeIdx": [
+    15,
+    10
+   ],
+   "runes": [
+    "Rebirth",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 640,
+    "id": "Metadata/Items/SoulCores/RuneAccuracyLesser",
+    "name": "Lesser Vision Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 12,
+   "id": "2SlotLesserGlacialRune1",
+   "size": 2,
+   "runeIdx": [
+    1,
+    4
+   ],
+   "runes": [
+    "Cold",
+    "Momentum"
+   ],
+   "reward": {
+    "idx": 632,
+    "id": "Metadata/Items/SoulCores/RuneColdLesser",
+    "name": "Lesser Glacial Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 13,
+   "id": "2SlotLesserAdeptRune1",
+   "size": 2,
+   "runeIdx": [
+    1,
+    3
+   ],
+   "runes": [
+    "Cold",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 665,
+    "id": "Metadata/Items/SoulCores/RuneDexterityLesser",
+    "name": "Lesser Adept Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 14,
+   "id": "2SlotLesserIronRune1",
+   "size": 2,
+   "runeIdx": [
+    6,
+    4
+   ],
+   "runes": [
+    "Stone",
+    "Momentum"
+   ],
+   "reward": {
+    "idx": 634,
+    "id": "Metadata/Items/SoulCores/RuneEnhanceLesser",
+    "name": "Lesser Iron Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 15,
+   "id": "2SlotLesserDesertRune1",
+   "size": 2,
+   "runeIdx": [
+    0,
+    4
+   ],
+   "runes": [
+    "Fire",
+    "Momentum"
+   ],
+   "reward": {
+    "idx": 631,
+    "id": "Metadata/Items/SoulCores/RuneFireLesser",
+    "name": "Lesser Desert Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 16,
+   "id": "2SlotLesserResolveRune1",
+   "size": 2,
+   "runeIdx": [
+    2,
+    3
+   ],
+   "runes": [
+    "Lightning",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 669,
+    "id": "Metadata/Items/SoulCores/RuneIntelligenceLesser",
+    "name": "Lesser Resolve Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 17,
+   "id": "2SlotLesserRebirthRune1",
+   "size": 2,
+   "runeIdx": [
+    15,
+    18
+   ],
+   "runes": [
+    "Rebirth",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 637,
+    "id": "Metadata/Items/SoulCores/RuneLifeRecoveryLesser",
+    "name": "Lesser Rebirth Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 18,
+   "id": "2SlotLesserStormRune1",
+   "size": 2,
+   "runeIdx": [
+    2,
+    4
+   ],
+   "runes": [
+    "Lightning",
+    "Momentum"
+   ],
+   "reward": {
+    "idx": 633,
+    "id": "Metadata/Items/SoulCores/RuneLightningLesser",
+    "name": "Lesser Storm Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 19,
+   "id": "2SlotLesserInspirationRune1",
+   "size": 2,
+   "runeIdx": [
+    15,
+    1
+   ],
+   "runes": [
+    "Rebirth",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 638,
+    "id": "Metadata/Items/SoulCores/RuneManaRecoveryLesser",
+    "name": "Lesser Inspiration Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 20,
+   "id": "2SlotLesserRobustRune1",
+   "size": 2,
+   "runeIdx": [
+    0,
+    3
+   ],
+   "runes": [
+    "Fire",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 661,
+    "id": "Metadata/Items/SoulCores/RuneStrengthLesser",
+    "name": "Lesser Robust Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 21,
+   "id": "2SlotLesserStoneRune1",
+   "size": 2,
+   "runeIdx": [
+    6,
+    1
+   ],
+   "runes": [
+    "Stone",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 639,
+    "id": "Metadata/Items/SoulCores/RuneStunLesser",
+    "name": "Lesser Stone Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 22,
+   "id": "2SlotLesserBodyRune1",
+   "size": 2,
+   "runeIdx": [
+    6,
+    10
+   ],
+   "runes": [
+    "Stone",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 635,
+    "id": "Metadata/Items/SoulCores/RuneLifeLesser",
+    "name": "Lesser Body Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 23,
+   "id": "2SlotLesserMindRune1",
+   "size": 2,
+   "runeIdx": [
+    8,
+    10
+   ],
+   "runes": [
+    "Arcane",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 636,
+    "id": "Metadata/Items/SoulCores/RuneManaLesser",
+    "name": "Lesser Mind Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 24,
+   "id": "2SlotLesserWardRune1",
+   "size": 2,
+   "runeIdx": [
+    8,
+    18
+   ],
+   "runes": [
+    "Arcane",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 5065,
+    "id": "Metadata/Items/SoulCores/RuneWard1Lesser",
+    "name": "Lesser Ward Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 25,
+   "id": "2SlotLesserChargingRune1",
+   "size": 2,
+   "runeIdx": [
+    12,
+    14
+   ],
+   "runes": [
+    "Cyclonic",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 5069,
+    "id": "Metadata/Items/SoulCores/RuneWard2Lesser",
+    "name": "Lesser Charging Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 26,
+   "id": "2SlotVisionRune1",
+   "size": 2,
+   "runeIdx": [
+    13,
+    11
+   ],
+   "runes": [
+    "Vision",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 630,
+    "id": "Metadata/Items/SoulCores/RuneAccuracy",
+    "name": "Vision Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 27,
+   "id": "2SlotGlacialRune1",
+   "size": 2,
+   "runeIdx": [
+    18,
+    12
+   ],
+   "runes": [
+    "Moon",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 622,
+    "id": "Metadata/Items/SoulCores/RuneCold",
+    "name": "Glacial Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 28,
+   "id": "2SlotAdeptRune1",
+   "size": 2,
+   "runeIdx": [
+    18,
+    13
+   ],
+   "runes": [
+    "Moon",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 666,
+    "id": "Metadata/Items/SoulCores/RuneDexterity",
+    "name": "Adept Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 29,
+   "id": "2SlotIronRune1",
+   "size": 2,
+   "runeIdx": [
+    11,
+    12
+   ],
+   "runes": [
+    "Protective",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 624,
+    "id": "Metadata/Items/SoulCores/RuneEnhance",
+    "name": "Iron Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 30,
+   "id": "2SlotDesertRune1",
+   "size": 2,
+   "runeIdx": [
+    21,
+    12
+   ],
+   "runes": [
+    "Rage",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 621,
+    "id": "Metadata/Items/SoulCores/RuneFire",
+    "name": "Desert Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 31,
+   "id": "2SlotResolveRune1",
+   "size": 2,
+   "runeIdx": [
+    14,
+    13
+   ],
+   "runes": [
+    "Tidal",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 670,
+    "id": "Metadata/Items/SoulCores/RuneIntelligence",
+    "name": "Resolve Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 32,
+   "id": "2SlotBodyRune1",
+   "size": 2,
+   "runeIdx": [
+    11,
+    17
+   ],
+   "runes": [
+    "Protective",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 625,
+    "id": "Metadata/Items/SoulCores/RuneLife",
+    "name": "Body Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 33,
+   "id": "2SlotRebirthRune1",
+   "size": 2,
+   "runeIdx": [
+    13,
+    11
+   ],
+   "runes": [
+    "Vision",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 627,
+    "id": "Metadata/Items/SoulCores/RuneLifeRecovery",
+    "name": "Rebirth Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 34,
+   "id": "2SlotStormRune1",
+   "size": 2,
+   "runeIdx": [
+    14,
+    12
+   ],
+   "runes": [
+    "Tidal",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 623,
+    "id": "Metadata/Items/SoulCores/RuneLightning",
+    "name": "Storm Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 35,
+   "id": "2SlotMindRune1",
+   "size": 2,
+   "runeIdx": [
+    17,
+    0
+   ],
+   "runes": [
+    "Gasp",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 626,
+    "id": "Metadata/Items/SoulCores/RuneMana",
+    "name": "Mind Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 36,
+   "id": "2SlotInspirationRune1",
+   "size": 2,
+   "runeIdx": [
+    10,
+    11
+   ],
+   "runes": [
+    "Electrocuting",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 628,
+    "id": "Metadata/Items/SoulCores/RuneManaRecovery",
+    "name": "Inspiration Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 37,
+   "id": "2SlotRobustRune1",
+   "size": 2,
+   "runeIdx": [
+    21,
+    13
+   ],
+   "runes": [
+    "Rage",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 662,
+    "id": "Metadata/Items/SoulCores/RuneStrength",
+    "name": "Robust Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 38,
+   "id": "2SlotStoneRune1",
+   "size": 2,
+   "runeIdx": [
+    11,
+    14
+   ],
+   "runes": [
+    "Protective",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 629,
+    "id": "Metadata/Items/SoulCores/RuneStun",
+    "name": "Stone Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 39,
+   "id": "2SlotWardRune1",
+   "size": 2,
+   "runeIdx": [
+    17,
+    0
+   ],
+   "runes": [
+    "Gasp",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 5066,
+    "id": "Metadata/Items/SoulCores/RuneWard1Normal",
+    "name": "Ward Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 40,
+   "id": "2SlotArtificersOrb2",
+   "size": 2,
+   "runeIdx": [
+    17,
+    13
+   ],
+   "runes": [
+    "Gasp",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 35,
+    "id": "Metadata/Items/Currency/CurrencyAddEquipmentSocket",
+    "name": "Artificer's Orb"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 41,
+   "id": "2SlotOrbofAugmentation2",
+   "size": 2,
+   "runeIdx": [
+    16,
+    14
+   ],
+   "runes": [
+    "Prismatic",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 24,
+    "id": "Metadata/Items/Currency/CurrencyAddModToMagic",
+    "name": "Orb of Augmentation"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 42,
+   "id": "2SlotOrbofTransmutation2",
+   "size": 2,
+   "runeIdx": [
+    16,
+    18
+   ],
+   "runes": [
+    "Prismatic",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 13,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToMagic",
+    "name": "Orb of Transmutation"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 43,
+   "id": "2SlotRunicAlloy1",
+   "size": 2,
+   "runeIdx": [
+    7,
+    15
+   ],
+   "runes": [
+    "Adaptive",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 5043,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy1",
+    "name": "Runic Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 44,
+   "id": "2SlotUncutSpiritGem1",
+   "size": 2,
+   "runeIdx": [
+    16,
+    19
+   ],
+   "runes": [
+    "Prismatic",
+    "Celestial"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Uncut Spirit Gem",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 45,
+   "id": "2SlotGlassblowersBauble1",
+   "size": 2,
+   "runeIdx": [
+    24,
+    19
+   ],
+   "runes": [
+    "Earth",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 28,
+    "id": "Metadata/Items/Currency/CurrencyFlaskQuality",
+    "name": "Glassblower's Bauble"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 46,
+   "id": "2SlotGemcuttersPrism1",
+   "size": 2,
+   "runeIdx": [
+    23,
+    19
+   ],
+   "runes": [
+    "Sky",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 29,
+    "id": "Metadata/Items/Currency/CurrencyGemQuality",
+    "name": "Gemcutter's Prism"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 47,
+   "id": "2SlotRegalOrb2",
+   "size": 2,
+   "runeIdx": [
+    12,
+    19
+   ],
+   "runes": [
+    "Cyclonic",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 21,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare",
+    "name": "Regal Orb"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 48,
+   "id": "2SlotArmourersScrap4",
+   "size": 2,
+   "runeIdx": [
+    18,
+    7
+   ],
+   "runes": [
+    "Moon",
+    "Adaptive"
+   ],
+   "reward": {
+    "idx": 6,
+    "id": "Metadata/Items/Currency/CurrencyArmourQuality",
+    "name": "Armourer's Scrap"
+   },
+   "rewardCount": 4,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 49,
+   "id": "2SlotArcanistsEtcher4",
+   "size": 2,
+   "runeIdx": [
+    14,
+    7
+   ],
+   "runes": [
+    "Tidal",
+    "Adaptive"
+   ],
+   "reward": {
+    "idx": 1,
+    "id": "Metadata/Items/Currency/CurrencyMagicQuality",
+    "name": "Arcanist's Etcher"
+   },
+   "rewardCount": 4,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 50,
+   "id": "2SlotBlacksmithsWhetstone4",
+   "size": 2,
+   "runeIdx": [
+    21,
+    7
+   ],
+   "runes": [
+    "Rage",
+    "Adaptive"
+   ],
+   "reward": {
+    "idx": 0,
+    "id": "Metadata/Items/Currency/CurrencyWeaponQuality",
+    "name": "Blacksmith's Whetstone"
+   },
+   "rewardCount": 4,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 51,
+   "id": "3SlotChargingRune1",
+   "size": 3,
+   "runeIdx": [
+    23,
+    14,
+    6
+   ],
+   "runes": [
+    "Sky",
+    "Tidal",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5070,
+    "id": "Metadata/Items/SoulCores/RuneWard2Normal",
+    "name": "Charging Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 52,
+   "id": "3SlotGreaterVisionRune1",
+   "size": 3,
+   "runeIdx": [
+    13,
+    11,
+    1
+   ],
+   "runes": [
+    "Vision",
+    "Protective",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 650,
+    "id": "Metadata/Items/SoulCores/RuneAccuracyGreater",
+    "name": "Greater Vision Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 53,
+   "id": "3SlotGreaterGlacialRune1",
+   "size": 3,
+   "runeIdx": [
+    18,
+    12,
+    21
+   ],
+   "runes": [
+    "Moon",
+    "Cyclonic",
+    "Rage"
+   ],
+   "reward": {
+    "idx": 642,
+    "id": "Metadata/Items/SoulCores/RuneColdGreater",
+    "name": "Greater Glacial Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 54,
+   "id": "3SlotGreaterAdeptRune1",
+   "size": 3,
+   "runeIdx": [
+    18,
+    13,
+    2
+   ],
+   "runes": [
+    "Moon",
+    "Vision",
+    "Lightning"
+   ],
+   "reward": {
+    "idx": 667,
+    "id": "Metadata/Items/SoulCores/RuneDexterityGreater",
+    "name": "Greater Adept Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 55,
+   "id": "3SlotGreaterIronRune1",
+   "size": 3,
+   "runeIdx": [
+    11,
+    12,
+    19
+   ],
+   "runes": [
+    "Protective",
+    "Cyclonic",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 644,
+    "id": "Metadata/Items/SoulCores/RuneEnhanceGreater",
+    "name": "Greater Iron Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 56,
+   "id": "3SlotGreaterDesertRune1",
+   "size": 3,
+   "runeIdx": [
+    21,
+    12,
+    24
+   ],
+   "runes": [
+    "Rage",
+    "Cyclonic",
+    "Earth"
+   ],
+   "reward": {
+    "idx": 641,
+    "id": "Metadata/Items/SoulCores/RuneFireGreater",
+    "name": "Greater Desert Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 57,
+   "id": "3SlotGreaterResolveRune1",
+   "size": 3,
+   "runeIdx": [
+    14,
+    13,
+    24
+   ],
+   "runes": [
+    "Tidal",
+    "Vision",
+    "Earth"
+   ],
+   "reward": {
+    "idx": 671,
+    "id": "Metadata/Items/SoulCores/RuneIntelligenceGreater",
+    "name": "Greater Resolve Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 58,
+   "id": "3SlotGreaterBodyRune1",
+   "size": 3,
+   "runeIdx": [
+    11,
+    17,
+    6
+   ],
+   "runes": [
+    "Protective",
+    "Gasp",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 645,
+    "id": "Metadata/Items/SoulCores/RuneLifeGreater",
+    "name": "Greater Body Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 59,
+   "id": "3SlotGreaterRebirthRune1",
+   "size": 3,
+   "runeIdx": [
+    13,
+    11,
+    15
+   ],
+   "runes": [
+    "Vision",
+    "Protective",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 647,
+    "id": "Metadata/Items/SoulCores/RuneLifeRecoveryGreater",
+    "name": "Greater Rebirth Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 60,
+   "id": "3SlotGreaterStormRune1",
+   "size": 3,
+   "runeIdx": [
+    14,
+    12,
+    13
+   ],
+   "runes": [
+    "Tidal",
+    "Cyclonic",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 643,
+    "id": "Metadata/Items/SoulCores/RuneLightningGreater",
+    "name": "Greater Storm Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 61,
+   "id": "3SlotGreaterMindRune1",
+   "size": 3,
+   "runeIdx": [
+    17,
+    0,
+    15
+   ],
+   "runes": [
+    "Gasp",
+    "Fire",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 646,
+    "id": "Metadata/Items/SoulCores/RuneManaGreater",
+    "name": "Greater Mind Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 62,
+   "id": "3SlotGreaterInspirationRune1",
+   "size": 3,
+   "runeIdx": [
+    10,
+    11,
+    15
+   ],
+   "runes": [
+    "Electrocuting",
+    "Protective",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 648,
+    "id": "Metadata/Items/SoulCores/RuneManaRecoveryGreater",
+    "name": "Greater Inspiration Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 63,
+   "id": "3SlotGreaterRobustRune1",
+   "size": 3,
+   "runeIdx": [
+    21,
+    13,
+    21
+   ],
+   "runes": [
+    "Rage",
+    "Vision",
+    "Rage"
+   ],
+   "reward": {
+    "idx": 663,
+    "id": "Metadata/Items/SoulCores/RuneStrengthGreater",
+    "name": "Greater Robust Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 64,
+   "id": "3SlotGreaterStoneRune1",
+   "size": 3,
+   "runeIdx": [
+    11,
+    14,
+    19
+   ],
+   "runes": [
+    "Protective",
+    "Tidal",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 649,
+    "id": "Metadata/Items/SoulCores/RuneStunGreater",
+    "name": "Greater Stone Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 65,
+   "id": "3SlotGreaterWardRune1",
+   "size": 3,
+   "runeIdx": [
+    11,
+    27,
+    2
+   ],
+   "runes": [
+    "Protective",
+    "Ward",
+    "Lightning"
+   ],
+   "reward": {
+    "idx": 5067,
+    "id": "Metadata/Items/SoulCores/RuneWard1Greater",
+    "name": "Greater Ward Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 66,
+   "id": "3SlotGreaterChargingRune1",
+   "size": 3,
+   "runeIdx": [
+    11,
+    27,
+    0
+   ],
+   "runes": [
+    "Protective",
+    "Ward",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 5071,
+    "id": "Metadata/Items/SoulCores/RuneWard2Greater",
+    "name": "Greater Charging Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 67,
+   "id": "3SlotUniqueBodyArmour1",
+   "size": 3,
+   "runeIdx": [
+    19,
+    16,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Prismatic",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Body Armour",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 68,
+   "id": "3SlotUniqueBoots1",
+   "size": 3,
+   "runeIdx": [
+    19,
+    2,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Lightning",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Boots",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 69,
+   "id": "3SlotUniqueGloves1",
+   "size": 3,
+   "runeIdx": [
+    19,
+    2,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Lightning",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Gloves",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 70,
+   "id": "3SlotUniqueHelmet1",
+   "size": 3,
+   "runeIdx": [
+    19,
+    3,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Tempest",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Helmet",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 71,
+   "id": "3SlotArtificersOrb3",
+   "size": 3,
+   "runeIdx": [
+    6,
+    13,
+    16
+   ],
+   "runes": [
+    "Stone",
+    "Vision",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 35,
+    "id": "Metadata/Items/Currency/CurrencyAddEquipmentSocket",
+    "name": "Artificer's Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 72,
+   "id": "3SlotExaltedOrb2",
+   "size": 3,
+   "runeIdx": [
+    7,
+    8,
+    14
+   ],
+   "runes": [
+    "Adaptive",
+    "Arcane",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 18,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare",
+    "name": "Exalted Orb"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 73,
+   "id": "3SlotChaosOrb1",
+   "size": 3,
+   "runeIdx": [
+    7,
+    14,
+    5
+   ],
+   "runes": [
+    "Adaptive",
+    "Tidal",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 3,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare",
+    "name": "Chaos Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 74,
+   "id": "3SlotRegalOrb3",
+   "size": 3,
+   "runeIdx": [
+    24,
+    8,
+    14
+   ],
+   "runes": [
+    "Earth",
+    "Arcane",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 21,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare",
+    "name": "Regal Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 75,
+   "id": "3SlotRunicAlloy2",
+   "size": 3,
+   "runeIdx": [
+    13,
+    15,
+    16
+   ],
+   "runes": [
+    "Vision",
+    "Rebirth",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 5043,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy1",
+    "name": "Runic Alloy"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 76,
+   "id": "3SlotAdaptiveAlloy1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    15,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Rebirth",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5044,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy2",
+    "name": "Adaptive Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 77,
+   "id": "3SlotLesserJewellersOrb1",
+   "size": 3,
+   "runeIdx": [
+    16,
+    8,
+    12
+   ],
+   "runes": [
+    "Prismatic",
+    "Arcane",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 32,
+    "id": "Metadata/Items/Currency/CurrencyAddSkillGemSocket3",
+    "name": "Lesser Jeweller's Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 78,
+   "id": "3SlotArmourersScrap6",
+   "size": 3,
+   "runeIdx": [
+    18,
+    7,
+    1
+   ],
+   "runes": [
+    "Moon",
+    "Adaptive",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 6,
+    "id": "Metadata/Items/Currency/CurrencyArmourQuality",
+    "name": "Armourer's Scrap"
+   },
+   "rewardCount": 6,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 79,
+   "id": "3SlotArcanistsEtcher6",
+   "size": 3,
+   "runeIdx": [
+    14,
+    7,
+    17
+   ],
+   "runes": [
+    "Tidal",
+    "Adaptive",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 1,
+    "id": "Metadata/Items/Currency/CurrencyMagicQuality",
+    "name": "Arcanist's Etcher"
+   },
+   "rewardCount": 6,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 80,
+   "id": "3SlotProtectiveAlloy1",
+   "size": 3,
+   "runeIdx": [
+    23,
+    15,
+    5
+   ],
+   "runes": [
+    "Sky",
+    "Rebirth",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 5045,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy3",
+    "name": "Protective Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 81,
+   "id": "3SlotBlacksmithsWhetstone6",
+   "size": 3,
+   "runeIdx": [
+    21,
+    7,
+    5
+   ],
+   "runes": [
+    "Rage",
+    "Adaptive",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 0,
+    "id": "Metadata/Items/Currency/CurrencyWeaponQuality",
+    "name": "Blacksmith's Whetstone"
+   },
+   "rewardCount": 6,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 82,
+   "id": "3SlotGreaterOrbofAugmentation1",
+   "size": 3,
+   "runeIdx": [
+    4,
+    25,
+    3
+   ],
+   "runes": [
+    "Momentum",
+    "Life",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 25,
+    "id": "Metadata/Items/Currency/CurrencyAddModToMagic2",
+    "name": "Greater Orb of Augmentation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 83,
+   "id": "3SlotGlassblowersBauble2",
+   "size": 3,
+   "runeIdx": [
+    16,
+    9,
+    14
+   ],
+   "runes": [
+    "Prismatic",
+    "Toxic",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 28,
+    "id": "Metadata/Items/Currency/CurrencyFlaskQuality",
+    "name": "Glassblower's Bauble"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 84,
+   "id": "3SlotGreaterOrbofTransmutation1",
+   "size": 3,
+   "runeIdx": [
+    4,
+    25,
+    1
+   ],
+   "runes": [
+    "Momentum",
+    "Life",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 14,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToMagic2",
+    "name": "Greater Orb of Transmutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 85,
+   "id": "3SlotExpansiveAlloy1",
+   "size": 3,
+   "runeIdx": [
+    17,
+    15,
+    14
+   ],
+   "runes": [
+    "Gasp",
+    "Rebirth",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 5046,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy4",
+    "name": "Expansive Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 86,
+   "id": "3SlotDetonateLiving1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    1,
+    19
+   ],
+   "runes": [
+    "Cyclonic",
+    "Cold",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 5229,
+    "id": "Metadata/Items/Gems/SkillGemDetonateLiving",
+    "name": "Detonate Living"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 87,
+   "id": "3SlotEternalMarch1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    1,
+    11
+   ],
+   "runes": [
+    "Cyclonic",
+    "Cold",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 5232,
+    "id": "Metadata/Items/Gems/SkillGemEternalMarch",
+    "name": "Eternal March"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 88,
+   "id": "3SlotFragmentsofthePast1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    14,
+    2
+   ],
+   "runes": [
+    "Cyclonic",
+    "Tidal",
+    "Lightning"
+   ],
+   "reward": {
+    "idx": 5238,
+    "id": "Metadata/Items/Gems/SkillGemFragmentsOfThePast",
+    "name": "Fragments Of The Past"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 89,
+   "id": "3SlotFrostFlameNova1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    1,
+    0
+   ],
+   "runes": [
+    "Cyclonic",
+    "Cold",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 5216,
+    "id": "Metadata/Items/Gems/SkillGemFrostflameNova",
+    "name": "Frostflame Nova"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 90,
+   "id": "3SlotRepulsion1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    24,
+    11
+   ],
+   "runes": [
+    "Cyclonic",
+    "Earth",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 5224,
+    "id": "Metadata/Items/Gems/SkillGemRepulsion",
+    "name": "Repulsion"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 91,
+   "id": "3SlotRuneHazard1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    2,
+    13
+   ],
+   "runes": [
+    "Cyclonic",
+    "Lightning",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 5239,
+    "id": "Metadata/Items/Gems/SkillGemConductiveRunes",
+    "name": "Conductive Runes"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 92,
+   "id": "3SlotConcussiveRunes1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    16,
+    18
+   ],
+   "runes": [
+    "Cyclonic",
+    "Prismatic",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 5214,
+    "id": "Metadata/Items/Gems/SupportGemConcussiveRunes",
+    "name": "Concussive Runes"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 93,
+   "id": "3SlotBitterDead1",
+   "size": 3,
+   "runeIdx": [
+    15,
+    1,
+    27
+   ],
+   "runes": [
+    "Rebirth",
+    "Cold",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5231,
+    "id": "Metadata/Items/Gems/SkillGemBitterDead",
+    "name": "Bitter Dead"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 94,
+   "id": "3SlotGrimPillars1",
+   "size": 3,
+   "runeIdx": [
+    17,
+    1,
+    27
+   ],
+   "runes": [
+    "Gasp",
+    "Cold",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5233,
+    "id": "Metadata/Items/Gems/SkillGemGrimPillars",
+    "name": "Grim Pillars"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 95,
+   "id": "3SlotRemnantsofKalguur1",
+   "size": 3,
+   "runeIdx": [
+    23,
+    14,
+    27
+   ],
+   "runes": [
+    "Sky",
+    "Tidal",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5235,
+    "id": "Metadata/Items/Gems/SkillGemRemnantsOfKalguur",
+    "name": "Remnants of Kalguur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 96,
+   "id": "3SlotVerisiumInfusion1",
+   "size": 3,
+   "runeIdx": [
+    8,
+    24,
+    27
+   ],
+   "runes": [
+    "Arcane",
+    "Earth",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5222,
+    "id": "Metadata/Items/Gems/SkillGemPoweredByVerisium",
+    "name": "Powered by Verisium"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 97,
+   "id": "3SlotVerisiumManifestation1",
+   "size": 3,
+   "runeIdx": [
+    15,
+    21,
+    27
+   ],
+   "runes": [
+    "Rebirth",
+    "Rage",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5234,
+    "id": "Metadata/Items/Gems/SkillGemVerisiumManifestation",
+    "name": "Verisium Manifestations"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 98,
+   "id": "3SlotRuneforgedBlades1",
+   "size": 3,
+   "runeIdx": [
+    17,
+    10,
+    27
+   ],
+   "runes": [
+    "Gasp",
+    "Electrocuting",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5221,
+    "id": "Metadata/Items/Gems/SupportGemRuneforgedBlades",
+    "name": "Runeforged Blades"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 99,
+   "id": "3SlotScouringFlame1",
+   "size": 3,
+   "runeIdx": [
+    17,
+    0,
+    27
+   ],
+   "runes": [
+    "Gasp",
+    "Fire",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5242,
+    "id": "Metadata/Items/Gems/SupportGemScouringFlame",
+    "name": "Scouring Flame"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 100,
+   "id": "3SlotAnimusSplinters1",
+   "size": 3,
+   "runeIdx": [
+    1,
+    23,
+    3
+   ],
+   "runes": [
+    "Cold",
+    "Sky",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 5241,
+    "id": "Metadata/Items/Gems/SkillGemAnimusSplinters",
+    "name": "Animus Splinters"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 101,
+   "id": "3SlotExplosiveTransmutation1",
+   "size": 3,
+   "runeIdx": [
+    1,
+    23,
+    0
+   ],
+   "runes": [
+    "Cold",
+    "Sky",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 5463,
+    "id": "Metadata/Items/Gems/SkillGemExplosiveTransmutation",
+    "name": "Explosive Transmutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 102,
+   "id": "3SlotHollowShell1",
+   "size": 3,
+   "runeIdx": [
+    8,
+    23,
+    24
+   ],
+   "runes": [
+    "Arcane",
+    "Sky",
+    "Earth"
+   ],
+   "reward": {
+    "idx": 5217,
+    "id": "Metadata/Items/Gems/SkillGemHollowShell",
+    "name": "Hollow Shell"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 103,
+   "id": "3SlotVoltaicBarrier1",
+   "size": 3,
+   "runeIdx": [
+    27,
+    23,
+    2
+   ],
+   "runes": [
+    "Ward",
+    "Sky",
+    "Lightning"
+   ],
+   "reward": {
+    "idx": 5460,
+    "id": "Metadata/Items/Gems/SkillGemVoltaicBarrier",
+    "name": "Voltaic Barrier"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 104,
+   "id": "3SlotWardboundMinions1",
+   "size": 3,
+   "runeIdx": [
+    3,
+    23,
+    12
+   ],
+   "runes": [
+    "Tempest",
+    "Sky",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 5237,
+    "id": "Metadata/Items/Gems/SkillGemWardboundMinions",
+    "name": "Wardbound Minions"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 105,
+   "id": "3SlotFistofKalguur1",
+   "size": 3,
+   "runeIdx": [
+    5,
+    23,
+    21
+   ],
+   "runes": [
+    "Bloodletting",
+    "Sky",
+    "Rage"
+   ],
+   "reward": {
+    "idx": 5459,
+    "id": "Metadata/Items/Gems/SupportGemFistOfKalguur",
+    "name": "Fist Of Kalguur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 106,
+   "id": "3SlotRunicExtraction1",
+   "size": 3,
+   "runeIdx": [
+    15,
+    23,
+    12
+   ],
+   "runes": [
+    "Rebirth",
+    "Sky",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 5236,
+    "id": "Metadata/Items/Gems/SupportGemRunicExtraction",
+    "name": "Runic Extraction"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 107,
+   "id": "3SlotRunicInfusion1",
+   "size": 3,
+   "runeIdx": [
+    10,
+    23,
+    3
+   ],
+   "runes": [
+    "Electrocuting",
+    "Sky",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 5219,
+    "id": "Metadata/Items/Gems/SupportGemRunicInfusion",
+    "name": "Runic Infusion"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 108,
+   "id": "3SlotRainOfBlades",
+   "size": 3,
+   "runeIdx": [
+    8,
+    23,
+    3
+   ],
+   "runes": [
+    "Arcane",
+    "Sky",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 5464,
+    "id": "Metadata/Items/Gems/SkillGemRainOfBlades",
+    "name": "Rain of Blades"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 109,
+   "id": "3SlotGemcuttersPrism2",
+   "size": 3,
+   "runeIdx": [
+    16,
+    19,
+    26
+   ],
+   "runes": [
+    "Prismatic",
+    "Celestial",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 29,
+    "id": "Metadata/Items/Currency/CurrencyGemQuality",
+    "name": "Gemcutter's Prism"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 110,
+   "id": "3SlotPileofVerisium1",
+   "size": 3,
+   "runeIdx": [
+    12,
+    23,
+    27
+   ],
+   "runes": [
+    "Cyclonic",
+    "Sky",
+    "Ward"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Verisium Pile",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 111,
+   "id": "3SlotWardingRuneofReinforcement1",
+   "size": 3,
+   "runeIdx": [
+    2,
+    27,
+    10
+   ],
+   "runes": [
+    "Lightning",
+    "Ward",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 5073,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial1",
+    "name": "Warding Rune of Reinforcement"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 112,
+   "id": "3SlotWardingRuneofProtection1",
+   "size": 3,
+   "runeIdx": [
+    13,
+    11,
+    10
+   ],
+   "runes": [
+    "Vision",
+    "Protective",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 5074,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial2",
+    "name": "Warding Rune of Protection"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 113,
+   "id": "3SlotWardingRuneofDisintegration1",
+   "size": 3,
+   "runeIdx": [
+    1,
+    6,
+    10
+   ],
+   "runes": [
+    "Cold",
+    "Stone",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 5075,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial3",
+    "name": "Warding Rune of Disintegration"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 114,
+   "id": "3SlotWardingRuneofDesperation1",
+   "size": 3,
+   "runeIdx": [
+    5,
+    6,
+    10
+   ],
+   "runes": [
+    "Bloodletting",
+    "Stone",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 5076,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial4",
+    "name": "Warding Rune of Desperation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 115,
+   "id": "3SlotWardingRuneofCourage1",
+   "size": 3,
+   "runeIdx": [
+    1,
+    27,
+    10
+   ],
+   "runes": [
+    "Cold",
+    "Ward",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 5078,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial9",
+    "name": "Warding Rune of Courage"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 116,
+   "id": "3SlotOrbofAlchemy1",
+   "size": 3,
+   "runeIdx": [
+    7,
+    15,
+    16
+   ],
+   "runes": [
+    "Adaptive",
+    "Rebirth",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 9,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToRare",
+    "name": "Orb of Alchemy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 117,
+   "id": "4SlotAnimusExchange1",
+   "size": 4,
+   "runeIdx": [
+    12,
+    16,
+    10,
+    27
+   ],
+   "runes": [
+    "Cyclonic",
+    "Prismatic",
+    "Electrocuting",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5230,
+    "id": "Metadata/Items/Gems/SkillGemAnimusExchange",
+    "name": "Animus Exchange"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 118,
+   "id": "4SlotLeylines1",
+   "size": 4,
+   "runeIdx": [
+    2,
+    19,
+    15,
+    27
+   ],
+   "runes": [
+    "Lightning",
+    "Celestial",
+    "Rebirth",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5215,
+    "id": "Metadata/Items/Gems/SkillGemLeylines",
+    "name": "Leylines"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 119,
+   "id": "4SlotRuneWard1",
+   "size": 4,
+   "runeIdx": [
+    5,
+    16,
+    15,
+    27
+   ],
+   "runes": [
+    "Bloodletting",
+    "Prismatic",
+    "Rebirth",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5458,
+    "id": "Metadata/Items/Gems/SkillGemRunicReprieve",
+    "name": "Runic Reprieve"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 120,
+   "id": "4SlotRunicFortress1",
+   "size": 4,
+   "runeIdx": [
+    21,
+    16,
+    6,
+    27
+   ],
+   "runes": [
+    "Rage",
+    "Prismatic",
+    "Stone",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5223,
+    "id": "Metadata/Items/Gems/SkillGemRefutation",
+    "name": "Refutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 121,
+   "id": "4SlotTriskelionCascade1",
+   "size": 4,
+   "runeIdx": [
+    1,
+    19,
+    6,
+    27
+   ],
+   "runes": [
+    "Cold",
+    "Celestial",
+    "Stone",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5225,
+    "id": "Metadata/Items/Gems/SkillGemTriskelionCascade",
+    "name": "Triskelion Cascade"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 122,
+   "id": "4SlotVerisiumComet1",
+   "size": 4,
+   "runeIdx": [
+    3,
+    19,
+    11,
+    27
+   ],
+   "runes": [
+    "Tempest",
+    "Celestial",
+    "Protective",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5228,
+    "id": "Metadata/Items/Gems/SkillGemSkyfall",
+    "name": "Skyfall"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 123,
+   "id": "4SlotHealingRunes1",
+   "size": 4,
+   "runeIdx": [
+    10,
+    16,
+    11,
+    27
+   ],
+   "runes": [
+    "Electrocuting",
+    "Prismatic",
+    "Protective",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5461,
+    "id": "Metadata/Items/Gems/SupportGemHealingRunes",
+    "name": "Healing Runes"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 124,
+   "id": "4SlotUniqueBow1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    13,
+    22,
+    4
+   ],
+   "runes": [
+    "Celestial",
+    "Vision",
+    "Wisdom",
+    "Momentum"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Bow",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 125,
+   "id": "4SlotUniqueCrossbow1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    10,
+    22,
+    4
+   ],
+   "runes": [
+    "Celestial",
+    "Electrocuting",
+    "Wisdom",
+    "Momentum"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Crossbow",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 126,
+   "id": "4SlotUniqueFocus1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    11,
+    22,
+    8
+   ],
+   "runes": [
+    "Celestial",
+    "Protective",
+    "Wisdom",
+    "Arcane"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Focus",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 127,
+   "id": "4SlotUniqueOneHandMace1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    21,
+    22,
+    8
+   ],
+   "runes": [
+    "Celestial",
+    "Rage",
+    "Wisdom",
+    "Arcane"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] One Hand Mace",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 128,
+   "id": "4SlotUniqueQuarterstaff1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    21,
+    22,
+    7
+   ],
+   "runes": [
+    "Celestial",
+    "Rage",
+    "Wisdom",
+    "Adaptive"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Quarterstaff",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 129,
+   "id": "4SlotUniqueQuiver1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    11,
+    22,
+    21
+   ],
+   "runes": [
+    "Celestial",
+    "Protective",
+    "Wisdom",
+    "Rage"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Quiver",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 130,
+   "id": "4SlotUniqueSceptre1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    11,
+    22,
+    8
+   ],
+   "runes": [
+    "Celestial",
+    "Protective",
+    "Wisdom",
+    "Arcane"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Sceptre",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 131,
+   "id": "4SlotUniqueShield1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    11,
+    22,
+    16
+   ],
+   "runes": [
+    "Celestial",
+    "Protective",
+    "Wisdom",
+    "Prismatic"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Shield",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 132,
+   "id": "4SlotUniqueSpear1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    21,
+    22,
+    4
+   ],
+   "runes": [
+    "Celestial",
+    "Rage",
+    "Wisdom",
+    "Momentum"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Spear",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 133,
+   "id": "4SlotUniqueStaff1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    8,
+    22,
+    4
+   ],
+   "runes": [
+    "Celestial",
+    "Arcane",
+    "Wisdom",
+    "Momentum"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Staff",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 134,
+   "id": "4SlotUniqueTalisman1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    21,
+    22,
+    5
+   ],
+   "runes": [
+    "Celestial",
+    "Rage",
+    "Wisdom",
+    "Bloodletting"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Talisman",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 135,
+   "id": "4SlotUniqueTwoHandMace1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    21,
+    22,
+    14
+   ],
+   "runes": [
+    "Celestial",
+    "Rage",
+    "Wisdom",
+    "Tidal"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Two Hand Mace",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 136,
+   "id": "4SlotUniqueWand1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    8,
+    22,
+    4
+   ],
+   "runes": [
+    "Celestial",
+    "Arcane",
+    "Wisdom",
+    "Momentum"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Wand",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 137,
+   "id": "4SlotExaltedOrb3",
+   "size": 4,
+   "runeIdx": [
+    7,
+    18,
+    28,
+    12
+   ],
+   "runes": [
+    "Adaptive",
+    "Moon",
+    "Soul",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 18,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare",
+    "name": "Exalted Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 138,
+   "id": "4SlotGlassblowersBauble3",
+   "size": 4,
+   "runeIdx": [
+    16,
+    9,
+    14,
+    17
+   ],
+   "runes": [
+    "Prismatic",
+    "Toxic",
+    "Tidal",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 28,
+    "id": "Metadata/Items/Currency/CurrencyFlaskQuality",
+    "name": "Glassblower's Bauble"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 139,
+   "id": "4SlotGemcuttersPrism3",
+   "size": 4,
+   "runeIdx": [
+    16,
+    28,
+    13,
+    17
+   ],
+   "runes": [
+    "Prismatic",
+    "Soul",
+    "Vision",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 29,
+    "id": "Metadata/Items/Currency/CurrencyGemQuality",
+    "name": "Gemcutter's Prism"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 140,
+   "id": "4SlotWardingRuneofStability1",
+   "size": 4,
+   "runeIdx": [
+    1,
+    27,
+    8,
+    6
+   ],
+   "runes": [
+    "Cold",
+    "Ward",
+    "Arcane",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5079,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial10",
+    "name": "Warding Rune of Stability"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 141,
+   "id": "4SlotWardingRuneofGlancing1",
+   "size": 4,
+   "runeIdx": [
+    14,
+    27,
+    11,
+    6
+   ],
+   "runes": [
+    "Tidal",
+    "Ward",
+    "Protective",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5080,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial13",
+    "name": "Warding Rune of Glancing"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 142,
+   "id": "4SlotWardingRuneoftheHeart1",
+   "size": 4,
+   "runeIdx": [
+    10,
+    27,
+    13,
+    6
+   ],
+   "runes": [
+    "Electrocuting",
+    "Ward",
+    "Vision",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5081,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial14",
+    "name": "Warding Rune of Heart"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 143,
+   "id": "4SlotWardingRuneofAnnihilation1",
+   "size": 4,
+   "runeIdx": [
+    13,
+    27,
+    10,
+    6
+   ],
+   "runes": [
+    "Vision",
+    "Ward",
+    "Electrocuting",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5083,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial16",
+    "name": "Warding Rune of Annihilation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 144,
+   "id": "4SlotWardingRuneofSalvaging1",
+   "size": 4,
+   "runeIdx": [
+    12,
+    27,
+    18,
+    6
+   ],
+   "runes": [
+    "Cyclonic",
+    "Ward",
+    "Moon",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5087,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial21",
+    "name": "Warding Rune of Salvaging"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 145,
+   "id": "4SlotWardingRuneofSymbiosis1",
+   "size": 4,
+   "runeIdx": [
+    3,
+    27,
+    25,
+    6
+   ],
+   "runes": [
+    "Tempest",
+    "Ward",
+    "Life",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5077,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial8",
+    "name": "Warding Rune of Symbiosis"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 146,
+   "id": "4SlotOrbofAlchemy3",
+   "size": 4,
+   "runeIdx": [
+    7,
+    18,
+    14,
+    10
+   ],
+   "runes": [
+    "Adaptive",
+    "Moon",
+    "Tidal",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 9,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToRare",
+    "name": "Orb of Alchemy"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 147,
+   "id": "4SlotChaosOrb2",
+   "size": 4,
+   "runeIdx": [
+    7,
+    30,
+    0,
+    15
+   ],
+   "runes": [
+    "Adaptive",
+    "Oath",
+    "Fire",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 3,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare",
+    "name": "Chaos Orb"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 148,
+   "id": "4SlotCyclonicAlloy1",
+   "size": 4,
+   "runeIdx": [
+    21,
+    15,
+    14,
+    12
+   ],
+   "runes": [
+    "Rage",
+    "Rebirth",
+    "Tidal",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 5048,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy6",
+    "name": "Cyclonic Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 149,
+   "id": "4SlotGreaterJewellersOrb1",
+   "size": 4,
+   "runeIdx": [
+    16,
+    30,
+    7,
+    12
+   ],
+   "runes": [
+    "Prismatic",
+    "Oath",
+    "Adaptive",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 33,
+    "id": "Metadata/Items/Currency/CurrencyAddSkillGemSocket4",
+    "name": "Greater Jeweller's Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 150,
+   "id": "4SlotSwiftAlloy1",
+   "size": 4,
+   "runeIdx": [
+    7,
+    15,
+    28,
+    15
+   ],
+   "runes": [
+    "Adaptive",
+    "Rebirth",
+    "Soul",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 5046,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy4",
+    "name": "Expansive Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 151,
+   "id": "4SlotUniqueJewellery1",
+   "size": 4,
+   "runeIdx": [
+    9,
+    18,
+    22,
+    12
+   ],
+   "runes": [
+    "Toxic",
+    "Moon",
+    "Wisdom",
+    "Cyclonic"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Jewellery",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 152,
+   "id": "4SlotRuneofConsistency1",
+   "size": 4,
+   "runeIdx": [
+    18,
+    10,
+    1,
+    7
+   ],
+   "runes": [
+    "Moon",
+    "Electrocuting",
+    "Cold",
+    "Adaptive"
+   ],
+   "reward": {
+    "idx": 5107,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients14",
+    "name": "Rune of Vitality"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 153,
+   "id": "4SlotRuneofReach1",
+   "size": 4,
+   "runeIdx": [
+    24,
+    10,
+    1,
+    17
+   ],
+   "runes": [
+    "Earth",
+    "Electrocuting",
+    "Cold",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 5108,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients15",
+    "name": "Rune of the Hunt"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 154,
+   "id": "4SlotRuneofFoundations1",
+   "size": 4,
+   "runeIdx": [
+    24,
+    12,
+    1,
+    25
+   ],
+   "runes": [
+    "Earth",
+    "Cyclonic",
+    "Cold",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5109,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients16",
+    "name": "Rune of Acrobatics"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 155,
+   "id": "4SlotRuneofthePrism1",
+   "size": 4,
+   "runeIdx": [
+    18,
+    16,
+    1,
+    25
+   ],
+   "runes": [
+    "Moon",
+    "Prismatic",
+    "Cold",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5110,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients17",
+    "name": "Rune of Culmination"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 156,
+   "id": "4SlotRuneoftheSoul1",
+   "size": 4,
+   "runeIdx": [
+    8,
+    10,
+    0,
+    25
+   ],
+   "runes": [
+    "Arcane",
+    "Electrocuting",
+    "Fire",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5111,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients18",
+    "name": "Rune of Renown"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 157,
+   "id": "4SlotRuneofCulmination1",
+   "size": 4,
+   "runeIdx": [
+    24,
+    12,
+    0,
+    18
+   ],
+   "runes": [
+    "Earth",
+    "Cyclonic",
+    "Fire",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 5112,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients19",
+    "name": "Rune of Accumulation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 158,
+   "id": "4SlotRuneofRenown1",
+   "size": 4,
+   "runeIdx": [
+    8,
+    12,
+    0,
+    11
+   ],
+   "runes": [
+    "Arcane",
+    "Cyclonic",
+    "Fire",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 5113,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients20",
+    "name": "Rune of Foundations"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 159,
+   "id": "4SlotRuneofAccumulation1",
+   "size": 4,
+   "runeIdx": [
+    23,
+    10,
+    0,
+    11
+   ],
+   "runes": [
+    "Sky",
+    "Electrocuting",
+    "Fire",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 5114,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients21",
+    "name": "Rune of the Prism"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 160,
+   "id": "4SlotRuneoftheAdept1",
+   "size": 4,
+   "runeIdx": [
+    18,
+    12,
+    2,
+    11
+   ],
+   "runes": [
+    "Moon",
+    "Cyclonic",
+    "Lightning",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 5115,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients22",
+    "name": "Rune of the Blossom"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 161,
+   "id": "4SlotRuneofDashing1",
+   "size": 4,
+   "runeIdx": [
+    23,
+    12,
+    4,
+    13
+   ],
+   "runes": [
+    "Sky",
+    "Cyclonic",
+    "Momentum",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 5116,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients23",
+    "name": "Rune of Consistency"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 162,
+   "id": "4SlotRuneofAcrobatics1",
+   "size": 4,
+   "runeIdx": [
+    8,
+    4,
+    2,
+    13
+   ],
+   "runes": [
+    "Arcane",
+    "Momentum",
+    "Lightning",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 5117,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients24",
+    "name": "Rune of Reach"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 163,
+   "id": "4SlotArchaicRuneofSplinters1",
+   "size": 4,
+   "runeIdx": [
+    18,
+    3,
+    2,
+    20
+   ],
+   "runes": [
+    "Moon",
+    "Tempest",
+    "Lightning",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5094,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients1",
+    "name": "Ancient Rune of Splinters"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 164,
+   "id": "4SlotArchaicRuneoftheHorde1",
+   "size": 4,
+   "runeIdx": [
+    17,
+    5,
+    4,
+    20
+   ],
+   "runes": [
+    "Gasp",
+    "Bloodletting",
+    "Momentum",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5103,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients10",
+    "name": "Ancient Rune of the Horde"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 165,
+   "id": "4SlotArchaicRuneofAnimosity1",
+   "size": 4,
+   "runeIdx": [
+    17,
+    4,
+    21,
+    20
+   ],
+   "runes": [
+    "Gasp",
+    "Momentum",
+    "Rage",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5104,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients11",
+    "name": "Ancient Rune of Animosity"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 166,
+   "id": "4SlotArchaicRuneofDetonation1",
+   "size": 4,
+   "runeIdx": [
+    9,
+    7,
+    3,
+    20
+   ],
+   "runes": [
+    "Toxic",
+    "Adaptive",
+    "Tempest",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5105,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients12",
+    "name": "Ancient Rune of Detonation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 167,
+   "id": "4SlotArchaicRuneofRetaliation1",
+   "size": 4,
+   "runeIdx": [
+    17,
+    23,
+    4,
+    20
+   ],
+   "runes": [
+    "Gasp",
+    "Sky",
+    "Momentum",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5106,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients13",
+    "name": "Ancient Rune of Retaliation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 168,
+   "id": "4SlotArchaicRuneofDueling1",
+   "size": 4,
+   "runeIdx": [
+    17,
+    24,
+    6,
+    20
+   ],
+   "runes": [
+    "Gasp",
+    "Earth",
+    "Stone",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5095,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients2",
+    "name": "Ancient Rune of Dueling"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 169,
+   "id": "4SlotRuneofVitalFlame1",
+   "size": 4,
+   "runeIdx": [
+    17,
+    2,
+    24,
+    3
+   ],
+   "runes": [
+    "Gasp",
+    "Lightning",
+    "Earth",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 5118,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients25",
+    "name": "Rune of Vital Flame"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 170,
+   "id": "4SlotRuneofConfrontation1",
+   "size": 4,
+   "runeIdx": [
+    23,
+    14,
+    10,
+    3
+   ],
+   "runes": [
+    "Sky",
+    "Tidal",
+    "Electrocuting",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 5119,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients26",
+    "name": "Rune of Confrontation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 171,
+   "id": "4SlotArchaicRuneoftheTitan1",
+   "size": 4,
+   "runeIdx": [
+    9,
+    5,
+    21,
+    20
+   ],
+   "runes": [
+    "Toxic",
+    "Bloodletting",
+    "Rage",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5096,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients3",
+    "name": "Ancient Rune of the Titan"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 172,
+   "id": "4SlotArchaicRuneofShattering1",
+   "size": 4,
+   "runeIdx": [
+    9,
+    14,
+    2,
+    20
+   ],
+   "runes": [
+    "Toxic",
+    "Tidal",
+    "Lightning",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5097,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients4",
+    "name": "Ancient Rune of Shattering"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 173,
+   "id": "4SlotArchaicRuneofProwess1",
+   "size": 4,
+   "runeIdx": [
+    23,
+    4,
+    8,
+    20
+   ],
+   "runes": [
+    "Sky",
+    "Momentum",
+    "Arcane",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5098,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients5",
+    "name": "Ancient Rune of Prowess"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 174,
+   "id": "4SlotArchaicRuneofControl1",
+   "size": 4,
+   "runeIdx": [
+    24,
+    7,
+    18,
+    20
+   ],
+   "runes": [
+    "Earth",
+    "Adaptive",
+    "Moon",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5099,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients6",
+    "name": "Ancient Rune of Control"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 175,
+   "id": "4SlotArchaicRuneofDiscovery1",
+   "size": 4,
+   "runeIdx": [
+    9,
+    19,
+    23,
+    20
+   ],
+   "runes": [
+    "Toxic",
+    "Celestial",
+    "Sky",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5100,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients7",
+    "name": "Ancient Rune of Discovery"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 176,
+   "id": "4SlotArchaicRuneofDecay1",
+   "size": 4,
+   "runeIdx": [
+    9,
+    7,
+    8,
+    20
+   ],
+   "runes": [
+    "Toxic",
+    "Adaptive",
+    "Arcane",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5101,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients8",
+    "name": "Ancient Rune of Decay"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 177,
+   "id": "4SlotArchaicRuneofWitchcraft1",
+   "size": 4,
+   "runeIdx": [
+    8,
+    5,
+    19,
+    20
+   ],
+   "runes": [
+    "Arcane",
+    "Bloodletting",
+    "Celestial",
+    "Opulent"
+   ],
+   "reward": {
+    "idx": 5102,
+    "id": "Metadata/Items/SoulCores/RuneOfTheAncients9",
+    "name": "Ancient Rune of Witchcraft"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 178,
+   "id": "4SlotUniqueAmulet1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    1,
+    0,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Cold",
+    "Fire",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Amulet",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 179,
+   "id": "4SlotUniqueBelt1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    26,
+    27,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Bond",
+    "Ward",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Belt",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 180,
+   "id": "4SlotUniqueRing1",
+   "size": 4,
+   "runeIdx": [
+    19,
+    23,
+    1,
+    22
+   ],
+   "runes": [
+    "Celestial",
+    "Sky",
+    "Cold",
+    "Wisdom"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "[Rarity|Unique] Ring",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 181,
+   "id": "4SlotGreaterRegalOrb1",
+   "size": 4,
+   "runeIdx": [
+    30,
+    12,
+    25,
+    18
+   ],
+   "runes": [
+    "Oath",
+    "Cyclonic",
+    "Life",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 22,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare2",
+    "name": "Greater Regal Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 182,
+   "id": "4SlotGreaterExaltedOrb1",
+   "size": 4,
+   "runeIdx": [
+    30,
+    8,
+    26,
+    16
+   ],
+   "runes": [
+    "Oath",
+    "Arcane",
+    "Bond",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 19,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare2",
+    "name": "Greater Exalted Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 183,
+   "id": "4SlotGreaterChaosOrb1",
+   "size": 4,
+   "runeIdx": [
+    30,
+    10,
+    21,
+    17
+   ],
+   "runes": [
+    "Oath",
+    "Electrocuting",
+    "Rage",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 4,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare2",
+    "name": "Greater Chaos Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 184,
+   "id": "4SlotDivineOrb1",
+   "size": 4,
+   "runeIdx": [
+    29,
+    28,
+    32,
+    25
+   ],
+   "runes": [
+    "Death",
+    "Soul",
+    "Power",
+    "Life"
+   ],
+   "reward": {
+    "idx": 36,
+    "id": "Metadata/Items/Currency/CurrencyModValues",
+    "name": "Divine Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 185,
+   "id": "5SlotUncutSpiritGem(Level19)1",
+   "size": 5,
+   "runeIdx": [
+    4,
+    8,
+    16,
+    25,
+    14
+   ],
+   "runes": [
+    "Momentum",
+    "Arcane",
+    "Prismatic",
+    "Life",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 4916,
+    "id": "Metadata/Items/Gems/ReservationGemUncut19",
+    "name": "Uncut Spirit Gem (Level 19)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 186,
+   "id": "5SlotUncutSkillGem(Level19)1",
+   "size": 5,
+   "runeIdx": [
+    4,
+    0,
+    10,
+    1,
+    16
+   ],
+   "runes": [
+    "Momentum",
+    "Fire",
+    "Electrocuting",
+    "Cold",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 4894,
+    "id": "Metadata/Items/Gems/SkillGemUncut19",
+    "name": "Uncut Skill Gem (Level 19)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 187,
+   "id": "5SlotAstackofrandomcurrency1",
+   "size": 5,
+   "runeIdx": [
+    7,
+    20,
+    29,
+    3,
+    14
+   ],
+   "runes": [
+    "Adaptive",
+    "Opulent",
+    "Death",
+    "Tempest",
+    "Tidal"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "5x Random Currency",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 188,
+   "id": "5SlotWardingRuneofArmature1",
+   "size": 5,
+   "runeIdx": [
+    27,
+    17,
+    26,
+    6,
+    13
+   ],
+   "runes": [
+    "Ward",
+    "Gasp",
+    "Bond",
+    "Stone",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 5084,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial18",
+    "name": "Warding Rune of Armature"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 189,
+   "id": "5SlotWardingRuneofObsession1",
+   "size": 5,
+   "runeIdx": [
+    27,
+    25,
+    21,
+    6,
+    0
+   ],
+   "runes": [
+    "Ward",
+    "Life",
+    "Rage",
+    "Stone",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 5085,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial19",
+    "name": "Warding Rune of Obsession"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 190,
+   "id": "5SlotWardingRuneofEquinox1",
+   "size": 5,
+   "runeIdx": [
+    27,
+    3,
+    11,
+    6,
+    5
+   ],
+   "runes": [
+    "Ward",
+    "Tempest",
+    "Protective",
+    "Stone",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 5086,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial20",
+    "name": "Warding Rune of Equinox"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 191,
+   "id": "5SlotWardingRuneofBodyguards1",
+   "size": 5,
+   "runeIdx": [
+    27,
+    11,
+    30,
+    6,
+    16
+   ],
+   "runes": [
+    "Ward",
+    "Protective",
+    "Oath",
+    "Stone",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 5088,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial23",
+    "name": "Warding Rune of Bodyguards"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 192,
+   "id": "5SlotWardingRuneofHollowing1",
+   "size": 5,
+   "runeIdx": [
+    27,
+    2,
+    28,
+    6,
+    8
+   ],
+   "runes": [
+    "Ward",
+    "Lightning",
+    "Soul",
+    "Stone",
+    "Arcane"
+   ],
+   "reward": {
+    "idx": 5089,
+    "id": "Metadata/Items/SoulCores/RuneWardSpecial24",
+    "name": "Warding Rune of Hollowing"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 193,
+   "id": "5SlotGreaterOrbofAugmentation3",
+   "size": 5,
+   "runeIdx": [
+    15,
+    8,
+    10,
+    7,
+    26
+   ],
+   "runes": [
+    "Rebirth",
+    "Arcane",
+    "Electrocuting",
+    "Adaptive",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 25,
+    "id": "Metadata/Items/Currency/CurrencyAddModToMagic2",
+    "name": "Greater Orb of Augmentation"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 194,
+   "id": "5SlotGreaterOrbofTransmutation3",
+   "size": 5,
+   "runeIdx": [
+    17,
+    0,
+    1,
+    7,
+    26
+   ],
+   "runes": [
+    "Gasp",
+    "Fire",
+    "Cold",
+    "Adaptive",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 14,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToMagic2",
+    "name": "Greater Orb of Transmutation"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 195,
+   "id": "5SlotLevel20DetonateLiving1",
+   "size": 5,
+   "runeIdx": [
+    12,
+    17,
+    19,
+    0,
+    25
+   ],
+   "runes": [
+    "Cyclonic",
+    "Gasp",
+    "Celestial",
+    "Fire",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5229,
+    "id": "Metadata/Items/Gems/SkillGemDetonateLiving",
+    "name": "Detonate Living"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 196,
+   "id": "5SlotLevel20EternalMarch1",
+   "size": 5,
+   "runeIdx": [
+    12,
+    16,
+    11,
+    15,
+    25
+   ],
+   "runes": [
+    "Cyclonic",
+    "Prismatic",
+    "Protective",
+    "Rebirth",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5232,
+    "id": "Metadata/Items/Gems/SkillGemEternalMarch",
+    "name": "Eternal March"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 197,
+   "id": "5SlotLevel20FragmentsofthePast1",
+   "size": 5,
+   "runeIdx": [
+    12,
+    3,
+    2,
+    9,
+    25
+   ],
+   "runes": [
+    "Cyclonic",
+    "Tempest",
+    "Lightning",
+    "Toxic",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5238,
+    "id": "Metadata/Items/Gems/SkillGemFragmentsOfThePast",
+    "name": "Fragments Of The Past"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 198,
+   "id": "5SlotLevel20FrostFlameNova1",
+   "size": 5,
+   "runeIdx": [
+    12,
+    2,
+    0,
+    4,
+    25
+   ],
+   "runes": [
+    "Cyclonic",
+    "Lightning",
+    "Fire",
+    "Momentum",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5216,
+    "id": "Metadata/Items/Gems/SkillGemFrostflameNova",
+    "name": "Frostflame Nova"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 199,
+   "id": "5SlotLevel20Repulsion1",
+   "size": 5,
+   "runeIdx": [
+    12,
+    24,
+    11,
+    2,
+    25
+   ],
+   "runes": [
+    "Cyclonic",
+    "Earth",
+    "Protective",
+    "Lightning",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5224,
+    "id": "Metadata/Items/Gems/SkillGemRepulsion",
+    "name": "Repulsion"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 200,
+   "id": "5SlotLevel20RuneHazard1",
+   "size": 5,
+   "runeIdx": [
+    12,
+    2,
+    13,
+    13,
+    25
+   ],
+   "runes": [
+    "Cyclonic",
+    "Lightning",
+    "Vision",
+    "Vision",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5239,
+    "id": "Metadata/Items/Gems/SkillGemConductiveRunes",
+    "name": "Conductive Runes"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 201,
+   "id": "5SlotLevel20BitterDead1",
+   "size": 5,
+   "runeIdx": [
+    15,
+    16,
+    27,
+    9,
+    28
+   ],
+   "runes": [
+    "Rebirth",
+    "Prismatic",
+    "Ward",
+    "Toxic",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 5231,
+    "id": "Metadata/Items/Gems/SkillGemBitterDead",
+    "name": "Bitter Dead"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 202,
+   "id": "5SlotLevel20GrimPillars1",
+   "size": 5,
+   "runeIdx": [
+    17,
+    24,
+    27,
+    4,
+    28
+   ],
+   "runes": [
+    "Gasp",
+    "Earth",
+    "Ward",
+    "Momentum",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 5233,
+    "id": "Metadata/Items/Gems/SkillGemGrimPillars",
+    "name": "Grim Pillars"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 203,
+   "id": "5SlotLevel20RemnantsofKalguur1",
+   "size": 5,
+   "runeIdx": [
+    23,
+    3,
+    27,
+    2,
+    28
+   ],
+   "runes": [
+    "Sky",
+    "Tempest",
+    "Ward",
+    "Lightning",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 5235,
+    "id": "Metadata/Items/Gems/SkillGemRemnantsOfKalguur",
+    "name": "Remnants of Kalguur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 204,
+   "id": "5SlotLevel20VerisiumInfusion1",
+   "size": 5,
+   "runeIdx": [
+    8,
+    24,
+    27,
+    13,
+    28
+   ],
+   "runes": [
+    "Arcane",
+    "Earth",
+    "Ward",
+    "Vision",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 5222,
+    "id": "Metadata/Items/Gems/SkillGemPoweredByVerisium",
+    "name": "Powered by Verisium"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 205,
+   "id": "5SlotLevel20VerisiumManifestation1",
+   "size": 5,
+   "runeIdx": [
+    15,
+    2,
+    27,
+    1,
+    28
+   ],
+   "runes": [
+    "Rebirth",
+    "Lightning",
+    "Ward",
+    "Cold",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 5234,
+    "id": "Metadata/Items/Gems/SkillGemVerisiumManifestation",
+    "name": "Verisium Manifestations"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 206,
+   "id": "5SlotOrbofChance1",
+   "size": 5,
+   "runeIdx": [
+    19,
+    31,
+    21,
+    5,
+    15
+   ],
+   "runes": [
+    "Celestial",
+    "Time",
+    "Rage",
+    "Bloodletting",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 10,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeRandomly",
+    "name": "Orb of Chance"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 207,
+   "id": "5SlotRareUnique1",
+   "size": 5,
+   "runeIdx": [
+    19,
+    22,
+    11,
+    21,
+    26
+   ],
+   "runes": [
+    "Celestial",
+    "Wisdom",
+    "Protective",
+    "Rage",
+    "Bond"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Rare [Rarity|Unique] Item",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 208,
+   "id": "5SlotPerfectJewellersOrb1",
+   "size": 5,
+   "runeIdx": [
+    16,
+    7,
+    29,
+    25,
+    17
+   ],
+   "runes": [
+    "Prismatic",
+    "Adaptive",
+    "Death",
+    "Life",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 34,
+    "id": "Metadata/Items/Currency/CurrencyAddSkillGemSocket5",
+    "name": "Perfect Jeweller's Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 209,
+   "id": "5SlotPrismaticAlloy1",
+   "size": 5,
+   "runeIdx": [
+    16,
+    15,
+    7,
+    20,
+    26
+   ],
+   "runes": [
+    "Prismatic",
+    "Rebirth",
+    "Adaptive",
+    "Opulent",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5049,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy7",
+    "name": "Prismatic Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 210,
+   "id": "5SlotMasterworkRune1",
+   "size": 5,
+   "runeIdx": [
+    16,
+    22,
+    23,
+    8,
+    15
+   ],
+   "runes": [
+    "Prismatic",
+    "Wisdom",
+    "Sky",
+    "Arcane",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 701,
+    "id": "Metadata/Items/SoulCores/RuneUpgrade",
+    "name": "Masterwork Rune"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 211,
+   "id": "5SlotMysticAlloy1",
+   "size": 5,
+   "runeIdx": [
+    7,
+    15,
+    31,
+    8,
+    10
+   ],
+   "runes": [
+    "Adaptive",
+    "Rebirth",
+    "Time",
+    "Arcane",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 5050,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy8",
+    "name": "Mystic Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 212,
+   "id": "5SlotChaosOrb3",
+   "size": 5,
+   "runeIdx": [
+    7,
+    30,
+    29,
+    15,
+    3
+   ],
+   "runes": [
+    "Adaptive",
+    "Oath",
+    "Death",
+    "Rebirth",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 3,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare",
+    "name": "Chaos Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 213,
+   "id": "5SlotCraiceannsRuneofWarding1",
+   "size": 5,
+   "runeIdx": [
+    25,
+    14,
+    1,
+    31,
+    27
+   ],
+   "runes": [
+    "Life",
+    "Tidal",
+    "Cold",
+    "Time",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 685,
+    "id": "Metadata/Items/SoulCores/RuneSpecial10",
+    "name": "Craiceann's Rune of Warding"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 214,
+   "id": "5SlotSaqawalsRuneofErosion1",
+   "size": 5,
+   "runeIdx": [
+    15,
+    23,
+    13,
+    31,
+    9
+   ],
+   "runes": [
+    "Rebirth",
+    "Sky",
+    "Vision",
+    "Time",
+    "Toxic"
+   ],
+   "reward": {
+    "idx": 687,
+    "id": "Metadata/Items/SoulCores/RuneSpecial12",
+    "name": "Saqawal's Rune of Erosion"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 215,
+   "id": "5SlotFarrulsRuneoftheHunt1",
+   "size": 5,
+   "runeIdx": [
+    13,
+    5,
+    26,
+    31,
+    21
+   ],
+   "runes": [
+    "Vision",
+    "Bloodletting",
+    "Bond",
+    "Time",
+    "Rage"
+   ],
+   "reward": {
+    "idx": 688,
+    "id": "Metadata/Items/SoulCores/RuneSpecial13",
+    "name": "Farrul's Rune of the Hunt"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 216,
+   "id": "5SlotCraiceannsRuneofRecovery1",
+   "size": 5,
+   "runeIdx": [
+    29,
+    14,
+    28,
+    31,
+    21
+   ],
+   "runes": [
+    "Death",
+    "Tidal",
+    "Soul",
+    "Time",
+    "Rage"
+   ],
+   "reward": {
+    "idx": 689,
+    "id": "Metadata/Items/SoulCores/RuneSpecial14",
+    "name": "Craiceann's Rune of Recovery"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 217,
+   "id": "5SlotFenumusRuneofSpinning1",
+   "size": 5,
+   "runeIdx": [
+    4,
+    9,
+    3,
+    31,
+    11
+   ],
+   "runes": [
+    "Momentum",
+    "Toxic",
+    "Tempest",
+    "Time",
+    "Protective"
+   ],
+   "reward": {
+    "idx": 692,
+    "id": "Metadata/Items/SoulCores/RuneSpecial17",
+    "name": "Fenumus' Rune of Spinning"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 218,
+   "id": "5SlotFenumusRuneofDraining1",
+   "size": 5,
+   "runeIdx": [
+    29,
+    9,
+    1,
+    31,
+    8
+   ],
+   "runes": [
+    "Death",
+    "Toxic",
+    "Cold",
+    "Time",
+    "Arcane"
+   ],
+   "reward": {
+    "idx": 695,
+    "id": "Metadata/Items/SoulCores/RuneSpecial20",
+    "name": "Fenumus' Rune of Draining"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 219,
+   "id": "5SlotThaneMyrksRuneofSummer1",
+   "size": 5,
+   "runeIdx": [
+    0,
+    26,
+    21,
+    31,
+    29
+   ],
+   "runes": [
+    "Fire",
+    "Bond",
+    "Rage",
+    "Time",
+    "Death"
+   ],
+   "reward": {
+    "idx": 696,
+    "id": "Metadata/Items/SoulCores/RuneSpecial21",
+    "name": "Thane Myrk's Rune of Summer"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 220,
+   "id": "5SlotLadyHestrasRuneofWinter1",
+   "size": 5,
+   "runeIdx": [
+    14,
+    1,
+    12,
+    31,
+    3
+   ],
+   "runes": [
+    "Tidal",
+    "Cold",
+    "Cyclonic",
+    "Time",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 697,
+    "id": "Metadata/Items/SoulCores/RuneSpecial22",
+    "name": "Lady Hestra's Rune of Winter"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 221,
+   "id": "5SlotThaneLeldsRuneofSpring1",
+   "size": 5,
+   "runeIdx": [
+    2,
+    26,
+    17,
+    31,
+    10
+   ],
+   "runes": [
+    "Lightning",
+    "Bond",
+    "Gasp",
+    "Time",
+    "Electrocuting"
+   ],
+   "reward": {
+    "idx": 698,
+    "id": "Metadata/Items/SoulCores/RuneSpecial23",
+    "name": "Thane Leld's Rune of Spring"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 222,
+   "id": "5SlotTheGreatwolfsRuneofClaws1",
+   "size": 5,
+   "runeIdx": [
+    5,
+    21,
+    4,
+    31,
+    9
+   ],
+   "runes": [
+    "Bloodletting",
+    "Rage",
+    "Momentum",
+    "Time",
+    "Toxic"
+   ],
+   "reward": {
+    "idx": 699,
+    "id": "Metadata/Items/SoulCores/RuneSpecial24",
+    "name": "The Greatwolf's Rune of Claws"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 223,
+   "id": "5SlotTheGreatwolfsRuneofWillpower1",
+   "size": 5,
+   "runeIdx": [
+    14,
+    21,
+    9,
+    31,
+    4
+   ],
+   "runes": [
+    "Tidal",
+    "Rage",
+    "Toxic",
+    "Time",
+    "Momentum"
+   ],
+   "reward": {
+    "idx": 700,
+    "id": "Metadata/Items/SoulCores/RuneSpecial25",
+    "name": "The Greatwolf's Rune of Willpower"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 224,
+   "id": "5SlotSaqawalsRuneoftheSky1",
+   "size": 5,
+   "runeIdx": [
+    15,
+    23,
+    5,
+    31,
+    17
+   ],
+   "runes": [
+    "Rebirth",
+    "Sky",
+    "Bloodletting",
+    "Time",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 681,
+    "id": "Metadata/Items/SoulCores/RuneSpecial6",
+    "name": "Saqawal's Rune of the Sky"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 225,
+   "id": "5SlotFenumusRuneofAgony1",
+   "size": 5,
+   "runeIdx": [
+    17,
+    9,
+    7,
+    31,
+    13
+   ],
+   "runes": [
+    "Gasp",
+    "Toxic",
+    "Adaptive",
+    "Time",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 682,
+    "id": "Metadata/Items/SoulCores/RuneSpecial7",
+    "name": "Fenumus' Rune of Agony"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 226,
+   "id": "5SlotFarrulsRuneofGrace1",
+   "size": 5,
+   "runeIdx": [
+    4,
+    5,
+    7,
+    31,
+    25
+   ],
+   "runes": [
+    "Momentum",
+    "Bloodletting",
+    "Adaptive",
+    "Time",
+    "Life"
+   ],
+   "reward": {
+    "idx": 683,
+    "id": "Metadata/Items/SoulCores/RuneSpecial8",
+    "name": "Farrul's Rune of Grace"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 227,
+   "id": "5SlotPerfectOrbofAugmentation1",
+   "size": 5,
+   "runeIdx": [
+    7,
+    31,
+    23,
+    14,
+    15
+   ],
+   "runes": [
+    "Adaptive",
+    "Time",
+    "Sky",
+    "Tidal",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 26,
+    "id": "Metadata/Items/Currency/CurrencyAddModToMagic3",
+    "name": "Perfect Orb of Augmentation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 228,
+   "id": "5SlotPerfectOrbofTransmutation1",
+   "size": 5,
+   "runeIdx": [
+    7,
+    29,
+    23,
+    30,
+    19
+   ],
+   "runes": [
+    "Adaptive",
+    "Death",
+    "Sky",
+    "Oath",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 15,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToMagic3",
+    "name": "Perfect Orb of Transmutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 229,
+   "id": "5SlotThaneGrannellsRuneofMastery1",
+   "size": 5,
+   "runeIdx": [
+    10,
+    26,
+    14,
+    31,
+    16
+   ],
+   "runes": [
+    "Electrocuting",
+    "Bond",
+    "Tidal",
+    "Time",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 691,
+    "id": "Metadata/Items/SoulCores/RuneSpecial16",
+    "name": "Thane Grannell's Rune of Mastery"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 230,
+   "id": "5SlotSaqawalsRuneofMemory1",
+   "size": 5,
+   "runeIdx": [
+    8,
+    23,
+    28,
+    31,
+    18
+   ],
+   "runes": [
+    "Arcane",
+    "Sky",
+    "Soul",
+    "Time",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 686,
+    "id": "Metadata/Items/SoulCores/RuneSpecial11",
+    "name": "Saqawal's Rune of Memory"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 231,
+   "id": "5SlotCourtesanMannansRuneofCruelty1",
+   "size": 5,
+   "runeIdx": [
+    5,
+    1,
+    9,
+    31,
+    17
+   ],
+   "runes": [
+    "Bloodletting",
+    "Cold",
+    "Toxic",
+    "Time",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 690,
+    "id": "Metadata/Items/SoulCores/RuneSpecial15",
+    "name": "Courtesan Mannan's Rune of Cruelty"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 232,
+   "id": "5SlotThaneGirtsRuneofWildness1",
+   "size": 5,
+   "runeIdx": [
+    21,
+    26,
+    21,
+    31,
+    17
+   ],
+   "runes": [
+    "Rage",
+    "Bond",
+    "Rage",
+    "Time",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 694,
+    "id": "Metadata/Items/SoulCores/RuneSpecial19",
+    "name": "Thane Girt's Rune of Wildness"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 233,
+   "id": "5SlotDivineOrb2",
+   "size": 5,
+   "runeIdx": [
+    29,
+    28,
+    32,
+    25,
+    13
+   ],
+   "runes": [
+    "Death",
+    "Soul",
+    "Power",
+    "Life",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 36,
+    "id": "Metadata/Items/Currency/CurrencyModValues",
+    "name": "Divine Orb"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 234,
+   "id": "6SlotLevel20AnimusExchange1",
+   "size": 6,
+   "runeIdx": [
+    8,
+    16,
+    10,
+    27,
+    22,
+    30
+   ],
+   "runes": [
+    "Arcane",
+    "Prismatic",
+    "Electrocuting",
+    "Ward",
+    "Wisdom",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 5230,
+    "id": "Metadata/Items/Gems/SkillGemAnimusExchange",
+    "name": "Animus Exchange"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 235,
+   "id": "6SlotLevel20Leylines1",
+   "size": 6,
+   "runeIdx": [
+    8,
+    19,
+    15,
+    27,
+    22,
+    25
+   ],
+   "runes": [
+    "Arcane",
+    "Celestial",
+    "Rebirth",
+    "Ward",
+    "Wisdom",
+    "Life"
+   ],
+   "reward": {
+    "idx": 5215,
+    "id": "Metadata/Items/Gems/SkillGemLeylines",
+    "name": "Leylines"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 236,
+   "id": "6SlotLevel20RuneWard1",
+   "size": 6,
+   "runeIdx": [
+    5,
+    16,
+    15,
+    27,
+    22,
+    28
+   ],
+   "runes": [
+    "Bloodletting",
+    "Prismatic",
+    "Rebirth",
+    "Ward",
+    "Wisdom",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 5458,
+    "id": "Metadata/Items/Gems/SkillGemRunicReprieve",
+    "name": "Runic Reprieve"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 237,
+   "id": "6SlotLevel20RunicFortress1",
+   "size": 6,
+   "runeIdx": [
+    21,
+    16,
+    6,
+    27,
+    22,
+    29
+   ],
+   "runes": [
+    "Rage",
+    "Prismatic",
+    "Stone",
+    "Ward",
+    "Wisdom",
+    "Death"
+   ],
+   "reward": {
+    "idx": 5223,
+    "id": "Metadata/Items/Gems/SkillGemRefutation",
+    "name": "Refutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 238,
+   "id": "6SlotLevel20TriskelionCascade1",
+   "size": 6,
+   "runeIdx": [
+    8,
+    19,
+    6,
+    27,
+    22,
+    26
+   ],
+   "runes": [
+    "Arcane",
+    "Celestial",
+    "Stone",
+    "Ward",
+    "Wisdom",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5225,
+    "id": "Metadata/Items/Gems/SkillGemTriskelionCascade",
+    "name": "Triskelion Cascade"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 239,
+   "id": "6SlotLevel20VerisiumComet1",
+   "size": 6,
+   "runeIdx": [
+    3,
+    19,
+    11,
+    27,
+    22,
+    30
+   ],
+   "runes": [
+    "Tempest",
+    "Celestial",
+    "Protective",
+    "Ward",
+    "Wisdom",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 5228,
+    "id": "Metadata/Items/Gems/SkillGemSkyfall",
+    "name": "Skyfall"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 240,
+   "id": "6SlotGreaterExaltedOrb3",
+   "size": 6,
+   "runeIdx": [
+    30,
+    8,
+    26,
+    10,
+    20,
+    16
+   ],
+   "runes": [
+    "Oath",
+    "Arcane",
+    "Bond",
+    "Electrocuting",
+    "Opulent",
+    "Prismatic"
+   ],
+   "reward": {
+    "idx": 19,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare2",
+    "name": "Greater Exalted Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 241,
+   "id": "6SlotGreaterChaosOrb3",
+   "size": 6,
+   "runeIdx": [
+    30,
+    27,
+    21,
+    17,
+    20,
+    31
+   ],
+   "runes": [
+    "Oath",
+    "Ward",
+    "Rage",
+    "Gasp",
+    "Opulent",
+    "Time"
+   ],
+   "reward": {
+    "idx": 4,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare2",
+    "name": "Greater Chaos Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 242,
+   "id": "6SlotGreaterRegalOrb3",
+   "size": 6,
+   "runeIdx": [
+    30,
+    12,
+    4,
+    18,
+    20,
+    5
+   ],
+   "runes": [
+    "Oath",
+    "Cyclonic",
+    "Momentum",
+    "Moon",
+    "Opulent",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 22,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare2",
+    "name": "Greater Regal Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 243,
+   "id": "6SlotMedvedsLogbook1",
+   "size": 6,
+   "runeIdx": [
+    21,
+    13,
+    5,
+    18,
+    31,
+    22
+   ],
+   "runes": [
+    "Rage",
+    "Vision",
+    "Bloodletting",
+    "Moon",
+    "Time",
+    "Wisdom"
+   ],
+   "reward": {
+    "idx": 1440,
+    "id": "Metadata/Items/Expedition/Expedition2LogbookMedved",
+    "name": "Medved's Saga"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 244,
+   "id": "6SlotUhtredsLogbook1",
+   "size": 6,
+   "runeIdx": [
+    27,
+    13,
+    6,
+    8,
+    22,
+    31
+   ],
+   "runes": [
+    "Ward",
+    "Vision",
+    "Stone",
+    "Arcane",
+    "Wisdom",
+    "Time"
+   ],
+   "reward": {
+    "idx": 1442,
+    "id": "Metadata/Items/Expedition/Expedition2LogbookUhtred",
+    "name": "Uhtred's Saga"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 245,
+   "id": "6SlotVoranasLogbook1",
+   "size": 6,
+   "runeIdx": [
+    18,
+    13,
+    26,
+    31,
+    22,
+    9
+   ],
+   "runes": [
+    "Moon",
+    "Vision",
+    "Bond",
+    "Time",
+    "Wisdom",
+    "Toxic"
+   ],
+   "reward": {
+    "idx": 1441,
+    "id": "Metadata/Items/Expedition/Expedition2LogbookVorana",
+    "name": "Vorana's Saga"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 246,
+   "id": "6SlotOlrothsLogbook1",
+   "size": 6,
+   "runeIdx": [
+    3,
+    13,
+    31,
+    19,
+    22,
+    32
+   ],
+   "runes": [
+    "Tempest",
+    "Vision",
+    "Time",
+    "Celestial",
+    "Wisdom",
+    "Power"
+   ],
+   "reward": {
+    "idx": 1443,
+    "id": "Metadata/Items/Expedition/Expedition2LogbookOlroth",
+    "name": "Olroth's Saga"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 247,
+   "id": "6SlotLevel20AnimusSplinters1",
+   "size": 6,
+   "runeIdx": [
+    5,
+    23,
+    7,
+    21,
+    28,
+    27
+   ],
+   "runes": [
+    "Bloodletting",
+    "Sky",
+    "Adaptive",
+    "Rage",
+    "Soul",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5241,
+    "id": "Metadata/Items/Gems/SkillGemAnimusSplinters",
+    "name": "Animus Splinters"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 248,
+   "id": "6SlotLevel20ExplosiveTransmutation1",
+   "size": 6,
+   "runeIdx": [
+    17,
+    23,
+    0,
+    17,
+    26,
+    27
+   ],
+   "runes": [
+    "Gasp",
+    "Sky",
+    "Fire",
+    "Gasp",
+    "Bond",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5463,
+    "id": "Metadata/Items/Gems/SkillGemExplosiveTransmutation",
+    "name": "Explosive Transmutation"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 249,
+   "id": "6SlotLevel20HollowShell1",
+   "size": 6,
+   "runeIdx": [
+    8,
+    23,
+    5,
+    16,
+    25,
+    27
+   ],
+   "runes": [
+    "Arcane",
+    "Sky",
+    "Bloodletting",
+    "Prismatic",
+    "Life",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5217,
+    "id": "Metadata/Items/Gems/SkillGemHollowShell",
+    "name": "Hollow Shell"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 250,
+   "id": "6SlotLevel20VoltaicBarrier1",
+   "size": 6,
+   "runeIdx": [
+    11,
+    23,
+    24,
+    6,
+    29,
+    27
+   ],
+   "runes": [
+    "Protective",
+    "Sky",
+    "Earth",
+    "Stone",
+    "Death",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5460,
+    "id": "Metadata/Items/Gems/SkillGemVoltaicBarrier",
+    "name": "Voltaic Barrier"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 251,
+   "id": "6SlotLevel20WardboundMinions1",
+   "size": 6,
+   "runeIdx": [
+    15,
+    23,
+    9,
+    11,
+    30,
+    27
+   ],
+   "runes": [
+    "Rebirth",
+    "Sky",
+    "Toxic",
+    "Protective",
+    "Oath",
+    "Ward"
+   ],
+   "reward": {
+    "idx": 5237,
+    "id": "Metadata/Items/Gems/SkillGemWardboundMinions",
+    "name": "Wardbound Minions"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 252,
+   "id": "6SlotLevel20RainOfBlades",
+   "size": 6,
+   "runeIdx": [
+    3,
+    23,
+    27,
+    8,
+    6,
+    21
+   ],
+   "runes": [
+    "Tempest",
+    "Sky",
+    "Ward",
+    "Arcane",
+    "Stone",
+    "Rage"
+   ],
+   "reward": {
+    "idx": 5464,
+    "id": "Metadata/Items/Gems/SkillGemRainOfBlades",
+    "name": "Rain of Blades"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 253,
+   "id": "6SlotChillingFlux1",
+   "size": 6,
+   "runeIdx": [
+    1,
+    12,
+    16,
+    29,
+    14,
+    18
+   ],
+   "runes": [
+    "Cold",
+    "Cyclonic",
+    "Prismatic",
+    "Death",
+    "Tidal",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 5062,
+    "id": "Metadata/Items/Currency/CurrencyArcaneFluxCold",
+    "name": "Chilling Flux"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 254,
+   "id": "6SlotBlazingFlux1",
+   "size": 6,
+   "runeIdx": [
+    0,
+    24,
+    16,
+    28,
+    21,
+    15
+   ],
+   "runes": [
+    "Fire",
+    "Earth",
+    "Prismatic",
+    "Soul",
+    "Rage",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 5061,
+    "id": "Metadata/Items/Currency/CurrencyArcaneFluxFire",
+    "name": "Blazing Flux"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 255,
+   "id": "6SlotCracklingFlux1",
+   "size": 6,
+   "runeIdx": [
+    2,
+    19,
+    16,
+    10,
+    30,
+    3
+   ],
+   "runes": [
+    "Lightning",
+    "Celestial",
+    "Prismatic",
+    "Electrocuting",
+    "Oath",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 5063,
+    "id": "Metadata/Items/Currency/CurrencyArcaneFluxLightning",
+    "name": "Crackling Flux"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 256,
+   "id": "6SlotCountessSeskesRuneofArchery1",
+   "size": 6,
+   "runeIdx": [
+    31,
+    3,
+    23,
+    22,
+    27,
+    30
+   ],
+   "runes": [
+    "Time",
+    "Tempest",
+    "Sky",
+    "Wisdom",
+    "Ward",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 693,
+    "id": "Metadata/Items/SoulCores/RuneSpecial18",
+    "name": "Countess Seske's Rune of Archery"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 257,
+   "id": "6SlotHedgewitchAssandrasRuneofWisdom1",
+   "size": 6,
+   "runeIdx": [
+    31,
+    27,
+    8,
+    22,
+    23,
+    30
+   ],
+   "runes": [
+    "Time",
+    "Ward",
+    "Arcane",
+    "Wisdom",
+    "Sky",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 680,
+    "id": "Metadata/Items/SoulCores/RuneSpecial5",
+    "name": "Hedgewitch Assandra's Rune of Wisdom"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 258,
+   "id": "6SlotFarrulsRuneoftheChase1",
+   "size": 6,
+   "runeIdx": [
+    31,
+    5,
+    12,
+    22,
+    29,
+    30
+   ],
+   "runes": [
+    "Time",
+    "Bloodletting",
+    "Cyclonic",
+    "Wisdom",
+    "Death",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 684,
+    "id": "Metadata/Items/SoulCores/RuneSpecial9",
+    "name": "Farrul's Rune of the Chase"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 259,
+   "id": "6SlotPerfectExaltedOrb1",
+   "size": 6,
+   "runeIdx": [
+    7,
+    25,
+    24,
+    32,
+    20,
+    30
+   ],
+   "runes": [
+    "Adaptive",
+    "Life",
+    "Earth",
+    "Power",
+    "Opulent",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 20,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare3",
+    "name": "Perfect Exalted Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 260,
+   "id": "6SlotVoidFlux1",
+   "size": 6,
+   "runeIdx": [
+    9,
+    31,
+    7,
+    28,
+    32,
+    29
+   ],
+   "runes": [
+    "Toxic",
+    "Time",
+    "Adaptive",
+    "Soul",
+    "Power",
+    "Death"
+   ],
+   "reward": {
+    "idx": 5064,
+    "id": "Metadata/Items/Currency/CurrencyArcaneFluxChaos",
+    "name": "Void Flux"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 261,
+   "id": "6SlotUncutSpiritGemLevel201",
+   "size": 6,
+   "runeIdx": [
+    4,
+    8,
+    28,
+    22,
+    16,
+    30
+   ],
+   "runes": [
+    "Momentum",
+    "Arcane",
+    "Soul",
+    "Wisdom",
+    "Prismatic",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 4917,
+    "id": "Metadata/Items/Gems/ReservationGemUncut20",
+    "name": "Uncut Spirit Gem (Level 20)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 262,
+   "id": "6SlotUncutSkillGemLevel201",
+   "size": 6,
+   "runeIdx": [
+    4,
+    0,
+    29,
+    22,
+    11,
+    28
+   ],
+   "runes": [
+    "Momentum",
+    "Fire",
+    "Death",
+    "Wisdom",
+    "Protective",
+    "Soul"
+   ],
+   "reward": {
+    "idx": 4895,
+    "id": "Metadata/Items/Gems/SkillGemUncut20",
+    "name": "Uncut Skill Gem (Level 20)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 2,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 263,
+   "id": "6SlotDivineOrb3",
+   "size": 6,
+   "runeIdx": [
+    29,
+    28,
+    32,
+    25,
+    13,
+    19
+   ],
+   "runes": [
+    "Death",
+    "Soul",
+    "Power",
+    "Life",
+    "Vision",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 36,
+    "id": "Metadata/Items/Currency/CurrencyModValues",
+    "name": "Divine Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 264,
+   "id": "6SlotPerfectChaosOrb1",
+   "size": 6,
+   "runeIdx": [
+    7,
+    19,
+    30,
+    32,
+    20,
+    19
+   ],
+   "runes": [
+    "Adaptive",
+    "Celestial",
+    "Oath",
+    "Power",
+    "Opulent",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 5,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare3",
+    "name": "Perfect Chaos Orb"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 265,
+   "id": "6SlotSovereignAlloy1",
+   "size": 6,
+   "runeIdx": [
+    7,
+    15,
+    18,
+    9,
+    32,
+    30
+   ],
+   "runes": [
+    "Adaptive",
+    "Rebirth",
+    "Moon",
+    "Toxic",
+    "Power",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 5051,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy9",
+    "name": "Sovereign Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 266,
+   "id": "6SlotOrbofChance2",
+   "size": 6,
+   "runeIdx": [
+    19,
+    28,
+    5,
+    21,
+    23,
+    3
+   ],
+   "runes": [
+    "Celestial",
+    "Soul",
+    "Bloodletting",
+    "Rage",
+    "Sky",
+    "Tempest"
+   ],
+   "reward": {
+    "idx": 10,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeRandomly",
+    "name": "Orb of Chance"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 267,
+   "id": "6SlotOrbofAnnulment1",
+   "size": 6,
+   "runeIdx": [
+    12,
+    4,
+    15,
+    31,
+    18,
+    13
+   ],
+   "runes": [
+    "Cyclonic",
+    "Momentum",
+    "Rebirth",
+    "Time",
+    "Moon",
+    "Vision"
+   ],
+   "reward": {
+    "idx": 196,
+    "id": "Metadata/Items/Currency/CurrencyRemoveMod",
+    "name": "Orb of Annulment"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 268,
+   "id": "7SlotAldursLogbook1",
+   "size": 7,
+   "runeIdx": [
+    22,
+    13,
+    25,
+    27,
+    32,
+    8,
+    31
+   ],
+   "runes": [
+    "Wisdom",
+    "Vision",
+    "Life",
+    "Ward",
+    "Power",
+    "Arcane",
+    "Time"
+   ],
+   "reward": {
+    "idx": 1439,
+    "id": "Metadata/Items/Expedition/Expedition2LogbookSpecial",
+    "name": "Aldur's Saga"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 269,
+   "id": "7SlotOrbofAnnulment2",
+   "size": 7,
+   "runeIdx": [
+    12,
+    8,
+    13,
+    15,
+    12,
+    2,
+    32
+   ],
+   "runes": [
+    "Cyclonic",
+    "Arcane",
+    "Vision",
+    "Rebirth",
+    "Cyclonic",
+    "Lightning",
+    "Power"
+   ],
+   "reward": {
+    "idx": 196,
+    "id": "Metadata/Items/Currency/CurrencyRemoveMod",
+    "name": "Orb of Annulment"
+   },
+   "rewardCount": 2,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 270,
+   "id": "7SlotCelestialAlloy1",
+   "size": 7,
+   "runeIdx": [
+    24,
+    15,
+    19,
+    7,
+    32,
+    28,
+    12
+   ],
+   "runes": [
+    "Earth",
+    "Rebirth",
+    "Celestial",
+    "Adaptive",
+    "Power",
+    "Soul",
+    "Cyclonic"
+   ],
+   "reward": {
+    "idx": 5052,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy10",
+    "name": "Celestial Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 271,
+   "id": "7SlotKalguuranAlloy1",
+   "size": 7,
+   "runeIdx": [
+    23,
+    15,
+    4,
+    21,
+    32,
+    10,
+    29
+   ],
+   "runes": [
+    "Sky",
+    "Rebirth",
+    "Momentum",
+    "Rage",
+    "Power",
+    "Electrocuting",
+    "Death"
+   ],
+   "reward": {
+    "idx": 5053,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy11",
+    "name": "Transcendent Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 272,
+   "id": "7SlotBreathofAldur1",
+   "size": 7,
+   "runeIdx": [
+    28,
+    1,
+    12,
+    14,
+    32,
+    22,
+    26
+   ],
+   "runes": [
+    "Soul",
+    "Cold",
+    "Cyclonic",
+    "Tidal",
+    "Power",
+    "Wisdom",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5091,
+    "id": "Metadata/Items/SoulCores/RuneConvertCold",
+    "name": "Breath of Aldur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 273,
+   "id": "7SlotPassionofAldur1",
+   "size": 7,
+   "runeIdx": [
+    28,
+    0,
+    21,
+    25,
+    32,
+    22,
+    24
+   ],
+   "runes": [
+    "Soul",
+    "Fire",
+    "Rage",
+    "Life",
+    "Power",
+    "Wisdom",
+    "Earth"
+   ],
+   "reward": {
+    "idx": 5090,
+    "id": "Metadata/Items/SoulCores/RuneConvertFire",
+    "name": "Passion of Aldur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 274,
+   "id": "7SlotIreofAldur1",
+   "size": 7,
+   "runeIdx": [
+    28,
+    2,
+    10,
+    23,
+    32,
+    22,
+    19
+   ],
+   "runes": [
+    "Soul",
+    "Lightning",
+    "Electrocuting",
+    "Sky",
+    "Power",
+    "Wisdom",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 5092,
+    "id": "Metadata/Items/SoulCores/RuneConvertLightning",
+    "name": "Ire of Aldur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 275,
+   "id": "7SlotAstridsCreativity1",
+   "size": 7,
+   "runeIdx": [
+    22,
+    8,
+    31,
+    7,
+    32,
+    17,
+    29
+   ],
+   "runes": [
+    "Wisdom",
+    "Arcane",
+    "Time",
+    "Adaptive",
+    "Power",
+    "Gasp",
+    "Death"
+   ],
+   "reward": {
+    "idx": 5131,
+    "id": "Metadata/Items/SoulCores/RuneWarpingAdditionalCraftedMod",
+    "name": "Astrid's Creativity"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 276,
+   "id": "7SlotBetrayalofAldur1",
+   "size": 7,
+   "runeIdx": [
+    28,
+    9,
+    26,
+    29,
+    32,
+    22,
+    17
+   ],
+   "runes": [
+    "Soul",
+    "Toxic",
+    "Bond",
+    "Death",
+    "Power",
+    "Wisdom",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 5093,
+    "id": "Metadata/Items/SoulCores/RuneConvertChaos",
+    "name": "Betrayal of Aldur"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 277,
+   "id": "7SlotCadigansEpiphany1",
+   "size": 7,
+   "runeIdx": [
+    22,
+    23,
+    30,
+    11,
+    32,
+    28,
+    5
+   ],
+   "runes": [
+    "Wisdom",
+    "Sky",
+    "Oath",
+    "Protective",
+    "Power",
+    "Soul",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 5130,
+    "id": "Metadata/Items/SoulCores/RuneWarpingCreateJewelSocket",
+    "name": "Cadigan's Epiphany"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 278,
+   "id": "8SlotAldurAlloy1",
+   "size": 7,
+   "runeIdx": [
+    27,
+    15,
+    28,
+    12,
+    32,
+    2,
+    5
+   ],
+   "runes": [
+    "Ward",
+    "Rebirth",
+    "Soul",
+    "Cyclonic",
+    "Power",
+    "Lightning",
+    "Bloodletting"
+   ],
+   "reward": {
+    "idx": 5054,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy12",
+    "name": "The Runebinder's Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 279,
+   "id": "8SlotAncientAlloy1",
+   "size": 7,
+   "runeIdx": [
+    27,
+    15,
+    31,
+    1,
+    32,
+    16,
+    18
+   ],
+   "runes": [
+    "Ward",
+    "Rebirth",
+    "Time",
+    "Cold",
+    "Power",
+    "Prismatic",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 5055,
+    "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy13",
+    "name": "The Runefather's Alloy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 3,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 280,
+   "id": "8SlotVoranasCarnage1",
+   "size": 8,
+   "runeIdx": [
+    21,
+    26,
+    1,
+    0,
+    32,
+    5,
+    20,
+    6
+   ],
+   "runes": [
+    "Rage",
+    "Bond",
+    "Cold",
+    "Fire",
+    "Power",
+    "Bloodletting",
+    "Opulent",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 5134,
+    "id": "Metadata/Items/SoulCores/RuneWarpingBerserkerInfluence",
+    "name": "Vorana's Carnage"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 281,
+   "id": "8SlotKatlasGloom1",
+   "size": 8,
+   "runeIdx": [
+    9,
+    26,
+    29,
+    15,
+    32,
+    13,
+    20,
+    19
+   ],
+   "runes": [
+    "Toxic",
+    "Bond",
+    "Death",
+    "Rebirth",
+    "Power",
+    "Vision",
+    "Opulent",
+    "Celestial"
+   ],
+   "reward": {
+    "idx": 5137,
+    "id": "Metadata/Items/SoulCores/RuneWarpingDecayInfluence",
+    "name": "Katla's Gloom"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 282,
+   "id": "8SlotThrudsMight1",
+   "size": 8,
+   "runeIdx": [
+    3,
+    26,
+    24,
+    29,
+    32,
+    27,
+    20,
+    15
+   ],
+   "runes": [
+    "Tempest",
+    "Bond",
+    "Earth",
+    "Death",
+    "Power",
+    "Ward",
+    "Opulent",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 5135,
+    "id": "Metadata/Items/SoulCores/RuneWarpingDestructionInfluence",
+    "name": "Thrud's Might"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 283,
+   "id": "8SlotKolrsHunt1",
+   "size": 8,
+   "runeIdx": [
+    4,
+    26,
+    23,
+    3,
+    32,
+    21,
+    20,
+    18
+   ],
+   "runes": [
+    "Momentum",
+    "Bond",
+    "Sky",
+    "Tempest",
+    "Power",
+    "Rage",
+    "Opulent",
+    "Moon"
+   ],
+   "reward": {
+    "idx": 5133,
+    "id": "Metadata/Items/SoulCores/RuneWarpingMarksmanInfluence",
+    "name": "Kolr's Hunt"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 284,
+   "id": "8SlotMedvedsTending1",
+   "size": 8,
+   "runeIdx": [
+    24,
+    26,
+    11,
+    16,
+    32,
+    25,
+    20,
+    7
+   ],
+   "runes": [
+    "Earth",
+    "Bond",
+    "Protective",
+    "Prismatic",
+    "Power",
+    "Life",
+    "Opulent",
+    "Adaptive"
+   ],
+   "reward": {
+    "idx": 5136,
+    "id": "Metadata/Items/SoulCores/RuneWarpingSoulInfluence",
+    "name": "Medved's Tending"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 285,
+   "id": "8SlotUhtredsSidereus1",
+   "size": 8,
+   "runeIdx": [
+    31,
+    26,
+    18,
+    12,
+    32,
+    17,
+    20,
+    1
+   ],
+   "runes": [
+    "Time",
+    "Bond",
+    "Moon",
+    "Cyclonic",
+    "Power",
+    "Gasp",
+    "Opulent",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 5132,
+    "id": "Metadata/Items/SoulCores/RuneWarpingTimeInfluence",
+    "name": "Uhtred's Sidereus"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 286,
+   "id": "8SlotSerlesTriumph1",
+   "size": 8,
+   "runeIdx": [
+    22,
+    4,
+    11,
+    18,
+    32,
+    30,
+    23,
+    14
+   ],
+   "runes": [
+    "Wisdom",
+    "Momentum",
+    "Protective",
+    "Moon",
+    "Power",
+    "Oath",
+    "Sky",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 5129,
+    "id": "Metadata/Items/SoulCores/RuneWarpingAdditionalSuffix",
+    "name": "Serle's Triumph"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 287,
+   "id": "8SlotPerfectOrbofAugmentation3",
+   "size": 8,
+   "runeIdx": [
+    7,
+    31,
+    20,
+    0,
+    31,
+    13,
+    5,
+    15
+   ],
+   "runes": [
+    "Adaptive",
+    "Time",
+    "Opulent",
+    "Fire",
+    "Time",
+    "Vision",
+    "Bloodletting",
+    "Rebirth"
+   ],
+   "reward": {
+    "idx": 26,
+    "id": "Metadata/Items/Currency/CurrencyAddModToMagic3",
+    "name": "Perfect Orb of Augmentation"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 288,
+   "id": "8SlotPerfectOrbofTransmutation3",
+   "size": 8,
+   "runeIdx": [
+    7,
+    29,
+    20,
+    3,
+    31,
+    25,
+    18,
+    1
+   ],
+   "runes": [
+    "Adaptive",
+    "Death",
+    "Opulent",
+    "Tempest",
+    "Time",
+    "Life",
+    "Moon",
+    "Cold"
+   ],
+   "reward": {
+    "idx": 15,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeToMagic3",
+    "name": "Perfect Orb of Transmutation"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 289,
+   "id": "8SlotPerfectRegalOrb3",
+   "size": 8,
+   "runeIdx": [
+    3,
+    9,
+    28,
+    18,
+    7,
+    15,
+    20,
+    32
+   ],
+   "runes": [
+    "Tempest",
+    "Toxic",
+    "Soul",
+    "Moon",
+    "Adaptive",
+    "Rebirth",
+    "Opulent",
+    "Power"
+   ],
+   "reward": {
+    "idx": 23,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare3",
+    "name": "Perfect Regal Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 290,
+   "id": "9SlotExtremelyRareUnique1",
+   "size": 9,
+   "runeIdx": [
+    19,
+    22,
+    18,
+    32,
+    24,
+    11,
+    16,
+    15,
+    0
+   ],
+   "runes": [
+    "Celestial",
+    "Wisdom",
+    "Moon",
+    "Power",
+    "Earth",
+    "Protective",
+    "Prismatic",
+    "Rebirth",
+    "Fire"
+   ],
+   "reward": null,
+   "rewardCount": 1,
+   "description": "Very Rare [Rarity|Unique] item",
+   "category": 4,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 291,
+   "id": "9SlotOrbofChance3",
+   "size": 9,
+   "runeIdx": [
+    19,
+    20,
+    18,
+    27,
+    24,
+    11,
+    16,
+    15,
+    0
+   ],
+   "runes": [
+    "Celestial",
+    "Opulent",
+    "Moon",
+    "Ward",
+    "Earth",
+    "Protective",
+    "Prismatic",
+    "Rebirth",
+    "Fire"
+   ],
+   "reward": {
+    "idx": 10,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeRandomly",
+    "name": "Orb of Chance"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 292,
+   "id": "9SlotOrbofAnnulment3",
+   "size": 9,
+   "runeIdx": [
+    12,
+    8,
+    13,
+    15,
+    12,
+    2,
+    16,
+    10,
+    32
+   ],
+   "runes": [
+    "Cyclonic",
+    "Arcane",
+    "Vision",
+    "Rebirth",
+    "Cyclonic",
+    "Lightning",
+    "Prismatic",
+    "Electrocuting",
+    "Power"
+   ],
+   "reward": {
+    "idx": 196,
+    "id": "Metadata/Items/Currency/CurrencyRemoveMod",
+    "name": "Orb of Annulment"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 293,
+   "id": "9SlotDivineOrb10",
+   "size": 9,
+   "runeIdx": [
+    29,
+    28,
+    32,
+    25,
+    13,
+    19,
+    9,
+    16,
+    14
+   ],
+   "runes": [
+    "Death",
+    "Soul",
+    "Power",
+    "Life",
+    "Vision",
+    "Celestial",
+    "Toxic",
+    "Prismatic",
+    "Tidal"
+   ],
+   "reward": {
+    "idx": 36,
+    "id": "Metadata/Items/Currency/CurrencyModValues",
+    "name": "Divine Orb"
+   },
+   "rewardCount": 10,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 294,
+   "id": "9SlotPerfectExaltedOrb3",
+   "size": 9,
+   "runeIdx": [
+    7,
+    25,
+    28,
+    6,
+    26,
+    30,
+    32,
+    29,
+    9
+   ],
+   "runes": [
+    "Adaptive",
+    "Life",
+    "Soul",
+    "Stone",
+    "Bond",
+    "Oath",
+    "Power",
+    "Death",
+    "Toxic"
+   ],
+   "reward": {
+    "idx": 20,
+    "id": "Metadata/Items/Currency/CurrencyAddModToRare3",
+    "name": "Perfect Exalted Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 295,
+   "id": "9SlotPerfectChaosOrb3",
+   "size": 9,
+   "runeIdx": [
+    7,
+    23,
+    30,
+    21,
+    24,
+    32,
+    3,
+    25,
+    17
+   ],
+   "runes": [
+    "Adaptive",
+    "Sky",
+    "Oath",
+    "Rage",
+    "Earth",
+    "Power",
+    "Tempest",
+    "Life",
+    "Gasp"
+   ],
+   "reward": {
+    "idx": 5,
+    "id": "Metadata/Items/Currency/CurrencyRerollRare3",
+    "name": "Perfect Chaos Orb"
+   },
+   "rewardCount": 3,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 296,
+   "id": "9SlotHinekorasLock1",
+   "size": 9,
+   "runeIdx": [
+    20,
+    32,
+    27,
+    15,
+    26,
+    25,
+    31,
+    29,
+    26
+   ],
+   "runes": [
+    "Opulent",
+    "Power",
+    "Ward",
+    "Rebirth",
+    "Bond",
+    "Life",
+    "Time",
+    "Death",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 8,
+    "id": "Metadata/Items/Currency/CurrencyHinekorasLock",
+    "name": "Hinekora's Lock"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 297,
+   "id": "9SlotMirrorofKalandra1",
+   "size": 9,
+   "runeIdx": [
+    32,
+    20,
+    31,
+    30,
+    29,
+    28,
+    26,
+    24,
+    6
+   ],
+   "runes": [
+    "Power",
+    "Opulent",
+    "Time",
+    "Oath",
+    "Death",
+    "Soul",
+    "Bond",
+    "Earth",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 7,
+    "id": "Metadata/Items/Currency/CurrencyDuplicate",
+    "name": "Mirror of Kalandra"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 298,
+   "id": "10SlotOlrothsBoon1",
+   "size": 10,
+   "runeIdx": [
+    30,
+    22,
+    32,
+    16,
+    1,
+    15,
+    7,
+    11,
+    31,
+    26
+   ],
+   "runes": [
+    "Oath",
+    "Wisdom",
+    "Power",
+    "Prismatic",
+    "Cold",
+    "Rebirth",
+    "Adaptive",
+    "Protective",
+    "Time",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5202,
+    "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune1",
+    "name": "Olroth's Boon"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 299,
+   "id": "10SlotVoranasBoon1",
+   "size": 10,
+   "runeIdx": [
+    29,
+    22,
+    32,
+    16,
+    9,
+    18,
+    14,
+    11,
+    31,
+    26
+   ],
+   "runes": [
+    "Death",
+    "Wisdom",
+    "Power",
+    "Prismatic",
+    "Toxic",
+    "Moon",
+    "Tidal",
+    "Protective",
+    "Time",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5203,
+    "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune2",
+    "name": "Vorana's Boon"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 300,
+   "id": "10SlotUhtredsBoon1",
+   "size": 10,
+   "runeIdx": [
+    27,
+    22,
+    32,
+    16,
+    2,
+    28,
+    8,
+    11,
+    31,
+    26
+   ],
+   "runes": [
+    "Ward",
+    "Wisdom",
+    "Power",
+    "Prismatic",
+    "Lightning",
+    "Soul",
+    "Arcane",
+    "Protective",
+    "Time",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5204,
+    "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune3",
+    "name": "Uhtred's Boon"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 301,
+   "id": "10SlotMedvedsBoon1",
+   "size": 10,
+   "runeIdx": [
+    21,
+    22,
+    32,
+    16,
+    21,
+    17,
+    25,
+    11,
+    31,
+    26
+   ],
+   "runes": [
+    "Rage",
+    "Wisdom",
+    "Power",
+    "Prismatic",
+    "Rage",
+    "Gasp",
+    "Life",
+    "Protective",
+    "Time",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5205,
+    "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune4",
+    "name": "Medved's Boon"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 302,
+   "id": "10SlotOlrothsLegacyRune1",
+   "size": 10,
+   "runeIdx": [
+    19,
+    22,
+    32,
+    16,
+    0,
+    29,
+    24,
+    11,
+    31,
+    26
+   ],
+   "runes": [
+    "Celestial",
+    "Wisdom",
+    "Power",
+    "Prismatic",
+    "Fire",
+    "Death",
+    "Earth",
+    "Protective",
+    "Time",
+    "Bond"
+   ],
+   "reward": {
+    "idx": 5138,
+    "id": "Metadata/Items/SoulCores/RuneWarpingOlrothsLegacy",
+    "name": "Aldur's Legacy"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 1,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 303,
+   "id": "8SlotCurrencyPerfectFlux1",
+   "size": 8,
+   "runeIdx": [
+    22,
+    20,
+    30,
+    25,
+    32,
+    31,
+    19,
+    2
+   ],
+   "runes": [
+    "Wisdom",
+    "Opulent",
+    "Oath",
+    "Life",
+    "Power",
+    "Time",
+    "Celestial",
+    "Lightning"
+   ],
+   "reward": {
+    "idx": 5128,
+    "id": "Metadata/Items/Currency/CurrencyUpgradeInherentTo20",
+    "name": "Perfect Flux"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 304,
+   "id": "3SlotLevel5Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4922,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel5",
+    "name": "Thaumaturgic Flux (Level 5)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 13,
+   "maxLevel": 18
+  },
+  {
+   "row": 305,
+   "id": "3SlotLevel6Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4923,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel6",
+    "name": "Thaumaturgic Flux (Level 6)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 19,
+   "maxLevel": 22
+  },
+  {
+   "row": 306,
+   "id": "3SlotLevel7Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4924,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel7",
+    "name": "Thaumaturgic Flux (Level 7)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 23,
+   "maxLevel": 26
+  },
+  {
+   "row": 307,
+   "id": "3SlotLevel8Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4925,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel8",
+    "name": "Thaumaturgic Flux (Level 8)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 27,
+   "maxLevel": 31
+  },
+  {
+   "row": 308,
+   "id": "3SlotLevel9Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4926,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel9",
+    "name": "Thaumaturgic Flux (Level 9)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 32,
+   "maxLevel": 36
+  },
+  {
+   "row": 309,
+   "id": "3SlotLevel10Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4927,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel10",
+    "name": "Thaumaturgic Flux (Level 10)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 37,
+   "maxLevel": 41
+  },
+  {
+   "row": 310,
+   "id": "3SlotLevel11Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4928,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel11",
+    "name": "Thaumaturgic Flux (Level 11)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 42,
+   "maxLevel": 46
+  },
+  {
+   "row": 311,
+   "id": "3SlotLevel12Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4929,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel12",
+    "name": "Thaumaturgic Flux (Level 12)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 47,
+   "maxLevel": 52
+  },
+  {
+   "row": 312,
+   "id": "3SlotLevel13Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4930,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel13",
+    "name": "Thaumaturgic Flux (Level 13)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 53,
+   "maxLevel": 58
+  },
+  {
+   "row": 313,
+   "id": "3SlotLevel14Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4931,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel14",
+    "name": "Thaumaturgic Flux (Level 14)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 59,
+   "maxLevel": 61
+  },
+  {
+   "row": 314,
+   "id": "3SlotLevel15Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4932,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel15",
+    "name": "Thaumaturgic Flux (Level 15)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 62,
+   "maxLevel": 65
+  },
+  {
+   "row": 315,
+   "id": "3SlotLevel16Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4933,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel16",
+    "name": "Thaumaturgic Flux (Level 16)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 66,
+   "maxLevel": 70
+  },
+  {
+   "row": 316,
+   "id": "3SlotLevel17Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4934,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel17",
+    "name": "Thaumaturgic Flux (Level 17)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 71,
+   "maxLevel": 76
+  },
+  {
+   "row": 317,
+   "id": "3SlotLevel18Flux1",
+   "size": 3,
+   "runeIdx": [
+    24,
+    27,
+    6
+   ],
+   "runes": [
+    "Earth",
+    "Ward",
+    "Stone"
+   ],
+   "reward": {
+    "idx": 4935,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel18",
+    "name": "Thaumaturgic Flux (Level 18)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 77,
+   "maxLevel": 100
+  },
+  {
+   "row": 318,
+   "id": "5SlotLevel19Flux1",
+   "size": 5,
+   "runeIdx": [
+    4,
+    24,
+    27,
+    5,
+    8
+   ],
+   "runes": [
+    "Momentum",
+    "Earth",
+    "Ward",
+    "Bloodletting",
+    "Arcane"
+   ],
+   "reward": {
+    "idx": 4936,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel19",
+    "name": "Thaumaturgic Flux (Level 19)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  },
+  {
+   "row": 319,
+   "id": "6SlotLevel20Flux1",
+   "size": 6,
+   "runeIdx": [
+    4,
+    24,
+    27,
+    6,
+    8,
+    30
+   ],
+   "runes": [
+    "Momentum",
+    "Earth",
+    "Ward",
+    "Stone",
+    "Arcane",
+    "Oath"
+   ],
+   "reward": {
+    "idx": 4937,
+    "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel20",
+    "name": "Thaumaturgic Flux (Level 20)"
+   },
+   "rewardCount": 1,
+   "description": "",
+   "category": 0,
+   "minLevel": 1,
+   "maxLevel": 100
+  }
+ ],
+ "runeWeights": [
+  {
+   "rune": 3,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 1
+  },
+  {
+   "rune": 4,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 1
+  },
+  {
+   "rune": 0,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 4
+  },
+  {
+   "rune": 1,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 4
+  },
+  {
+   "rune": 2,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 4
+  },
+  {
+   "rune": 0,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 4,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 4
+  },
+  {
+   "rune": 3,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 4
+  },
+  {
+   "rune": 6,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 5
+  },
+  {
+   "rune": 8,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 5
+  },
+  {
+   "rune": 1,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 5
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 5
+  },
+  {
+   "rune": 6,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 5
+  },
+  {
+   "rune": 12,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 100
+  },
+  {
+   "rune": 18,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 5
+  },
+  {
+   "rune": 10,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 8
+  },
+  {
+   "rune": 16,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 12
+  },
+  {
+   "rune": 21,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 18,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 14,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 11,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 12,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 15,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 12
+  },
+  {
+   "rune": 17,
+   "pos": 1,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 13,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 19,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 25
+  },
+  {
+   "rune": 7,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 18
+  },
+  {
+   "rune": 11,
+   "pos": 2,
+   "size": 2,
+   "minLevel": 15
+  },
+  {
+   "rune": 21,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 18,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 14,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 11,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 12,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 11,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 12
+  },
+  {
+   "rune": 12,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 13
+  },
+  {
+   "rune": 27,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 19,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 8
+  },
+  {
+   "rune": 10,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 15
+  },
+  {
+   "rune": 13,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 15,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 28
+  },
+  {
+   "rune": 14,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 17
+  },
+  {
+   "rune": 7,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 17
+  },
+  {
+   "rune": 16,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 25
+  },
+  {
+   "rune": 4,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 44
+  },
+  {
+   "rune": 5,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 24
+  },
+  {
+   "rune": 8,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 8
+  },
+  {
+   "rune": 27,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 23
+  },
+  {
+   "rune": 24,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 44
+  },
+  {
+   "rune": 16,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 55
+  },
+  {
+   "rune": 23,
+   "pos": 2,
+   "size": 3,
+   "minLevel": 33
+  },
+  {
+   "rune": 6,
+   "pos": 1,
+   "size": 3,
+   "minLevel": 100
+  },
+  {
+   "rune": 6,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 15,
+   "pos": 3,
+   "size": 3,
+   "minLevel": 30
+  },
+  {
+   "rune": 21,
+   "pos": 2,
+   "size": 4,
+   "minLevel": 12
+  },
+  {
+   "rune": 30,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 65
+  },
+  {
+   "rune": 4,
+   "pos": 4,
+   "size": 4,
+   "minLevel": 12
+  },
+  {
+   "rune": 11,
+   "pos": 2,
+   "size": 4,
+   "minLevel": 12
+  },
+  {
+   "rune": 14,
+   "pos": 3,
+   "size": 4,
+   "minLevel": 24
+  },
+  {
+   "rune": 18,
+   "pos": 2,
+   "size": 4,
+   "minLevel": 15
+  },
+  {
+   "rune": 27,
+   "pos": 4,
+   "size": 4,
+   "minLevel": 44
+  },
+  {
+   "rune": 12,
+   "pos": 4,
+   "size": 4,
+   "minLevel": 45
+  },
+  {
+   "rune": 6,
+   "pos": 4,
+   "size": 4,
+   "minLevel": 100
+  },
+  {
+   "rune": 27,
+   "pos": 2,
+   "size": 4,
+   "minLevel": 30
+  },
+  {
+   "rune": 8,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 15
+  },
+  {
+   "rune": 16,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 45
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 24
+  },
+  {
+   "rune": 28,
+   "pos": 3,
+   "size": 4,
+   "minLevel": 24
+  },
+  {
+   "rune": 18,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 15
+  },
+  {
+   "rune": 24,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 15
+  },
+  {
+   "rune": 23,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 15
+  },
+  {
+   "rune": 9,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 50
+  },
+  {
+   "rune": 30,
+   "pos": 2,
+   "size": 4,
+   "minLevel": 45
+  },
+  {
+   "rune": 17,
+   "pos": 1,
+   "size": 4,
+   "minLevel": 50
+  },
+  {
+   "rune": 22,
+   "pos": 4,
+   "size": 4,
+   "minLevel": 15
+  },
+  {
+   "rune": 32,
+   "pos": 3,
+   "size": 4,
+   "minLevel": 35
+  },
+  {
+   "rune": 15,
+   "pos": 2,
+   "size": 4,
+   "minLevel": 38
+  },
+  {
+   "rune": 19,
+   "pos": 1,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 26,
+   "pos": 5,
+   "size": 5,
+   "minLevel": 44
+  },
+  {
+   "rune": 6,
+   "pos": 4,
+   "size": 5,
+   "minLevel": 45
+  },
+  {
+   "rune": 27,
+   "pos": 3,
+   "size": 5,
+   "minLevel": 75
+  },
+  {
+   "rune": 12,
+   "pos": 1,
+   "size": 5,
+   "minLevel": 75
+  },
+  {
+   "rune": 8,
+   "pos": 4,
+   "size": 5,
+   "minLevel": 55
+  },
+  {
+   "rune": 0,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 72
+  },
+  {
+   "rune": 8,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 70
+  },
+  {
+   "rune": 26,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 5,
+   "minLevel": 70
+  },
+  {
+   "rune": 14,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 5,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 16,
+   "pos": 1,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 23,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 21,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 1,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 10,
+   "pos": 3,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 9,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 65
+  },
+  {
+   "rune": 29,
+   "pos": 3,
+   "size": 5,
+   "minLevel": 70
+  },
+  {
+   "rune": 14,
+   "pos": 5,
+   "size": 5,
+   "minLevel": 75
+  },
+  {
+   "rune": 23,
+   "pos": 3,
+   "size": 5,
+   "minLevel": 70
+  },
+  {
+   "rune": 32,
+   "pos": 3,
+   "size": 5,
+   "minLevel": 55
+  },
+  {
+   "rune": 15,
+   "pos": 2,
+   "size": 5,
+   "minLevel": 44
+  },
+  {
+   "rune": 30,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 70
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 13,
+   "pos": 2,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 18,
+   "pos": 4,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 26,
+   "pos": 3,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 31,
+   "pos": 6,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 6,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 4,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 23,
+   "pos": 2,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 16,
+   "pos": 3,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 0,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 1,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 2,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 19,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 65
+  },
+  {
+   "rune": 9,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 31,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 23,
+   "pos": 3,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 12,
+   "pos": 3,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 8,
+   "pos": 3,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 32,
+   "pos": 5,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 15,
+   "pos": 2,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 32,
+   "pos": 3,
+   "size": 6,
+   "minLevel": 65
+  },
+  {
+   "rune": 32,
+   "pos": 4,
+   "size": 6,
+   "minLevel": 78
+  },
+  {
+   "rune": 4,
+   "pos": 3,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 12,
+   "pos": 1,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 1,
+   "pos": 2,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 2,
+   "pos": 2,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 0,
+   "pos": 2,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 9,
+   "pos": 2,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 28,
+   "pos": 1,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 13,
+   "pos": 2,
+   "size": 7,
+   "minLevel": 78
+  },
+  {
+   "rune": 22,
+   "pos": 1,
+   "size": 7,
+   "minLevel": 78
+  },
+  {
+   "rune": 28,
+   "pos": 6,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 15,
+   "pos": 2,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 7,
+   "pos": 4,
+   "size": 7,
+   "minLevel": 75
+  },
+  {
+   "rune": 5,
+   "pos": 7,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 18,
+   "pos": 7,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 15,
+   "pos": 2,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 26,
+   "pos": 2,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 15,
+   "pos": 8,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 0,
+   "pos": 4,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 13,
+   "pos": 6,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 3,
+   "pos": 4,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 25,
+   "pos": 6,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 1,
+   "pos": 8,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 18,
+   "pos": 4,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 8,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 4,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 6,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 7,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 9,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 3,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 7,
+   "pos": 1,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 19,
+   "pos": 1,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 32,
+   "pos": 2,
+   "size": 9,
+   "minLevel": 70
+  },
+  {
+   "rune": 32,
+   "pos": 1,
+   "size": 9,
+   "minLevel": 75
+  },
+  {
+   "rune": 32,
+   "pos": 3,
+   "size": 10,
+   "minLevel": 78
+  },
+  {
+   "rune": 12,
+   "pos": 1,
+   "size": 6,
+   "minLevel": 70
+  },
+  {
+   "rune": 12,
+   "pos": 1,
+   "size": 9,
+   "minLevel": 78
+  },
+  {
+   "rune": 27,
+   "pos": 4,
+   "size": 6,
+   "minLevel": 75
+  },
+  {
+   "rune": 2,
+   "pos": 8,
+   "size": 8,
+   "minLevel": 78
+  },
+  {
+   "rune": 5,
+   "pos": 4,
+   "size": 5,
+   "minLevel": 78
+  }
+ ]
+}

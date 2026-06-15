@@ -9,11 +9,14 @@ namespace RunecraftHelper
     using GameHelper;
     using GameHelper.Plugin;
     using GameHelper.RemoteEnums;
+    using GameHelper.RemoteObjects.Components;
+    using GameHelper.RemoteObjects.States.InGameStateObjects;
+    using GameOffsets.Natives;
     using GameOffsets.Objects.UiElement;
     using ImGuiNET;
     using Newtonsoft.Json;
 
-    public sealed class RunecraftHelperCore : PCore<RunecraftHelperSettings>
+    public sealed partial class RunecraftHelperCore : PCore<RunecraftHelperSettings>
     {
         // Fixed UI path through PoE2 0.5.x's Runeshape Combinations panel:
         //   GameUi → window-container → ? → ? → ? → recipes-container
@@ -113,6 +116,10 @@ namespace RunecraftHelper
         private string SettingPathname => Path.Join(this.DllDirectory, "config", "settings.txt");
         private string PriceCachePathname => Path.Join(this.DllDirectory, "config", "prices.json");
 
+        // Metadata substring identifying the persistent monolith device entity (used by the
+        // Monolith reward window in RunecraftHelperCore.MonolithRewards.cs).
+        private const string MonolithDevicePath = "Expedition2Encounter";
+
         public override void OnEnable(bool isGameOpened)
         {
             if (File.Exists(this.SettingPathname))
@@ -154,7 +161,25 @@ namespace RunecraftHelper
                 this.Settings.ColorMode = (RewardColorMode)colorMode;
 
             ImGui.SliderFloat("Price X offset", ref this.Settings.OverlayXOffset, -400f, 400f, "%.0f px");
-            ImGui.Checkbox("Show debug list window", ref this.Settings.ShowWindow);
+
+            ImGui.Spacing();
+            ImGui.SeparatorText("Monolith rewards");
+            ImGui.Checkbox("Show monolith reward window", ref this.Settings.ShowMonolithRewards);
+            if (this.Settings.ShowMonolithRewards)
+            {
+                ImGui.SliderFloat("Hide rewards under (ex)", ref this.Settings.MonolithRewardsMinExalted, 0f, 50f, "%.0f ex");
+                ImGui.TextDisabled("For each nearby monolith: its anchor rune + hole, and the candidate\n" +
+                    "recipes (from Expedition2Recipes.dat, filtered by the anchor) with\n" +
+                    "poe.ninja Exalted prices. Reads the anchor off the persistent device,\n" +
+                    "so it works even out of the network bubble.");
+            }
+
+            ImGui.Checkbox("Show monolith debug window", ref this.Settings.ShowWindow);
+            if (this.Settings.ShowWindow)
+                ImGui.TextDisabled("Pick a monolith and dump everything the offer rule uses (anchor/p/N,\n" +
+                    "sockets-vs-station N, area level, addresses, and every offered recipe with\n" +
+                    "row/size/gate/category/reward/levels/rune pattern). 'Copy report' → clipboard\n" +
+                    "for reporting a game-vs-plugin mismatch.");
 
             ImGui.Spacing();
 
@@ -203,6 +228,11 @@ namespace RunecraftHelper
 
             if (!this.EnsureProcess()) return;
 
+            // Monolith windows (rewards list + per-monolith debug dump). Both are driven by the same
+            // scan inside DrawMonolithRewards; ShowWindow now opens the monolith debug window.
+            if (this.Settings.ShowMonolithRewards || this.Settings.ShowWindow)
+                this.DrawMonolithRewards();
+
             var panel = this.ResolvePanel();
             if (panel == IntPtr.Zero)
             {
@@ -215,7 +245,6 @@ namespace RunecraftHelper
             if (this.recipes.Count == 0) return;
 
             this.DrawOverlay();
-            if (this.Settings.ShowWindow) this.DrawWindow();
         }
 
         // ── Panel resolution ──────────────────────────────────────────────
@@ -515,66 +544,6 @@ namespace RunecraftHelper
         private const uint ColorRed = 0xFF4040FFu;
         private const uint ColorShadow = 0xCC000000u;
         private const uint ColorPriceBg = 0xE6000000u; // 90%-opaque black plate behind the price text
-
-        // Debug list window: one row per visible reward showing the language-independent metaId we
-        // resolved, the price we found for it (or "—"), and the raw in-game name. Lets the user see
-        // exactly which reward failed to map to a price and what key it tried.
-        private void DrawWindow()
-        {
-            ImGui.SetNextWindowSize(new Vector2(460, 340), ImGuiCond.FirstUseEver);
-            if (!ImGui.Begin($"Runeshape Rewards ({this.recipes.Count})###RunecraftHelper"))
-            {
-                ImGui.End();
-                return;
-            }
-
-            if (ImGui.BeginTable("recipes", 5,
-                    ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.SizingFixedFit |
-                    ImGuiTableFlags.Resizable))
-            {
-                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, 30f);
-                ImGui.TableSetupColumn("metaId", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("dds art", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("ex", ImGuiTableColumnFlags.WidthFixed, 72f);
-                ImGui.TableSetupColumn("name (poe.ninja)", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupScrollFreeze(0, 1);
-                ImGui.TableHeadersRow();
-
-                var red = new Vector4(1f, 0.45f, 0.45f, 1f);
-                foreach (var r in this.recipes)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableSetColumnIndex(0);
-                    ImGui.TextDisabled($"{r.Count}x");
-
-                    ImGui.TableSetColumnIndex(1);
-                    if (string.IsNullOrEmpty(r.MetaId)) ImGui.TextColored(red, "(none)");
-                    else ImGui.TextUnformatted(r.MetaId);
-
-                    ImGui.TableSetColumnIndex(2);
-                    if (string.IsNullOrEmpty(r.DdsArt)) ImGui.TextColored(red, "(none)");
-                    else ImGui.TextUnformatted(r.DdsArt);
-
-                    ImGui.TableSetColumnIndex(3);
-                    if (this.TryGetRecipePrice(in r, out var unit))
-                        ImGui.TextUnformatted(FormatExalted(unit * Math.Max(1, r.Count)));
-                    else
-                        ImGui.TextDisabled("—");
-
-                    // Readable English label from poe.ninja (the game name is non-Latin and GH's font
-                    // can't render it). Same key priority as the price lookup.
-                    ImGui.TableSetColumnIndex(4);
-                    if (this.TryGetRecipeName(in r, out var en))
-                        ImGui.TextUnformatted(en);
-                    else
-                        ImGui.TextDisabled("—");
-                }
-
-                ImGui.EndTable();
-            }
-
-            ImGui.End();
-        }
 
         private void DrawOverlay()
         {

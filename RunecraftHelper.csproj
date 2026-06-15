@@ -24,8 +24,15 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Recipe data built by build_recipes_json.py from game_dat/. Bundled with the plugin. -->
+    <Content Include="expedition2_recipes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="CopyFiles" AfterTargets="Build">
-    <Copy SourceFiles="$(OutDir)$(TargetName)$(TargetExt);$(OutDir)$(TargetName).pdb;" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OutDir)$(TargetName)$(TargetExt);$(OutDir)$(TargetName).pdb;$(OutDir)expedition2_recipes.json;" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
