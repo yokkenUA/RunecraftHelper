@@ -216,7 +216,11 @@ namespace RunecraftHelper
 
             ImGui.Separator();
             if (v.AnchorIdx < 0)
-                ImGui.TextColored(red, "Anchor not resolved (station unavailable) — no recipes.");
+            {
+                ImGui.TextColored(red, "Anchor not resolved — no recipes.");
+                if (!string.IsNullOrEmpty(v.StationDiag))
+                    ImGui.TextColored(red, $"  why: {v.StationDiag}");
+            }
             else
                 ImGui.Text($"Anchor: {v.AnchorName} (idx {v.AnchorIdx})    p={v.AnchorPos}  (hole {v.AnchorPos + 1})");
 
@@ -228,6 +232,8 @@ namespace RunecraftHelper
 
             ImGui.Text($"Area level: {v.AreaLevel}");
             ImGui.TextColored(grey, $"device 0x{v.EntityId:X}   station 0x{v.StationAddr:X}   +0x40={FmtI(v.Field40)}  +0x44={FmtI(v.Field44)}");
+            if (!string.IsNullOrEmpty(v.SmStates))
+                ImGui.TextColored(grey, $"SM states: {v.SmStates}");
 
             if (ImGui.Button("Copy report"))
                 ImGui.SetClipboardText(BuildDebugReport(v));
@@ -295,6 +301,10 @@ namespace RunecraftHelper
             sb.AppendLine($"Monolith: {v.AnchorName} (idx {v.AnchorIdx})  p={v.AnchorPos} hole{v.AnchorPos + 1}  " +
                           $"N={v.HoleCount} (sockets={v.SocketsState})  areaLvl={v.AreaLevel}  +0x40={FmtI(v.Field40)} +0x44={FmtI(v.Field44)}");
             sb.AppendLine($"device 0x{v.EntityId:X}  station 0x{v.StationAddr:X}");
+            if (!string.IsNullOrEmpty(v.SmStates))
+                sb.AppendLine($"SM states: {v.SmStates}");
+            if (v.AnchorIdx < 0 && !string.IsNullOrEmpty(v.StationDiag))
+                sb.AppendLine($"resolve failed: {v.StationDiag}");
             sb.AppendLine($"offered {v.Candidates.Count}:");
             foreach (var c in v.Candidates)
                 sb.AppendLine($"  row{c.Row} size{c.Size} [{(c.Full ? "N" : "RW")}] cat{c.Category} " +
@@ -339,8 +349,11 @@ namespace RunecraftHelper
                 // Observed values (live, 2026-06-15, docs §6.11): 0 = dormant/out of range, 1 = available,
                 // 7 = collected. Hide ONLY the collected (==7) ones — 0 and 1 are both live monoliths.
                 bool collected = false;
+                var smDump = new System.Text.StringBuilder();
                 foreach (var s in sm.States)
                 {
+                    if (smDump.Length > 0) smDump.Append(", ");
+                    smDump.Append(s.Name).Append('=').Append(s.Value);
                     if (string.Equals(s.Name, "sockets", StringComparison.OrdinalIgnoreCase))
                     {
                         v.SocketsState = (int)s.Value;
@@ -349,26 +362,37 @@ namespace RunecraftHelper
                     else if (string.Equals(s.Name, "activated", StringComparison.OrdinalIgnoreCase))
                         collected = s.Value == 7;
                 }
+                v.SmStates = smDump.ToString();
                 if (collected) continue;
 
                 if (havePlayer && e.TryGetComponent<Render>(out var r))
                     v.Distance = Vector2.Distance(pg, new Vector2(r.GridPosition.X, r.GridPosition.Y));
 
-                if (this.TryResolveStation(sm, e.Address, out var station) &&
-                    this.TryReadAnchor(station, out var aidx, out var apos))
+                if (this.TryResolveStation(sm, e.Address, out var station, out var sdiag))
                 {
                     v.StationAddr = station.ToInt64();
-                    v.AnchorIdx = aidx;
-                    v.AnchorPos = apos;
-                    v.AnchorName = this.runeNames.TryGetValue(aidx, out var nm) ? nm : $"#{aidx}";
-                    // N (hole count) authoritative from the station (+0x38) — this is what the in-game
-                    // offer builder uses. The StateMachine "sockets" state can read LOW (observed 6 while
-                    // the recipe N is 7), which would drop the largest recipes; override it when sane.
-                    if (this.TryReadI32(station + StationHoleCountOffset, out var nHoles) && nHoles > 0 && nHoles <= 16)
-                        v.HoleCount = nHoles;
-                    if (this.TryReadI32(station + 0x40, out var f40)) v.Field40 = f40;
-                    if (this.TryReadI32(station + 0x44, out var f44)) v.Field44 = f44;
-                    this.BuildCandidates(v, areaLevel);
+                    if (this.TryReadAnchor(station, out var aidx, out var apos))
+                    {
+                        v.AnchorIdx = aidx;
+                        v.AnchorPos = apos;
+                        v.AnchorName = this.runeNames.TryGetValue(aidx, out var nm) ? nm : $"#{aidx}";
+                        // N (hole count) authoritative from the station (+0x38) — this is what the in-game
+                        // offer builder uses. The StateMachine "sockets" state can read LOW (observed 6 while
+                        // the recipe N is 7), which would drop the largest recipes; override it when sane.
+                        if (this.TryReadI32(station + StationHoleCountOffset, out var nHoles) && nHoles > 0 && nHoles <= 16)
+                            v.HoleCount = nHoles;
+                        if (this.TryReadI32(station + 0x40, out var f40)) v.Field40 = f40;
+                        if (this.TryReadI32(station + 0x44, out var f44)) v.Field44 = f44;
+                        this.BuildCandidates(v, areaLevel);
+                    }
+                    else
+                    {
+                        v.StationDiag = "station resolved but anchor read failed (rune table base / row ptr)";
+                    }
+                }
+                else
+                {
+                    v.StationDiag = sdiag;
                 }
 
                 list.Add(v);
@@ -379,15 +403,25 @@ namespace RunecraftHelper
         }
 
         // Walk the device StateMachine's listener vector to the RuneStation that registered on it.
-        private bool TryResolveStation(StateMachine sm, IntPtr deviceAddr, out IntPtr station)
+        // `diag` records the failure step so community debug reports can pinpoint why big/odd monoliths
+        // don't resolve (empty on success).
+        private bool TryResolveStation(StateMachine sm, IntPtr deviceAddr, out IntPtr station, out string diag)
         {
             station = IntPtr.Zero;
-            if (sm == null || sm.Address == IntPtr.Zero) return false;
+            diag = string.Empty;
+            if (sm == null || sm.Address == IntPtr.Zero) { diag = "SM component null"; return false; }
             if (!this.TryReadStdVector(sm.Address + StateMachineListenerVecOffset, out var first, out var last))
+            {
+                diag = "SM listener vector (+0x20) unreadable";
                 return false;
+            }
 
             long n = ((long)last - (long)first) / 8;
-            if (n <= 0 || n > 256) return false;
+            if (n <= 0 || n > 256)
+            {
+                diag = $"listener vector size out of range (n={n})";
+                return false;
+            }
 
             for (long i = 0; i < n; i++)
             {
@@ -402,6 +436,8 @@ namespace RunecraftHelper
                     return true;
                 }
             }
+
+            diag = $"no listener matched device ({n} checked)";
 
             return false;
         }
@@ -566,6 +602,8 @@ namespace RunecraftHelper
             public int AnchorIdx = -1;
             public int AnchorPos = -1;
             public string AnchorName = "?";
+            public string StationDiag = string.Empty; // why station/anchor failed to resolve (debug)
+            public string SmStates = string.Empty;     // all StateMachine states "name=value" (debug)
             public List<MonoCand> Candidates = new();
         }
 
