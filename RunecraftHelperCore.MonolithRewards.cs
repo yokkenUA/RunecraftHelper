@@ -8,6 +8,7 @@ namespace RunecraftHelper
     using GameHelper.RemoteEnums.Entity;
     using GameHelper.RemoteObjects.Components;
     using GameHelper.RemoteObjects.States.InGameStateObjects;
+    using GameOffsets.Objects.UiElement;
     using ImGuiNET;
     using Newtonsoft.Json;
 
@@ -36,6 +37,7 @@ namespace RunecraftHelper
         private const int RuneCount = 34;                  // Expedition2Runes rows 0..33
 
         private List<MonoRecipe> monolithRecipes = new();
+        private readonly List<double> monoPriceScratch = new(); // per-reward totals → row-total colour median
         private Dictionary<int, string> runeNames = new();
         // (anchorRune, pos1based, size) → min area level at which that partial size is offered.
         // Built from Expedition2RunesWeights; gates which size<N recipes a monolith can roll.
@@ -95,8 +97,84 @@ namespace RunecraftHelper
                 this.nextMonolithScanUtc = now.AddMilliseconds(750);
             }
 
+            if (this.Settings.DrawMonolithValueOnMap) this.DrawMonolithMapLabels();
             if (this.Settings.ShowMonolithRewards) this.DrawMonolithRewardsWindow();
             if (this.Settings.ShowWindow) this.DrawMonolithDebugWindow();
+        }
+
+        // Camera rotation of the in-game map, mirrored from Radar.Helper.CameraAngle.
+        private const double MapCameraAngle = 38.7 * Math.PI / 180.0;
+
+        // Draw each monolith's best reward value (ex) on the in-game LARGE-map overlay, at the monolith's
+        // projected map position — the same spot Radar paints the socket count. Radar can't be modified and
+        // its Helper/settings aren't reachable, so the large-map projection (Radar.Helper.DeltaInWorldToMapDelta
+        // + UpdateLargeMapDetails) is replicated here. Calibration baselines match Radar's defaults; the
+        // MapValue* settings re-align if the user's Radar offsets/zoom differ. Foreground draw list with
+        // absolute screen coords (largeMap.Center is screen-space).
+        private void DrawMonolithMapLabels()
+        {
+            if (this.monolithViews.Count == 0) return;
+
+            var gameUi = Core.States.InGameStateObject.GameUi;
+            var largeMap = gameUi.LargeMap;
+            if (largeMap == null || !largeMap.IsVisible || gameUi.WorldMapPanel.IsVisible) return;
+
+            var area = Core.States.InGameStateObject.CurrentAreaInstance;
+            if (area?.Player == null || !area.Player.TryGetComponent<Render>(out var playerRender)) return;
+            var trackingPos = new Vector2(playerRender.GridPosition.X, playerRender.GridPosition.Y);
+            float trackingHeight = playerRender.TerrainHeight;
+
+            // Diagonal length (UpdateLargeMapDetails): base-resolution diagonal scaled by the map's height.
+            var baseRes = UiElementBaseFuncs.BaseResolution;
+            double baseDiag = Math.Sqrt(((double)baseRes.X * baseRes.X) + ((double)baseRes.Y * baseRes.Y));
+            double diag = baseDiag * largeMap.Size.Y / baseRes.Y;
+            if (diag <= 0) return;
+
+            // Helper.Scale for the large map: LargeMapScaleBaseline 0.187812, Radar default multiplier 1.
+            float scale = this.Settings.MapValueScaleMultiplier * largeMap.Zoom * 0.187812f;
+            if (scale <= 0) return;
+            float mapScale = 240f / scale;
+            float cos = (float)(diag * Math.Cos(MapCameraAngle) / mapScale);
+            float sin = (float)(diag * Math.Sin(MapCameraAngle) / mapScale);
+
+            // largeMapRealCenter: Center+Shift+DefaultShift + calibrated biases (0.6, 0.3) + user offsets.
+            var center = largeMap.Center + largeMap.Shift + largeMap.DefaultShift;
+            center.X += 0.6f + this.Settings.MapValueXOffset;
+            center.Y += 0.3f + this.Settings.MapValueYOffset;
+
+            var dl = ImGui.GetForegroundDrawList();
+            var font = ImGui.GetFont();
+            float ambient = ImGui.GetFontSize();
+            float fontPx = ambient * 1.5f;
+            float k = fontPx / ambient;
+
+            // maxBest across visible monoliths — needed by the ColorMode=Relative header tint so the map
+            // label colour matches the window header (which compares each monolith against the best on screen).
+            double maxBest = 0;
+            foreach (var mv in this.monolithViews)
+                if (mv.Best > maxBest) maxBest = mv.Best;
+
+            foreach (var v in this.monolithViews)
+            {
+                if (!v.HasPos || v.Best <= 0) continue;
+
+                // DeltaInWorldToMapDelta replicated (Radar.Helper).
+                var delta = v.GridPos - trackingPos;
+                float deltaZ = (v.TerrainHeight - trackingHeight) / 10.86957f;
+                var fpos = new Vector2((delta.X - delta.Y) * cos, (deltaZ - (delta.X + delta.Y)) * sin);
+                var screen = center + fpos;
+
+                // Same tint as the rewards-window header (shared helper); untinted → white on the map.
+                uint col = this.MonolithValueColor(v.Best, maxBest, out _);
+
+                var text = $"{v.Best:F0} ex";
+                var ts = ImGui.CalcTextSize(text) * k;
+                var at = new Vector2(screen.X - (ts.X * 0.5f), screen.Y + 6f);
+                var pad = new Vector2(3f, 1f);
+                dl.AddRectFilled(at - pad, at + ts + pad, ColorPriceBg, 2f);
+                dl.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
+                dl.AddText(font, fontPx, at, col, text);
+            }
         }
 
         private void DrawMonolithRewardsWindow()
@@ -110,20 +188,57 @@ namespace RunecraftHelper
             if (ImGui.Begin("Monolith Rewards", ImGuiWindowFlags.AlwaysAutoResize))
             {
                 float min = this.Settings.MonolithRewardsMinExalted;
+
+                // Colour thresholds reuse the recipe-overlay logic (PickColor/ColorMode). In Relative
+                // mode the row Total cells compare against the median over every priced reward (like the
+                // recipe overlay). The HEADER, however, is coloured relative to the BEST monolith on
+                // screen (see PickHeaderColor), not the median: the price distribution is bimodal (a
+                // couple of huge monoliths among many cheap ones), so a median baseline drifts into the
+                // cheap tail and an 8 ex monolith lights green next to a 387 ex one. Relative-to-max
+                // keeps green for the genuine standouts at any distribution.
+                bool colorize = this.Settings.ColorMode != RewardColorMode.Off;
+                double median = 0, maxBest = 0;
+                if (colorize && this.Settings.ColorMode == RewardColorMode.Relative)
+                {
+                    this.monoPriceScratch.Clear();
+                    foreach (var mv in this.monolithViews)
+                    {
+                        double b = 0;
+                        foreach (var c in mv.Candidates)
+                            if (c.Priced)
+                            {
+                                var t = c.UnitEx * c.Count;
+                                this.monoPriceScratch.Add(t);
+                                if (t > b) b = t;
+                            }
+                        if (b > maxBest) maxBest = b;
+                    }
+                    median = MedianOfDoubles(this.monoPriceScratch);
+                }
+
                 foreach (var v in this.monolithViews)
                 {
                     double best = 0;
                     foreach (var c in v.Candidates)
                         if (c.Priced) best = Math.Max(best, c.UnitEx * c.Count);
 
-                    string hdr = v.AnchorIdx >= 0
-                        ? $"{v.AnchorName}  ·  hole {v.AnchorPos + 1}/{v.HoleCount}  ·  {v.Distance:F0}  ·  best {best:F0} ex###m{v.EntityId}"
-                        : $"(anchor ?)  ·  {v.HoleCount} holes  ·  {v.Distance:F0}###m{v.EntityId}";
+                    string hdr;
+                    if (v.IsUnique)
+                        hdr = $"Unique Monolith  ·  {v.HoleCount} holes  ·  {v.Distance:F0}  ·  best {best:F0} ex###m{v.EntityId}";
+                    else if (v.AnchorIdx >= 0)
+                        hdr = $"{v.AnchorName}  ·  hole {v.AnchorPos + 1}/{v.HoleCount}  ·  {v.Distance:F0}  ·  best {best:F0} ex###m{v.EntityId}";
+                    else
+                        hdr = $"(anchor ?)  ·  {v.HoleCount} holes  ·  {v.Distance:F0}###m{v.EntityId}";
 
-                    if (!ImGui.CollapsingHeader(hdr, ImGuiTreeNodeFlags.None))
+                    // Header tint via the shared helper so it matches the map-overlay label exactly.
+                    uint hdrColor = this.MonolithValueColor(best, maxBest, out bool colorHdr);
+                    if (colorHdr) ImGui.PushStyleColor(ImGuiCol.Text, hdrColor);
+                    bool open = ImGui.CollapsingHeader(hdr, ImGuiTreeNodeFlags.None);
+                    if (colorHdr) ImGui.PopStyleColor();
+                    if (!open)
                         continue;
 
-                    if (v.AnchorIdx < 0)
+                    if (v.AnchorIdx < 0 && !v.IsUnique)
                     {
                         ImGui.TextDisabled("  anchor not resolved (station unavailable)");
                         continue;
@@ -157,7 +272,16 @@ namespace RunecraftHelper
                             ImGui.TableSetColumnIndex(2);
                             ImGui.Text(c.Priced ? c.UnitEx.ToString("F0") : "—");
                             ImGui.TableSetColumnIndex(3);
-                            ImGui.Text(c.Priced ? total.ToString("F0") : "—");
+                            if (c.Priced && colorize)
+                            {
+                                ImGui.PushStyleColor(ImGuiCol.Text, this.PickColor(total, median));
+                                ImGui.Text(total.ToString("F0"));
+                                ImGui.PopStyleColor();
+                            }
+                            else
+                            {
+                                ImGui.Text(c.Priced ? total.ToString("F0") : "—");
+                            }
                             shown++;
                         }
 
@@ -202,9 +326,11 @@ namespace RunecraftHelper
             for (int i = 0; i < labels.Length; i++)
             {
                 var mv = this.monolithViews[i];
-                labels[i] = mv.AnchorIdx >= 0
-                    ? $"{mv.AnchorName}  hole {mv.AnchorPos + 1}/{mv.HoleCount}  ({mv.Distance:F0})"
-                    : $"(anchor ?)  {mv.HoleCount}h  ({mv.Distance:F0})";
+                labels[i] = mv.IsUnique
+                    ? $"Unique  {mv.HoleCount}h  ({mv.Distance:F0})"
+                    : mv.AnchorIdx >= 0
+                        ? $"{mv.AnchorName}  hole {mv.AnchorPos + 1}/{mv.HoleCount}  ({mv.Distance:F0})"
+                        : $"(anchor ?)  {mv.HoleCount}h  ({mv.Distance:F0})";
             }
             if (this.monolithDebugSel < 0 || this.monolithDebugSel >= labels.Length) this.monolithDebugSel = 0;
             ImGui.SetNextItemWidth(420f);
@@ -215,7 +341,9 @@ namespace RunecraftHelper
             var grey = new Vector4(0.6f, 0.6f, 0.6f, 1f);
 
             ImGui.Separator();
-            if (v.AnchorIdx < 0)
+            if (v.IsUnique)
+                ImGui.Text($"Unique monolith (no anchor) — offers all recipes with size <= N ({v.HoleCount}).");
+            else if (v.AnchorIdx < 0)
             {
                 ImGui.TextColored(red, "Anchor not resolved — no recipes.");
                 if (!string.IsNullOrEmpty(v.StationDiag))
@@ -365,35 +493,57 @@ namespace RunecraftHelper
                 v.SmStates = smDump.ToString();
                 if (collected) continue;
 
-                if (havePlayer && e.TryGetComponent<Render>(out var r))
-                    v.Distance = Vector2.Distance(pg, new Vector2(r.GridPosition.X, r.GridPosition.Y));
+                if (e.TryGetComponent<Render>(out var r))
+                {
+                    v.GridPos = new Vector2(r.GridPosition.X, r.GridPosition.Y);
+                    v.TerrainHeight = r.TerrainHeight;
+                    v.HasPos = true;
+                    if (havePlayer)
+                        v.Distance = Vector2.Distance(pg, v.GridPos);
+                }
 
                 if (this.TryResolveStation(sm, e.Address, out var station, out var sdiag))
                 {
                     v.StationAddr = station.ToInt64();
-                    if (this.TryReadAnchor(station, out var aidx, out var apos))
+                    // Read the station fields whenever it resolves — independent of the anchor. N (hole
+                    // count) is authoritative from +0x38 (what the in-game offer builder uses); the
+                    // StateMachine "sockets" state caps at 6 and under-reports >6-hole monoliths. These
+                    // must run even when the anchor read fails (e.g. no rune socketed) so the debug still
+                    // shows the true N and +0x40/+0x44.
+                    if (this.TryReadI32(station + StationHoleCountOffset, out var nHoles) && nHoles > 0 && nHoles <= 16)
+                        v.HoleCount = nHoles;
+                    if (this.TryReadI32(station + 0x40, out var f40)) v.Field40 = f40;
+                    if (this.TryReadI32(station + 0x44, out var f44)) v.Field44 = f44;
+
+                    // Anchor-less "unique" monolith: no pre-placed rune at station +0x28. Normal monoliths
+                    // always carry one (docs §6.6), so a null anchor is the discriminator under which the
+                    // game's offer builder runs its skip-anchor branch (offers all size<=N; docs §6.12).
+                    if (this.ReadPtr(station + StationAnchorRefOffset) == IntPtr.Zero && v.HoleCount > 0)
+                    {
+                        v.IsUnique = true;
+                        this.BuildCandidatesUnique(v, areaLevel);
+                    }
+                    else if (this.TryReadAnchor(station, out var aidx, out var apos, out var adiag))
                     {
                         v.AnchorIdx = aidx;
                         v.AnchorPos = apos;
                         v.AnchorName = this.runeNames.TryGetValue(aidx, out var nm) ? nm : $"#{aidx}";
-                        // N (hole count) authoritative from the station (+0x38) — this is what the in-game
-                        // offer builder uses. The StateMachine "sockets" state can read LOW (observed 6 while
-                        // the recipe N is 7), which would drop the largest recipes; override it when sane.
-                        if (this.TryReadI32(station + StationHoleCountOffset, out var nHoles) && nHoles > 0 && nHoles <= 16)
-                            v.HoleCount = nHoles;
-                        if (this.TryReadI32(station + 0x40, out var f40)) v.Field40 = f40;
-                        if (this.TryReadI32(station + 0x44, out var f44)) v.Field44 = f44;
                         this.BuildCandidates(v, areaLevel);
                     }
                     else
                     {
-                        v.StationDiag = "station resolved but anchor read failed (rune table base / row ptr)";
+                        v.StationDiag = $"station resolved, anchor read failed: {adiag}";
                     }
                 }
                 else
                 {
                     v.StationDiag = sdiag;
                 }
+
+                double best = 0;
+                foreach (var c in v.Candidates)
+                    if (c.Priced) best = Math.Max(best, c.UnitEx * c.Count);
+                v.Best = best;
 
                 list.Add(v);
             }
@@ -443,30 +593,33 @@ namespace RunecraftHelper
         }
 
         // anchor rune index = (station+0x28 row ptr − table base)/0x6c; hole pos = station+0x3c.
-        private bool TryReadAnchor(IntPtr station, out int idx, out int pos)
+        // `diag` records which step failed so debug reports distinguish "no rune socketed" from a
+        // genuinely different station layout (empty on success).
+        private bool TryReadAnchor(IntPtr station, out int idx, out int pos, out string diag)
         {
             idx = -1;
             pos = -1;
-            if (station == IntPtr.Zero) return false;
+            diag = string.Empty;
+            if (station == IntPtr.Zero) { diag = "station null"; return false; }
 
             this.TryReadI32(station + StationAnchorPosOffset, out pos);
 
             var rowPtr = this.ReadPtr(station + StationAnchorRefOffset);
-            if (rowPtr == IntPtr.Zero) return false;
+            if (rowPtr == IntPtr.Zero) { diag = "rune row ptr null at +0x28 (no rune socketed?)"; return false; }
 
             // Rune-table base must be computed per station: the Expedition2Runes row array is
             // re-instantiated per area, so its base differs every map. Caching it across areas
             // makes rowPtr − base go negative on the next map (mirrors FUN_14179ed70 exactly).
             var holder = this.ReadPtr(station + StationAnchorHolderOffset);
-            if (holder == IntPtr.Zero) return false;
+            if (holder == IntPtr.Zero) { diag = "holder null at +0x30"; return false; }
             var p1 = this.ReadPtr(holder + 0x28);
-            if (p1 == IntPtr.Zero) return false;
+            if (p1 == IntPtr.Zero) { diag = "rune table ptr null at holder+0x28"; return false; }
             long tableBase = this.ReadPtr(p1).ToInt64();
-            if (tableBase == 0) return false;
+            if (tableBase == 0) { diag = "rune table base 0"; return false; }
             long delta = rowPtr.ToInt64() - tableBase;
-            if (delta < 0 || delta % ExpeditionRuneStride != 0) return false;
+            if (delta < 0 || delta % ExpeditionRuneStride != 0) { diag = $"rowPtr-base misaligned (delta=0x{delta:X})"; return false; }
             long i = delta / ExpeditionRuneStride;
-            if (i < 0 || i >= RuneCount) return false;
+            if (i < 0 || i >= RuneCount) { diag = $"rune index out of range (i={i}, pos={pos})"; return false; }
 
             idx = (int)i;
             return true;
@@ -496,38 +649,65 @@ namespace RunecraftHelper
                 if (rec.size != v.HoleCount &&
                     !this.IsPartialAllowed(v.AnchorIdx, v.AnchorPos, rec.size, areaLevel)) continue;
 
-                var c = new MonoCand
-                {
-                    Size = rec.size,
-                    Count = Math.Max(1, rec.rewardCount),
-                    Runes = rec.runes != null ? string.Join(" · ", rec.runes) : string.Empty,
-                    Row = rec.row,
-                    Category = rec.category,
-                    RewardIdx = rec.reward?.idx ?? -1,
-                    RewardId = rec.reward?.id ?? string.Empty,
-                    MinLevel = rec.minLevel,
-                    MaxLevel = rec.maxLevel,
-                    Full = rec.size == v.HoleCount,
-                };
-
-                if (rec.reward != null && !string.IsNullOrEmpty(rec.reward.name))
-                {
-                    c.Reward = rec.reward.name;
-                    if (this.priceCache.TryGetExaltedPrice(rec.reward.name, out var u) && u > 0)
-                    {
-                        c.UnitEx = u;
-                        c.Priced = true;
-                    }
-                }
-                else
-                {
-                    c.Reward = string.IsNullOrEmpty(rec.description) ? $"(unique) {rec.id}" : rec.description;
-                }
-
-                v.Candidates.Add(c);
+                this.AddCandidate(v, rec);
             }
 
             v.Candidates.Sort((a, b) => (b.UnitEx * b.Count).CompareTo(a.UnitEx * a.Count));
+        }
+
+        // Recipes an anchor-less "unique" monolith offers. Decoded from the same offer builder
+        // FUN_141e33b00 (docs/re-findings.md §6.12): when the station carries no pre-placed anchor
+        // (station +0x28 == 0), the game calls it with the skip-anchor flag set (param_5 != 0), which
+        // bypasses BOTH the runeIdx[p]==anchor match AND the size==N/partial gate. What remains is just
+        //   recipe not disabled (+0x75==0, true for every row)  AND  size <= N  AND  level band passes.
+        // So it offers the whole catalog that fits the holes — hence the very large list.
+        private void BuildCandidatesUnique(MonoView v, int areaLevel)
+        {
+            if (v.HoleCount <= 0) return;
+            foreach (var rec in this.monolithRecipes)
+            {
+                if (rec.size > v.HoleCount) continue;
+                if (areaLevel > 0 && rec.maxLevel > 0 &&
+                    (areaLevel < rec.minLevel || areaLevel > rec.maxLevel)) continue;
+                this.AddCandidate(v, rec);
+            }
+
+            v.Candidates.Sort((a, b) => (b.UnitEx * b.Count).CompareTo(a.UnitEx * a.Count));
+        }
+
+        // Build a priced MonoCand from a recipe row and append it to the view. Shared by the anchored
+        // (BuildCandidates) and anchor-less (BuildCandidatesUnique) offer paths.
+        private void AddCandidate(MonoView v, MonoRecipe rec)
+        {
+            var c = new MonoCand
+            {
+                Size = rec.size,
+                Count = Math.Max(1, rec.rewardCount),
+                Runes = rec.runes != null ? string.Join(" · ", rec.runes) : string.Empty,
+                Row = rec.row,
+                Category = rec.category,
+                RewardIdx = rec.reward?.idx ?? -1,
+                RewardId = rec.reward?.id ?? string.Empty,
+                MinLevel = rec.minLevel,
+                MaxLevel = rec.maxLevel,
+                Full = rec.size == v.HoleCount,
+            };
+
+            if (rec.reward != null && !string.IsNullOrEmpty(rec.reward.name))
+            {
+                c.Reward = rec.reward.name;
+                if (this.priceCache.TryGetExaltedPrice(rec.reward.name, out var u) && u > 0)
+                {
+                    c.UnitEx = u;
+                    c.Priced = true;
+                }
+            }
+            else
+            {
+                c.Reward = string.IsNullOrEmpty(rec.description) ? $"(unique) {rec.id}" : rec.description;
+            }
+
+            v.Candidates.Add(c);
         }
 
         // True if Expedition2RunesWeights enables a partial recipe of `size` for anchor `idx` at hole
@@ -540,6 +720,59 @@ namespace RunecraftHelper
 
         private static long PartialKey(int rune, int pos1Based, int size)
             => ((long)rune << 16) | ((long)pos1Based << 8) | (uint)size;
+
+        // Header colour. Absolute mode defers to the shared PickColor (fixed ex thresholds). Relative
+        // mode is judged against the BEST monolith on screen rather than a median: green only for the
+        // top tier (≥0.5×max), red for the long cheap tail (≤0.2×max), yellow in between — robust to
+        // the bimodal price spread where a median baseline would green-light cheap monoliths.
+        // Single source of truth for a monolith's value tint, shared by the rewards-window header and the
+        // map-overlay label so they always agree. A non-zero MonolithHighlightThreshold uses the absolute
+        // scheme (green ≥ T, yellow 0.6×T..T, untinted below); otherwise the ColorMode-driven header tint.
+        // `tinted` is false when no colour applies (caller leaves the default / neutral colour).
+        private uint MonolithValueColor(double best, double maxBest, out bool tinted)
+        {
+            tinted = false;
+            if (best <= 0) return ColorWhite;
+
+            float threshold = this.Settings.MonolithHighlightThreshold;
+            if (threshold > 0f)
+            {
+                if (best >= threshold) { tinted = true; return ColorGreen; }
+                if (best >= 0.6f * threshold) { tinted = true; return ColorYellow; }
+                return ColorWhite; // below 0.6×threshold → untinted
+            }
+
+            if (this.Settings.ColorMode != RewardColorMode.Off)
+            {
+                tinted = true;
+                return this.PickHeaderColor(best, maxBest);
+            }
+
+            return ColorWhite;
+        }
+
+        private uint PickHeaderColor(double best, double maxBest)
+        {
+            if (this.Settings.ColorMode == RewardColorMode.Absolute)
+                return this.PickColor(best, 0);
+            if (this.Settings.ColorMode == RewardColorMode.Relative)
+            {
+                if (maxBest <= 0) return ColorWhite;
+                double r = best / maxBest;
+                if (r >= 0.5) return ColorGreen;
+                if (r <= 0.2) return ColorRed;
+                return ColorYellow;
+            }
+            return ColorWhite;
+        }
+
+        private static double MedianOfDoubles(List<double> v)
+        {
+            if (v.Count == 0) return 0;
+            v.Sort();
+            int n = v.Count;
+            return n % 2 == 1 ? v[n / 2] : (v[n / 2 - 1] + v[n / 2]) * 0.5;
+        }
 
         private bool TryReadI32(IntPtr addr, out int val)
         {
@@ -594,6 +827,10 @@ namespace RunecraftHelper
             public long EntityId;          // device entity address
             public long StationAddr;       // resolved RuneStation address (0 if unresolved)
             public float Distance;
+            public Vector2 GridPos;        // monolith grid position (for the radar-map projection)
+            public float TerrainHeight;    // monolith terrain height (for the radar-map projection)
+            public bool HasPos;            // GridPos/TerrainHeight were read
+            public double Best;            // best priced reward total (header tint + map label)
             public int HoleCount;          // N — authoritative, from station +0x38
             public int SocketsState = -1;  // StateMachine "sockets" value (for debug; can under-read N)
             public int AreaLevel;
@@ -602,6 +839,7 @@ namespace RunecraftHelper
             public int AnchorIdx = -1;
             public int AnchorPos = -1;
             public string AnchorName = "?";
+            public bool IsUnique;          // anchor-less "unique" monolith: offers all size<=N (docs §6.12)
             public string StationDiag = string.Empty; // why station/anchor failed to resolve (debug)
             public string SmStates = string.Empty;     // all StateMachine states "name=value" (debug)
             public List<MonoCand> Candidates = new();

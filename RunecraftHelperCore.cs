@@ -168,6 +168,23 @@ namespace RunecraftHelper
             if (this.Settings.ShowMonolithRewards)
             {
                 ImGui.SliderFloat("Hide rewards under (ex)", ref this.Settings.MonolithRewardsMinExalted, 0f, 50f, "%.0f ex");
+
+                ImGui.InputFloat("Highlight threshold (ex)", ref this.Settings.MonolithHighlightThreshold, 1f, 10f, "%.0f");
+                if (this.Settings.MonolithHighlightThreshold < 0f) this.Settings.MonolithHighlightThreshold = 0f;
+                ImGui.TextDisabled("Tints a monolith's header by its best reward value: green at/above the\n" +
+                    "threshold, yellow from 0.6× up to it, none below. 0 = off (use Price color).");
+
+                ImGui.Checkbox("Draw value on map overlay", ref this.Settings.DrawMonolithValueOnMap);
+                if (this.Settings.DrawMonolithValueOnMap)
+                {
+                    ImGui.TextDisabled("Paints each monolith's best value (ex) on the large-map overlay, like\n" +
+                        "Radar's socket count (tinted by the threshold above). If it doesn't line\n" +
+                        "up with the monolith, match these to your Radar large-map settings:");
+                    ImGui.SliderFloat("Map value scale", ref this.Settings.MapValueScaleMultiplier, 0.1f, 3f, "%.2f");
+                    ImGui.SliderFloat("Map value X offset", ref this.Settings.MapValueXOffset, -200f, 200f, "%.0f");
+                    ImGui.SliderFloat("Map value Y offset", ref this.Settings.MapValueYOffset, -200f, 200f, "%.0f");
+                }
+
                 ImGui.TextDisabled("For each nearby monolith: its anchor rune + hole, and the candidate\n" +
                     "recipes (from Expedition2Recipes.dat, filtered by the anchor) with\n" +
                     "poe.ninja Exalted prices. Reads the anchor off the persistent device,\n" +
@@ -230,7 +247,7 @@ namespace RunecraftHelper
 
             // Monolith windows (rewards list + per-monolith debug dump). Both are driven by the same
             // scan inside DrawMonolithRewards; ShowWindow now opens the monolith debug window.
-            if (this.Settings.ShowMonolithRewards || this.Settings.ShowWindow)
+            if (this.Settings.ShowMonolithRewards || this.Settings.ShowWindow || this.Settings.DrawMonolithValueOnMap)
                 this.DrawMonolithRewards();
 
             var panel = this.ResolvePanel();

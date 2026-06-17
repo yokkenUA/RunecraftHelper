@@ -47,5 +47,20 @@ namespace RunecraftHelper
 
         // Hide candidate rewards whose unit Exalted price is below this (0 = show all, incl. unpriced).
         public float MonolithRewardsMinExalted = 0f;
+
+        // Monolith Rewards header highlight by absolute value. If a monolith's best reward value (ex)
+        // reaches this threshold its header is tinted green; from 0.6× the threshold up to it, yellow;
+        // below 0.6× it is not tinted. 0 disables the threshold highlight (header falls back to ColorMode).
+        public float MonolithHighlightThreshold = 0f;
+
+        // Draw each monolith's best reward value (ex) on the in-game large-map overlay, at the monolith's
+        // map position (the same place Radar shows the socket count). Tinted by MonolithHighlightThreshold.
+        public bool DrawMonolithValueOnMap = false;
+
+        // Large-map projection tuning (mirrors Radar's calibration so the label lines up with the monolith).
+        // Defaults match Radar's defaults; nudge these if your Radar large-map zoom/offsets are non-default.
+        public float MapValueScaleMultiplier = 1f;
+        public float MapValueXOffset = 0f;
+        public float MapValueYOffset = 0f;
     }
 }
