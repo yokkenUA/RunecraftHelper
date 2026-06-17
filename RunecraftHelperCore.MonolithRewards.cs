@@ -474,8 +474,9 @@ namespace RunecraftHelper
 
                 // Collected gate: the device persists (IsValid stays true, Life 100/100) after the player
                 // collects a monolith, so the "still available" signal is its StateMachine "activated" state.
-                // Observed values (live, 2026-06-15, docs §6.11): 0 = dormant/out of range, 1 = available,
-                // 7 = collected. Hide ONLY the collected (==7) ones — 0 and 1 are both live monoliths.
+                // Observed values (live, docs §6.11): 0 = dormant/out of range, 1 = available; collected
+                // monoliths jump to a high value (7 and 8 both seen post-collection). Live monoliths stay
+                // low (0/1), so treat activated >= 7 as collected and hide it; 0/1 stay shown.
                 bool collected = false;
                 var smDump = new System.Text.StringBuilder();
                 foreach (var s in sm.States)
@@ -488,7 +489,7 @@ namespace RunecraftHelper
                         v.HoleCount = (int)s.Value;
                     }
                     else if (string.Equals(s.Name, "activated", StringComparison.OrdinalIgnoreCase))
-                        collected = s.Value == 7;
+                        collected = s.Value >= 7;
                 }
                 v.SmStates = smDump.ToString();
                 if (collected) continue;
