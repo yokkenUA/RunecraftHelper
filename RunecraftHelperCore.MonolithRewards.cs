@@ -171,7 +171,7 @@ namespace RunecraftHelper
                 var ts = ImGui.CalcTextSize(text) * k;
                 var at = new Vector2(screen.X - (ts.X * 0.5f), screen.Y + 6f);
                 var pad = new Vector2(3f, 1f);
-                dl.AddRectFilled(at - pad, at + ts + pad, ColorPriceBg, 2f);
+                dl.AddRectFilled(at - pad, at + ts + pad, ColorMonolithMapBg, 2f);
                 dl.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
                 dl.AddText(font, fontPx, at, col, text);
             }

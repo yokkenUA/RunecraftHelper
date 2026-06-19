@@ -561,6 +561,8 @@ namespace RunecraftHelper
         private const uint ColorRed = 0xFF4040FFu;
         private const uint ColorShadow = 0xCC000000u;
         private const uint ColorPriceBg = 0xE6000000u; // 90%-opaque black plate behind the price text
+        // Plate behind the monolith price on the large-map overlay (alpha 0xE4 ≈ 89% opaque).
+        private const uint ColorMonolithMapBg = 0xE4000000u;
 
         private void DrawOverlay()
         {
