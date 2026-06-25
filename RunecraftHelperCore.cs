@@ -180,6 +180,7 @@ namespace RunecraftHelper
                     ImGui.TextDisabled("Paints each monolith's best value (ex) on the large-map overlay, like\n" +
                         "Radar's socket count (tinted by the threshold above). If it doesn't line\n" +
                         "up with the monolith, match these to your Radar large-map settings:");
+                    ImGui.Checkbox("Hide map values while Combinations panel open", ref this.Settings.HideMapValueWhenPanelOpen);
                     ImGui.SliderFloat("Map value scale", ref this.Settings.MapValueScaleMultiplier, 0.1f, 3f, "%.2f");
                     ImGui.SliderFloat("Map value X offset", ref this.Settings.MapValueXOffset, -200f, 200f, "%.0f");
                     ImGui.SliderFloat("Map value Y offset", ref this.Settings.MapValueYOffset, -200f, 200f, "%.0f");
@@ -245,13 +246,18 @@ namespace RunecraftHelper
 
             if (!this.EnsureProcess()) return;
 
+            // Resolve the Runeshape Combinations panel first: a non-zero result means it's open (the
+            // fp-walk's gate requires a visible window-container). The monolith map labels use this to
+            // hide themselves while the panel is up (HideMapValueWhenPanelOpen).
+            var panel = this.ResolvePanel();
+            bool panelOpen = panel != IntPtr.Zero;
+
             // Monolith windows (rewards list + per-monolith debug dump). Both are driven by the same
             // scan inside DrawMonolithRewards; ShowWindow now opens the monolith debug window.
             if (this.Settings.ShowMonolithRewards || this.Settings.ShowWindow || this.Settings.DrawMonolithValueOnMap)
-                this.DrawMonolithRewards();
+                this.DrawMonolithRewards(panelOpen);
 
-            var panel = this.ResolvePanel();
-            if (panel == IntPtr.Zero)
+            if (!panelOpen)
             {
                 this.recipes.Clear();
                 return;
@@ -561,8 +567,10 @@ namespace RunecraftHelper
         private const uint ColorRed = 0xFF4040FFu;
         private const uint ColorShadow = 0xCC000000u;
         private const uint ColorPriceBg = 0xE6000000u; // 90%-opaque black plate behind the price text
-        // Plate behind the monolith price on the large-map overlay (alpha 0xE4 ≈ 89% opaque).
-        private const uint ColorMonolithMapBg = 0xE4000000u;
+        // Alpha for the plate behind the monolith price on the large-map overlay. Matches the LootTracker
+        // map/hideout bars (their BarOpacity default); the plate uses the theme's WindowBg colour at this
+        // alpha, computed live in DrawMonolithMapLabels.
+        private const float MonolithMapBgAlpha = 0.55f;
 
         private void DrawOverlay()
         {

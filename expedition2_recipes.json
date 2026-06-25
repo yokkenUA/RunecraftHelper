@@ -306,7 +306,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 642,
+    "idx": 643,
     "id": "Metadata/Items/SoulCores/RuneAccuracyLesser",
     "name": "Lesser Vision Rune"
    },
@@ -329,7 +329,7 @@
     "Momentum"
    ],
    "reward": {
-    "idx": 634,
+    "idx": 635,
     "id": "Metadata/Items/SoulCores/RuneColdLesser",
     "name": "Lesser Glacial Rune"
    },
@@ -352,7 +352,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 667,
+    "idx": 668,
     "id": "Metadata/Items/SoulCores/RuneDexterityLesser",
     "name": "Lesser Adept Rune"
    },
@@ -375,7 +375,7 @@
     "Momentum"
    ],
    "reward": {
-    "idx": 636,
+    "idx": 637,
     "id": "Metadata/Items/SoulCores/RuneEnhanceLesser",
     "name": "Lesser Iron Rune"
    },
@@ -398,7 +398,7 @@
     "Momentum"
    ],
    "reward": {
-    "idx": 633,
+    "idx": 634,
     "id": "Metadata/Items/SoulCores/RuneFireLesser",
     "name": "Lesser Desert Rune"
    },
@@ -421,7 +421,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 671,
+    "idx": 672,
     "id": "Metadata/Items/SoulCores/RuneIntelligenceLesser",
     "name": "Lesser Resolve Rune"
    },
@@ -444,7 +444,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 639,
+    "idx": 640,
     "id": "Metadata/Items/SoulCores/RuneLifeRecoveryLesser",
     "name": "Lesser Rebirth Rune"
    },
@@ -467,7 +467,7 @@
     "Momentum"
    ],
    "reward": {
-    "idx": 635,
+    "idx": 636,
     "id": "Metadata/Items/SoulCores/RuneLightningLesser",
     "name": "Lesser Storm Rune"
    },
@@ -490,7 +490,7 @@
     "Cold"
    ],
    "reward": {
-    "idx": 640,
+    "idx": 641,
     "id": "Metadata/Items/SoulCores/RuneManaRecoveryLesser",
     "name": "Lesser Inspiration Rune"
    },
@@ -513,7 +513,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 663,
+    "idx": 664,
     "id": "Metadata/Items/SoulCores/RuneStrengthLesser",
     "name": "Lesser Robust Rune"
    },
@@ -536,7 +536,7 @@
     "Cold"
    ],
    "reward": {
-    "idx": 641,
+    "idx": 642,
     "id": "Metadata/Items/SoulCores/RuneStunLesser",
     "name": "Lesser Stone Rune"
    },
@@ -559,7 +559,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 637,
+    "idx": 638,
     "id": "Metadata/Items/SoulCores/RuneLifeLesser",
     "name": "Lesser Body Rune"
    },
@@ -582,7 +582,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 638,
+    "idx": 639,
     "id": "Metadata/Items/SoulCores/RuneManaLesser",
     "name": "Lesser Mind Rune"
    },
@@ -605,7 +605,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 5068,
+    "idx": 5072,
     "id": "Metadata/Items/SoulCores/RuneWard1Lesser",
     "name": "Lesser Ward Rune"
    },
@@ -628,7 +628,7 @@
     "Tidal"
    ],
    "reward": {
-    "idx": 5072,
+    "idx": 5076,
     "id": "Metadata/Items/SoulCores/RuneWard2Lesser",
     "name": "Lesser Charging Rune"
    },
@@ -651,7 +651,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 632,
+    "idx": 633,
     "id": "Metadata/Items/SoulCores/RuneAccuracy",
     "name": "Vision Rune"
    },
@@ -674,7 +674,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 624,
+    "idx": 625,
     "id": "Metadata/Items/SoulCores/RuneCold",
     "name": "Glacial Rune"
    },
@@ -697,7 +697,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 668,
+    "idx": 669,
     "id": "Metadata/Items/SoulCores/RuneDexterity",
     "name": "Adept Rune"
    },
@@ -720,7 +720,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 626,
+    "idx": 627,
     "id": "Metadata/Items/SoulCores/RuneEnhance",
     "name": "Iron Rune"
    },
@@ -743,7 +743,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 623,
+    "idx": 624,
     "id": "Metadata/Items/SoulCores/RuneFire",
     "name": "Desert Rune"
    },
@@ -766,7 +766,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 672,
+    "idx": 673,
     "id": "Metadata/Items/SoulCores/RuneIntelligence",
     "name": "Resolve Rune"
    },
@@ -789,7 +789,7 @@
     "Gasp"
    ],
    "reward": {
-    "idx": 627,
+    "idx": 628,
     "id": "Metadata/Items/SoulCores/RuneLife",
     "name": "Body Rune"
    },
@@ -812,7 +812,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 629,
+    "idx": 630,
     "id": "Metadata/Items/SoulCores/RuneLifeRecovery",
     "name": "Rebirth Rune"
    },
@@ -835,7 +835,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 625,
+    "idx": 626,
     "id": "Metadata/Items/SoulCores/RuneLightning",
     "name": "Storm Rune"
    },
@@ -858,7 +858,7 @@
     "Fire"
    ],
    "reward": {
-    "idx": 628,
+    "idx": 629,
     "id": "Metadata/Items/SoulCores/RuneMana",
     "name": "Mind Rune"
    },
@@ -881,7 +881,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 630,
+    "idx": 631,
     "id": "Metadata/Items/SoulCores/RuneManaRecovery",
     "name": "Inspiration Rune"
    },
@@ -904,7 +904,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 664,
+    "idx": 665,
     "id": "Metadata/Items/SoulCores/RuneStrength",
     "name": "Robust Rune"
    },
@@ -927,7 +927,7 @@
     "Tidal"
    ],
    "reward": {
-    "idx": 631,
+    "idx": 632,
     "id": "Metadata/Items/SoulCores/RuneStun",
     "name": "Stone Rune"
    },
@@ -950,7 +950,7 @@
     "Fire"
    ],
    "reward": {
-    "idx": 5069,
+    "idx": 5073,
     "id": "Metadata/Items/SoulCores/RuneWard1Normal",
     "name": "Ward Rune"
    },
@@ -1042,7 +1042,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 5046,
+    "idx": 5049,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy1",
     "name": "Runic Alloy"
    },
@@ -1224,7 +1224,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5073,
+    "idx": 5077,
     "id": "Metadata/Items/SoulCores/RuneWard2Normal",
     "name": "Charging Rune"
    },
@@ -1249,7 +1249,7 @@
     "Cold"
    ],
    "reward": {
-    "idx": 652,
+    "idx": 653,
     "id": "Metadata/Items/SoulCores/RuneAccuracyGreater",
     "name": "Greater Vision Rune"
    },
@@ -1274,7 +1274,7 @@
     "Rage"
    ],
    "reward": {
-    "idx": 644,
+    "idx": 645,
     "id": "Metadata/Items/SoulCores/RuneColdGreater",
     "name": "Greater Glacial Rune"
    },
@@ -1299,7 +1299,7 @@
     "Lightning"
    ],
    "reward": {
-    "idx": 669,
+    "idx": 670,
     "id": "Metadata/Items/SoulCores/RuneDexterityGreater",
     "name": "Greater Adept Rune"
    },
@@ -1324,7 +1324,7 @@
     "Celestial"
    ],
    "reward": {
-    "idx": 646,
+    "idx": 647,
     "id": "Metadata/Items/SoulCores/RuneEnhanceGreater",
     "name": "Greater Iron Rune"
    },
@@ -1349,7 +1349,7 @@
     "Earth"
    ],
    "reward": {
-    "idx": 643,
+    "idx": 644,
     "id": "Metadata/Items/SoulCores/RuneFireGreater",
     "name": "Greater Desert Rune"
    },
@@ -1374,7 +1374,7 @@
     "Earth"
    ],
    "reward": {
-    "idx": 673,
+    "idx": 674,
     "id": "Metadata/Items/SoulCores/RuneIntelligenceGreater",
     "name": "Greater Resolve Rune"
    },
@@ -1399,7 +1399,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 647,
+    "idx": 648,
     "id": "Metadata/Items/SoulCores/RuneLifeGreater",
     "name": "Greater Body Rune"
    },
@@ -1424,7 +1424,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 649,
+    "idx": 650,
     "id": "Metadata/Items/SoulCores/RuneLifeRecoveryGreater",
     "name": "Greater Rebirth Rune"
    },
@@ -1449,7 +1449,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 645,
+    "idx": 646,
     "id": "Metadata/Items/SoulCores/RuneLightningGreater",
     "name": "Greater Storm Rune"
    },
@@ -1474,7 +1474,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 648,
+    "idx": 649,
     "id": "Metadata/Items/SoulCores/RuneManaGreater",
     "name": "Greater Mind Rune"
    },
@@ -1499,7 +1499,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 650,
+    "idx": 651,
     "id": "Metadata/Items/SoulCores/RuneManaRecoveryGreater",
     "name": "Greater Inspiration Rune"
    },
@@ -1524,7 +1524,7 @@
     "Rage"
    ],
    "reward": {
-    "idx": 665,
+    "idx": 666,
     "id": "Metadata/Items/SoulCores/RuneStrengthGreater",
     "name": "Greater Robust Rune"
    },
@@ -1549,7 +1549,7 @@
     "Celestial"
    ],
    "reward": {
-    "idx": 651,
+    "idx": 652,
     "id": "Metadata/Items/SoulCores/RuneStunGreater",
     "name": "Greater Stone Rune"
    },
@@ -1574,7 +1574,7 @@
     "Lightning"
    ],
    "reward": {
-    "idx": 5070,
+    "idx": 5074,
     "id": "Metadata/Items/SoulCores/RuneWard1Greater",
     "name": "Greater Ward Rune"
    },
@@ -1599,7 +1599,7 @@
     "Fire"
    ],
    "reward": {
-    "idx": 5074,
+    "idx": 5078,
     "id": "Metadata/Items/SoulCores/RuneWard2Greater",
     "name": "Greater Charging Rune"
    },
@@ -1808,7 +1808,7 @@
     "Prismatic"
    ],
    "reward": {
-    "idx": 5046,
+    "idx": 5049,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy1",
     "name": "Runic Alloy"
    },
@@ -1833,7 +1833,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5047,
+    "idx": 5050,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy2",
     "name": "Adaptive Alloy"
    },
@@ -1933,7 +1933,7 @@
     "Bloodletting"
    ],
    "reward": {
-    "idx": 5048,
+    "idx": 5051,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy3",
     "name": "Protective Alloy"
    },
@@ -2058,7 +2058,7 @@
     "Tidal"
    ],
    "reward": {
-    "idx": 5049,
+    "idx": 5052,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy4",
     "name": "Expansive Alloy"
    },
@@ -2083,7 +2083,7 @@
     "Celestial"
    ],
    "reward": {
-    "idx": 5232,
+    "idx": 5236,
     "id": "Metadata/Items/Gems/SkillGemDetonateLiving",
     "name": "Detonate Living"
    },
@@ -2108,7 +2108,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 5235,
+    "idx": 5239,
     "id": "Metadata/Items/Gems/SkillGemEternalMarch",
     "name": "Eternal March"
    },
@@ -2133,7 +2133,7 @@
     "Lightning"
    ],
    "reward": {
-    "idx": 5241,
+    "idx": 5245,
     "id": "Metadata/Items/Gems/SkillGemFragmentsOfThePast",
     "name": "Fragments Of The Past"
    },
@@ -2158,7 +2158,7 @@
     "Fire"
    ],
    "reward": {
-    "idx": 5219,
+    "idx": 5223,
     "id": "Metadata/Items/Gems/SkillGemFrostflameNova",
     "name": "Frostflame Nova"
    },
@@ -2183,7 +2183,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 5227,
+    "idx": 5231,
     "id": "Metadata/Items/Gems/SkillGemRepulsion",
     "name": "Repulsion"
    },
@@ -2208,7 +2208,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 5242,
+    "idx": 5246,
     "id": "Metadata/Items/Gems/SkillGemConductiveRunes",
     "name": "Conductive Runes"
    },
@@ -2233,7 +2233,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 5217,
+    "idx": 5221,
     "id": "Metadata/Items/Gems/SupportGemConcussiveRunes",
     "name": "Concussive Runes"
    },
@@ -2258,7 +2258,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5234,
+    "idx": 5238,
     "id": "Metadata/Items/Gems/SkillGemBitterDead",
     "name": "Bitter Dead"
    },
@@ -2283,7 +2283,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5236,
+    "idx": 5240,
     "id": "Metadata/Items/Gems/SkillGemGrimPillars",
     "name": "Grim Pillars"
    },
@@ -2308,7 +2308,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5238,
+    "idx": 5242,
     "id": "Metadata/Items/Gems/SkillGemRemnantsOfKalguur",
     "name": "Remnants of Kalguur"
    },
@@ -2333,7 +2333,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5225,
+    "idx": 5229,
     "id": "Metadata/Items/Gems/SkillGemPoweredByVerisium",
     "name": "Powered by Verisium"
    },
@@ -2358,7 +2358,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5237,
+    "idx": 5241,
     "id": "Metadata/Items/Gems/SkillGemVerisiumManifestation",
     "name": "Verisium Manifestations"
    },
@@ -2383,7 +2383,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5224,
+    "idx": 5228,
     "id": "Metadata/Items/Gems/SupportGemRuneforgedBlades",
     "name": "Runeforged Blades"
    },
@@ -2408,7 +2408,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5245,
+    "idx": 5249,
     "id": "Metadata/Items/Gems/SupportGemScouringFlame",
     "name": "Scouring Flame"
    },
@@ -2433,7 +2433,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 5244,
+    "idx": 5248,
     "id": "Metadata/Items/Gems/SkillGemAnimusSplinters",
     "name": "Animus Splinters"
    },
@@ -2458,7 +2458,7 @@
     "Fire"
    ],
    "reward": {
-    "idx": 5466,
+    "idx": 5470,
     "id": "Metadata/Items/Gems/SkillGemExplosiveTransmutation",
     "name": "Explosive Transmutation"
    },
@@ -2483,7 +2483,7 @@
     "Earth"
    ],
    "reward": {
-    "idx": 5220,
+    "idx": 5224,
     "id": "Metadata/Items/Gems/SkillGemHollowShell",
     "name": "Hollow Shell"
    },
@@ -2508,7 +2508,7 @@
     "Lightning"
    ],
    "reward": {
-    "idx": 5463,
+    "idx": 5467,
     "id": "Metadata/Items/Gems/SkillGemVoltaicBarrier",
     "name": "Voltaic Barrier"
    },
@@ -2533,7 +2533,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 5240,
+    "idx": 5244,
     "id": "Metadata/Items/Gems/SkillGemWardboundMinions",
     "name": "Wardbound Minions"
    },
@@ -2558,7 +2558,7 @@
     "Rage"
    ],
    "reward": {
-    "idx": 5462,
+    "idx": 5466,
     "id": "Metadata/Items/Gems/SupportGemFistOfKalguur",
     "name": "Fist Of Kalguur"
    },
@@ -2583,7 +2583,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 5239,
+    "idx": 5243,
     "id": "Metadata/Items/Gems/SupportGemRunicExtraction",
     "name": "Runic Extraction"
    },
@@ -2608,7 +2608,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 5222,
+    "idx": 5226,
     "id": "Metadata/Items/Gems/SupportGemRunicInfusion",
     "name": "Runic Infusion"
    },
@@ -2633,7 +2633,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 5467,
+    "idx": 5471,
     "id": "Metadata/Items/Gems/SkillGemRainOfBlades",
     "name": "Rain of Blades"
    },
@@ -2704,7 +2704,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5076,
+    "idx": 5080,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial1",
     "name": "Warding Rune of Reinforcement"
    },
@@ -2729,7 +2729,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5077,
+    "idx": 5081,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial2",
     "name": "Warding Rune of Protection"
    },
@@ -2754,7 +2754,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5078,
+    "idx": 5082,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial3",
     "name": "Warding Rune of Disintegration"
    },
@@ -2779,7 +2779,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5079,
+    "idx": 5083,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial4",
     "name": "Warding Rune of Desperation"
    },
@@ -2804,7 +2804,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5081,
+    "idx": 5085,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial9",
     "name": "Warding Rune of Courage"
    },
@@ -2829,7 +2829,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5085,
+    "idx": 5089,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial15",
     "name": "Warding Rune of Nourishment"
    },
@@ -2881,7 +2881,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5233,
+    "idx": 5237,
     "id": "Metadata/Items/Gems/SkillGemAnimusExchange",
     "name": "Animus Exchange"
    },
@@ -2908,7 +2908,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5218,
+    "idx": 5222,
     "id": "Metadata/Items/Gems/SkillGemLeylines",
     "name": "Leylines"
    },
@@ -2935,7 +2935,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5461,
+    "idx": 5465,
     "id": "Metadata/Items/Gems/SkillGemRunicReprieve",
     "name": "Runic Reprieve"
    },
@@ -2962,7 +2962,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5226,
+    "idx": 5230,
     "id": "Metadata/Items/Gems/SkillGemRefutation",
     "name": "Refutation"
    },
@@ -2989,7 +2989,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5228,
+    "idx": 5232,
     "id": "Metadata/Items/Gems/SkillGemTriskelionCascade",
     "name": "Triskelion Cascade"
    },
@@ -3016,7 +3016,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5231,
+    "idx": 5235,
     "id": "Metadata/Items/Gems/SkillGemSkyfall",
     "name": "Skyfall"
    },
@@ -3043,7 +3043,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5464,
+    "idx": 5468,
     "id": "Metadata/Items/Gems/SupportGemHealingRunes",
     "name": "Healing Runes"
    },
@@ -3450,7 +3450,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5082,
+    "idx": 5086,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial10",
     "name": "Warding Rune of Stability"
    },
@@ -3477,7 +3477,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5083,
+    "idx": 5087,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial13",
     "name": "Warding Rune of Glancing"
    },
@@ -3504,7 +3504,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5084,
+    "idx": 5088,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial14",
     "name": "Warding Rune of Heart"
    },
@@ -3531,7 +3531,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5086,
+    "idx": 5090,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial16",
     "name": "Warding Rune of Annihilation"
    },
@@ -3558,7 +3558,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5090,
+    "idx": 5094,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial21",
     "name": "Warding Rune of Salvaging"
    },
@@ -3585,7 +3585,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5080,
+    "idx": 5084,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial8",
     "name": "Warding Rune of Symbiosis"
    },
@@ -3666,7 +3666,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 5051,
+    "idx": 5054,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy6",
     "name": "Cyclonic Alloy"
    },
@@ -3720,7 +3720,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 5050,
+    "idx": 5053,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy5",
     "name": "Swift Alloy"
    },
@@ -3770,7 +3770,7 @@
     "Adaptive"
    ],
    "reward": {
-    "idx": 5110,
+    "idx": 5114,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients14",
     "name": "Rune of Vitality"
    },
@@ -3797,7 +3797,7 @@
     "Gasp"
    ],
    "reward": {
-    "idx": 5111,
+    "idx": 5115,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients15",
     "name": "Rune of the Hunt"
    },
@@ -3824,7 +3824,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5112,
+    "idx": 5116,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients16",
     "name": "Rune of Acrobatics"
    },
@@ -3851,7 +3851,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5113,
+    "idx": 5117,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients17",
     "name": "Rune of Culmination"
    },
@@ -3878,7 +3878,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5114,
+    "idx": 5118,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients18",
     "name": "Rune of Renown"
    },
@@ -3905,7 +3905,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 5115,
+    "idx": 5119,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients19",
     "name": "Rune of Accumulation"
    },
@@ -3932,7 +3932,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 5116,
+    "idx": 5120,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients20",
     "name": "Rune of Foundations"
    },
@@ -3959,7 +3959,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 5117,
+    "idx": 5121,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients21",
     "name": "Rune of the Prism"
    },
@@ -3986,7 +3986,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 5118,
+    "idx": 5122,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients22",
     "name": "Rune of the Blossom"
    },
@@ -4013,7 +4013,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 5119,
+    "idx": 5123,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients23",
     "name": "Rune of Consistency"
    },
@@ -4040,7 +4040,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 5120,
+    "idx": 5124,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients24",
     "name": "Rune of Reach"
    },
@@ -4067,7 +4067,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5097,
+    "idx": 5101,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients1",
     "name": "Ancient Rune of Splinters"
    },
@@ -4094,7 +4094,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5106,
+    "idx": 5110,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients10",
     "name": "Ancient Rune of the Horde"
    },
@@ -4121,7 +4121,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5107,
+    "idx": 5111,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients11",
     "name": "Ancient Rune of Animosity"
    },
@@ -4148,7 +4148,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5108,
+    "idx": 5112,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients12",
     "name": "Ancient Rune of Detonation"
    },
@@ -4175,7 +4175,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5109,
+    "idx": 5113,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients13",
     "name": "Ancient Rune of Retaliation"
    },
@@ -4202,7 +4202,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5098,
+    "idx": 5102,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients2",
     "name": "Ancient Rune of Dueling"
    },
@@ -4229,7 +4229,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 5121,
+    "idx": 5125,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients25",
     "name": "Rune of Vital Flame"
    },
@@ -4256,7 +4256,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 5122,
+    "idx": 5126,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients26",
     "name": "Rune of Confrontation"
    },
@@ -4283,7 +4283,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5099,
+    "idx": 5103,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients3",
     "name": "Ancient Rune of the Titan"
    },
@@ -4310,7 +4310,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5100,
+    "idx": 5104,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients4",
     "name": "Ancient Rune of Shattering"
    },
@@ -4337,7 +4337,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5101,
+    "idx": 5105,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients5",
     "name": "Ancient Rune of Prowess"
    },
@@ -4364,7 +4364,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5102,
+    "idx": 5106,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients6",
     "name": "Ancient Rune of Control"
    },
@@ -4391,7 +4391,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5103,
+    "idx": 5107,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients7",
     "name": "Ancient Rune of Discovery"
    },
@@ -4418,7 +4418,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5104,
+    "idx": 5108,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients8",
     "name": "Ancient Rune of Decay"
    },
@@ -4445,7 +4445,7 @@
     "Opulent"
    ],
    "reward": {
-    "idx": 5105,
+    "idx": 5109,
     "id": "Metadata/Items/SoulCores/RuneOfTheAncients9",
     "name": "Ancient Rune of Witchcraft"
    },
@@ -4651,7 +4651,7 @@
     "Tidal"
    ],
    "reward": {
-    "idx": 4919,
+    "idx": 4922,
     "id": "Metadata/Items/Gems/ReservationGemUncut19",
     "name": "Uncut Spirit Gem (Level 19)"
    },
@@ -4680,7 +4680,7 @@
     "Prismatic"
    ],
    "reward": {
-    "idx": 4897,
+    "idx": 4900,
     "id": "Metadata/Items/Gems/SkillGemUncut19",
     "name": "Uncut Skill Gem (Level 19)"
    },
@@ -4734,7 +4734,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 5087,
+    "idx": 5091,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial18",
     "name": "Warding Rune of Armature"
    },
@@ -4763,7 +4763,7 @@
     "Fire"
    ],
    "reward": {
-    "idx": 5088,
+    "idx": 5092,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial19",
     "name": "Warding Rune of Obsession"
    },
@@ -4792,7 +4792,7 @@
     "Bloodletting"
    ],
    "reward": {
-    "idx": 5089,
+    "idx": 5093,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial20",
     "name": "Warding Rune of Equinox"
    },
@@ -4821,7 +4821,7 @@
     "Prismatic"
    ],
    "reward": {
-    "idx": 5091,
+    "idx": 5095,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial23",
     "name": "Warding Rune of Bodyguards"
    },
@@ -4850,7 +4850,7 @@
     "Arcane"
    ],
    "reward": {
-    "idx": 5092,
+    "idx": 5096,
     "id": "Metadata/Items/SoulCores/RuneWardSpecial24",
     "name": "Warding Rune of Hollowing"
    },
@@ -4937,7 +4937,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5232,
+    "idx": 5236,
     "id": "Metadata/Items/Gems/SkillGemDetonateLiving",
     "name": "Detonate Living"
    },
@@ -4966,7 +4966,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5235,
+    "idx": 5239,
     "id": "Metadata/Items/Gems/SkillGemEternalMarch",
     "name": "Eternal March"
    },
@@ -4995,7 +4995,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5241,
+    "idx": 5245,
     "id": "Metadata/Items/Gems/SkillGemFragmentsOfThePast",
     "name": "Fragments Of The Past"
    },
@@ -5024,7 +5024,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5219,
+    "idx": 5223,
     "id": "Metadata/Items/Gems/SkillGemFrostflameNova",
     "name": "Frostflame Nova"
    },
@@ -5053,7 +5053,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5227,
+    "idx": 5231,
     "id": "Metadata/Items/Gems/SkillGemRepulsion",
     "name": "Repulsion"
    },
@@ -5082,7 +5082,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5242,
+    "idx": 5246,
     "id": "Metadata/Items/Gems/SkillGemConductiveRunes",
     "name": "Conductive Runes"
    },
@@ -5111,7 +5111,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 5234,
+    "idx": 5238,
     "id": "Metadata/Items/Gems/SkillGemBitterDead",
     "name": "Bitter Dead"
    },
@@ -5140,7 +5140,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 5236,
+    "idx": 5240,
     "id": "Metadata/Items/Gems/SkillGemGrimPillars",
     "name": "Grim Pillars"
    },
@@ -5169,7 +5169,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 5238,
+    "idx": 5242,
     "id": "Metadata/Items/Gems/SkillGemRemnantsOfKalguur",
     "name": "Remnants of Kalguur"
    },
@@ -5198,7 +5198,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 5225,
+    "idx": 5229,
     "id": "Metadata/Items/Gems/SkillGemPoweredByVerisium",
     "name": "Powered by Verisium"
    },
@@ -5227,7 +5227,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 5237,
+    "idx": 5241,
     "id": "Metadata/Items/Gems/SkillGemVerisiumManifestation",
     "name": "Verisium Manifestations"
    },
@@ -5339,7 +5339,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5052,
+    "idx": 5055,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy7",
     "name": "Prismatic Alloy"
    },
@@ -5368,7 +5368,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 703,
+    "idx": 704,
     "id": "Metadata/Items/SoulCores/RuneUpgrade",
     "name": "Masterwork Rune"
    },
@@ -5397,7 +5397,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 5053,
+    "idx": 5056,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy8",
     "name": "Mystic Alloy"
    },
@@ -5455,7 +5455,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 687,
+    "idx": 688,
     "id": "Metadata/Items/SoulCores/RuneSpecial10",
     "name": "Craiceann's Rune of Warding"
    },
@@ -5484,7 +5484,7 @@
     "Toxic"
    ],
    "reward": {
-    "idx": 689,
+    "idx": 690,
     "id": "Metadata/Items/SoulCores/RuneSpecial12",
     "name": "Saqawal's Rune of Erosion"
    },
@@ -5513,7 +5513,7 @@
     "Rage"
    ],
    "reward": {
-    "idx": 690,
+    "idx": 691,
     "id": "Metadata/Items/SoulCores/RuneSpecial13",
     "name": "Farrul's Rune of the Hunt"
    },
@@ -5542,7 +5542,7 @@
     "Rage"
    ],
    "reward": {
-    "idx": 691,
+    "idx": 692,
     "id": "Metadata/Items/SoulCores/RuneSpecial14",
     "name": "Craiceann's Rune of Recovery"
    },
@@ -5571,7 +5571,7 @@
     "Protective"
    ],
    "reward": {
-    "idx": 694,
+    "idx": 695,
     "id": "Metadata/Items/SoulCores/RuneSpecial17",
     "name": "Fenumus' Rune of Spinning"
    },
@@ -5600,7 +5600,7 @@
     "Arcane"
    ],
    "reward": {
-    "idx": 697,
+    "idx": 698,
     "id": "Metadata/Items/SoulCores/RuneSpecial20",
     "name": "Fenumus' Rune of Draining"
    },
@@ -5629,7 +5629,7 @@
     "Death"
    ],
    "reward": {
-    "idx": 698,
+    "idx": 699,
     "id": "Metadata/Items/SoulCores/RuneSpecial21",
     "name": "Thane Myrk's Rune of Summer"
    },
@@ -5658,7 +5658,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 699,
+    "idx": 700,
     "id": "Metadata/Items/SoulCores/RuneSpecial22",
     "name": "Lady Hestra's Rune of Winter"
    },
@@ -5687,7 +5687,7 @@
     "Electrocuting"
    ],
    "reward": {
-    "idx": 700,
+    "idx": 701,
     "id": "Metadata/Items/SoulCores/RuneSpecial23",
     "name": "Thane Leld's Rune of Spring"
    },
@@ -5716,7 +5716,7 @@
     "Toxic"
    ],
    "reward": {
-    "idx": 701,
+    "idx": 702,
     "id": "Metadata/Items/SoulCores/RuneSpecial24",
     "name": "The Greatwolf's Rune of Claws"
    },
@@ -5745,7 +5745,7 @@
     "Momentum"
    ],
    "reward": {
-    "idx": 702,
+    "idx": 703,
     "id": "Metadata/Items/SoulCores/RuneSpecial25",
     "name": "The Greatwolf's Rune of Willpower"
    },
@@ -5774,7 +5774,7 @@
     "Gasp"
    ],
    "reward": {
-    "idx": 683,
+    "idx": 684,
     "id": "Metadata/Items/SoulCores/RuneSpecial6",
     "name": "Saqawal's Rune of the Sky"
    },
@@ -5803,7 +5803,7 @@
     "Vision"
    ],
    "reward": {
-    "idx": 684,
+    "idx": 685,
     "id": "Metadata/Items/SoulCores/RuneSpecial7",
     "name": "Fenumus' Rune of Agony"
    },
@@ -5832,7 +5832,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 685,
+    "idx": 686,
     "id": "Metadata/Items/SoulCores/RuneSpecial8",
     "name": "Farrul's Rune of Grace"
    },
@@ -5919,7 +5919,7 @@
     "Prismatic"
    ],
    "reward": {
-    "idx": 693,
+    "idx": 694,
     "id": "Metadata/Items/SoulCores/RuneSpecial16",
     "name": "Thane Grannell's Rune of Mastery"
    },
@@ -5948,7 +5948,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 688,
+    "idx": 689,
     "id": "Metadata/Items/SoulCores/RuneSpecial11",
     "name": "Saqawal's Rune of Memory"
    },
@@ -5977,7 +5977,7 @@
     "Gasp"
    ],
    "reward": {
-    "idx": 692,
+    "idx": 693,
     "id": "Metadata/Items/SoulCores/RuneSpecial15",
     "name": "Courtesan Mannan's Rune of Cruelty"
    },
@@ -6006,7 +6006,7 @@
     "Gasp"
    ],
    "reward": {
-    "idx": 696,
+    "idx": 697,
     "id": "Metadata/Items/SoulCores/RuneSpecial19",
     "name": "Thane Girt's Rune of Wildness"
    },
@@ -6066,7 +6066,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 5233,
+    "idx": 5237,
     "id": "Metadata/Items/Gems/SkillGemAnimusExchange",
     "name": "Animus Exchange"
    },
@@ -6097,7 +6097,7 @@
     "Life"
    ],
    "reward": {
-    "idx": 5218,
+    "idx": 5222,
     "id": "Metadata/Items/Gems/SkillGemLeylines",
     "name": "Leylines"
    },
@@ -6128,7 +6128,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 5461,
+    "idx": 5465,
     "id": "Metadata/Items/Gems/SkillGemRunicReprieve",
     "name": "Runic Reprieve"
    },
@@ -6159,7 +6159,7 @@
     "Death"
    ],
    "reward": {
-    "idx": 5226,
+    "idx": 5230,
     "id": "Metadata/Items/Gems/SkillGemRefutation",
     "name": "Refutation"
    },
@@ -6190,7 +6190,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5228,
+    "idx": 5232,
     "id": "Metadata/Items/Gems/SkillGemTriskelionCascade",
     "name": "Triskelion Cascade"
    },
@@ -6221,7 +6221,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 5231,
+    "idx": 5235,
     "id": "Metadata/Items/Gems/SkillGemSkyfall",
     "name": "Skyfall"
    },
@@ -6345,7 +6345,7 @@
     "Wisdom"
    ],
    "reward": {
-    "idx": 1442,
+    "idx": 1443,
     "id": "Metadata/Items/Expedition/Expedition2LogbookMedved",
     "name": "Medved's Saga"
    },
@@ -6376,7 +6376,7 @@
     "Time"
    ],
    "reward": {
-    "idx": 1444,
+    "idx": 1445,
     "id": "Metadata/Items/Expedition/Expedition2LogbookUhtred",
     "name": "Uhtred's Saga"
    },
@@ -6407,7 +6407,7 @@
     "Toxic"
    ],
    "reward": {
-    "idx": 1443,
+    "idx": 1444,
     "id": "Metadata/Items/Expedition/Expedition2LogbookVorana",
     "name": "Vorana's Saga"
    },
@@ -6438,7 +6438,7 @@
     "Power"
    ],
    "reward": {
-    "idx": 1445,
+    "idx": 1446,
     "id": "Metadata/Items/Expedition/Expedition2LogbookOlroth",
     "name": "Olroth's Saga"
    },
@@ -6469,7 +6469,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5244,
+    "idx": 5248,
     "id": "Metadata/Items/Gems/SkillGemAnimusSplinters",
     "name": "Animus Splinters"
    },
@@ -6500,7 +6500,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5466,
+    "idx": 5470,
     "id": "Metadata/Items/Gems/SkillGemExplosiveTransmutation",
     "name": "Explosive Transmutation"
    },
@@ -6531,7 +6531,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5220,
+    "idx": 5224,
     "id": "Metadata/Items/Gems/SkillGemHollowShell",
     "name": "Hollow Shell"
    },
@@ -6562,7 +6562,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5463,
+    "idx": 5467,
     "id": "Metadata/Items/Gems/SkillGemVoltaicBarrier",
     "name": "Voltaic Barrier"
    },
@@ -6593,7 +6593,7 @@
     "Ward"
    ],
    "reward": {
-    "idx": 5240,
+    "idx": 5244,
     "id": "Metadata/Items/Gems/SkillGemWardboundMinions",
     "name": "Wardbound Minions"
    },
@@ -6624,7 +6624,7 @@
     "Rage"
    ],
    "reward": {
-    "idx": 5467,
+    "idx": 5471,
     "id": "Metadata/Items/Gems/SkillGemRainOfBlades",
     "name": "Rain of Blades"
    },
@@ -6655,7 +6655,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 5065,
+    "idx": 5068,
     "id": "Metadata/Items/Currency/CurrencyArcaneFluxCold",
     "name": "Chilling Flux"
    },
@@ -6686,7 +6686,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 5064,
+    "idx": 5067,
     "id": "Metadata/Items/Currency/CurrencyArcaneFluxFire",
     "name": "Blazing Flux"
    },
@@ -6717,7 +6717,7 @@
     "Tempest"
    ],
    "reward": {
-    "idx": 5066,
+    "idx": 5069,
     "id": "Metadata/Items/Currency/CurrencyArcaneFluxLightning",
     "name": "Crackling Flux"
    },
@@ -6748,7 +6748,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 695,
+    "idx": 696,
     "id": "Metadata/Items/SoulCores/RuneSpecial18",
     "name": "Countess Seske's Rune of Archery"
    },
@@ -6779,7 +6779,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 682,
+    "idx": 683,
     "id": "Metadata/Items/SoulCores/RuneSpecial5",
     "name": "Hedgewitch Assandra's Rune of Wisdom"
    },
@@ -6810,7 +6810,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 686,
+    "idx": 687,
     "id": "Metadata/Items/SoulCores/RuneSpecial9",
     "name": "Farrul's Rune of the Chase"
    },
@@ -6872,7 +6872,7 @@
     "Death"
    ],
    "reward": {
-    "idx": 5067,
+    "idx": 5070,
     "id": "Metadata/Items/Currency/CurrencyArcaneFluxChaos",
     "name": "Void Flux"
    },
@@ -6903,7 +6903,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 4920,
+    "idx": 4923,
     "id": "Metadata/Items/Gems/ReservationGemUncut20",
     "name": "Uncut Spirit Gem (Level 20)"
    },
@@ -6934,7 +6934,7 @@
     "Soul"
    ],
    "reward": {
-    "idx": 4898,
+    "idx": 4901,
     "id": "Metadata/Items/Gems/SkillGemUncut20",
     "name": "Uncut Skill Gem (Level 20)"
    },
@@ -7027,7 +7027,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 5054,
+    "idx": 5057,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy9",
     "name": "Sovereign Alloy"
    },
@@ -7122,7 +7122,7 @@
     "Time"
    ],
    "reward": {
-    "idx": 1441,
+    "idx": 1442,
     "id": "Metadata/Items/Expedition/Expedition2LogbookSpecial",
     "name": "Aldur's Saga"
    },
@@ -7188,7 +7188,7 @@
     "Cyclonic"
    ],
    "reward": {
-    "idx": 5055,
+    "idx": 5058,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy10",
     "name": "Celestial Alloy"
    },
@@ -7221,7 +7221,7 @@
     "Death"
    ],
    "reward": {
-    "idx": 5056,
+    "idx": 5059,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy11",
     "name": "Transcendent Alloy"
    },
@@ -7254,7 +7254,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5094,
+    "idx": 5098,
     "id": "Metadata/Items/SoulCores/RuneConvertCold",
     "name": "Breath of Aldur"
    },
@@ -7287,7 +7287,7 @@
     "Earth"
    ],
    "reward": {
-    "idx": 5093,
+    "idx": 5097,
     "id": "Metadata/Items/SoulCores/RuneConvertFire",
     "name": "Passion of Aldur"
    },
@@ -7320,7 +7320,7 @@
     "Celestial"
    ],
    "reward": {
-    "idx": 5095,
+    "idx": 5099,
     "id": "Metadata/Items/SoulCores/RuneConvertLightning",
     "name": "Ire of Aldur"
    },
@@ -7353,7 +7353,7 @@
     "Death"
    ],
    "reward": {
-    "idx": 5134,
+    "idx": 5138,
     "id": "Metadata/Items/SoulCores/RuneWarpingAdditionalCraftedMod",
     "name": "Astrid's Creativity"
    },
@@ -7386,7 +7386,7 @@
     "Gasp"
    ],
    "reward": {
-    "idx": 5096,
+    "idx": 5100,
     "id": "Metadata/Items/SoulCores/RuneConvertChaos",
     "name": "Betrayal of Aldur"
    },
@@ -7419,7 +7419,7 @@
     "Bloodletting"
    ],
    "reward": {
-    "idx": 5133,
+    "idx": 5137,
     "id": "Metadata/Items/SoulCores/RuneWarpingCreateJewelSocket",
     "name": "Cadigan's Epiphany"
    },
@@ -7454,7 +7454,7 @@
     "Wisdom"
    ],
    "reward": {
-    "idx": 5057,
+    "idx": 5060,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy12",
     "name": "The Runebinder's Alloy"
    },
@@ -7489,7 +7489,7 @@
     "Wisdom"
    ],
    "reward": {
-    "idx": 5058,
+    "idx": 5061,
     "id": "Metadata/Items/Currency/CurrencyVerisiumAlloy13",
     "name": "The Runefather's Alloy"
    },
@@ -7524,7 +7524,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 5137,
+    "idx": 5141,
     "id": "Metadata/Items/SoulCores/RuneWarpingBerserkerInfluence",
     "name": "Vorana's Carnage"
    },
@@ -7559,7 +7559,7 @@
     "Celestial"
    ],
    "reward": {
-    "idx": 5140,
+    "idx": 5144,
     "id": "Metadata/Items/SoulCores/RuneWarpingDecayInfluence",
     "name": "Katla's Gloom"
    },
@@ -7594,7 +7594,7 @@
     "Rebirth"
    ],
    "reward": {
-    "idx": 5138,
+    "idx": 5142,
     "id": "Metadata/Items/SoulCores/RuneWarpingDestructionInfluence",
     "name": "Thrud's Might"
    },
@@ -7629,7 +7629,7 @@
     "Moon"
    ],
    "reward": {
-    "idx": 5136,
+    "idx": 5140,
     "id": "Metadata/Items/SoulCores/RuneWarpingMarksmanInfluence",
     "name": "Kolr's Hunt"
    },
@@ -7664,7 +7664,7 @@
     "Adaptive"
    ],
    "reward": {
-    "idx": 5139,
+    "idx": 5143,
     "id": "Metadata/Items/SoulCores/RuneWarpingSoulInfluence",
     "name": "Medved's Tending"
    },
@@ -7699,7 +7699,7 @@
     "Cold"
    ],
    "reward": {
-    "idx": 5135,
+    "idx": 5139,
     "id": "Metadata/Items/SoulCores/RuneWarpingTimeInfluence",
     "name": "Uhtred's Sidereus"
    },
@@ -7734,7 +7734,7 @@
     "Tidal"
    ],
    "reward": {
-    "idx": 5132,
+    "idx": 5136,
     "id": "Metadata/Items/SoulCores/RuneWarpingAdditionalSuffix",
     "name": "Serle's Triumph"
    },
@@ -8170,7 +8170,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5205,
+    "idx": 5209,
     "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune1",
     "name": "Olroth's Boon"
    },
@@ -8209,7 +8209,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5206,
+    "idx": 5210,
     "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune2",
     "name": "Vorana's Boon"
    },
@@ -8248,7 +8248,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5207,
+    "idx": 5211,
     "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune3",
     "name": "Uhtred's Boon"
    },
@@ -8287,7 +8287,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5208,
+    "idx": 5212,
     "id": "Metadata/Items/QuestItems/Gallows/Endgame/LogbookQuestRune4",
     "name": "Medved's Boon"
    },
@@ -8326,7 +8326,7 @@
     "Bond"
    ],
    "reward": {
-    "idx": 5141,
+    "idx": 5145,
     "id": "Metadata/Items/SoulCores/RuneWarpingOlrothsLegacy",
     "name": "Aldur's Legacy"
    },
@@ -8361,7 +8361,7 @@
     "Lightning"
    ],
    "reward": {
-    "idx": 5131,
+    "idx": 5135,
     "id": "Metadata/Items/Currency/CurrencyUpgradeInherentTo20",
     "name": "Perfect Flux"
    },
@@ -8386,7 +8386,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4925,
+    "idx": 4928,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel5",
     "name": "Thaumaturgic Flux (Level 5)"
    },
@@ -8411,7 +8411,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4926,
+    "idx": 4929,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel6",
     "name": "Thaumaturgic Flux (Level 6)"
    },
@@ -8436,7 +8436,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4927,
+    "idx": 4930,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel7",
     "name": "Thaumaturgic Flux (Level 7)"
    },
@@ -8461,7 +8461,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4928,
+    "idx": 4931,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel8",
     "name": "Thaumaturgic Flux (Level 8)"
    },
@@ -8486,7 +8486,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4929,
+    "idx": 4932,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel9",
     "name": "Thaumaturgic Flux (Level 9)"
    },
@@ -8511,7 +8511,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4930,
+    "idx": 4933,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel10",
     "name": "Thaumaturgic Flux (Level 10)"
    },
@@ -8536,7 +8536,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4931,
+    "idx": 4934,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel11",
     "name": "Thaumaturgic Flux (Level 11)"
    },
@@ -8561,7 +8561,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4932,
+    "idx": 4935,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel12",
     "name": "Thaumaturgic Flux (Level 12)"
    },
@@ -8586,7 +8586,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4933,
+    "idx": 4936,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel13",
     "name": "Thaumaturgic Flux (Level 13)"
    },
@@ -8611,7 +8611,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4934,
+    "idx": 4937,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel14",
     "name": "Thaumaturgic Flux (Level 14)"
    },
@@ -8636,7 +8636,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4935,
+    "idx": 4938,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel15",
     "name": "Thaumaturgic Flux (Level 15)"
    },
@@ -8661,7 +8661,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4936,
+    "idx": 4939,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel16",
     "name": "Thaumaturgic Flux (Level 16)"
    },
@@ -8686,7 +8686,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4937,
+    "idx": 4940,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel17",
     "name": "Thaumaturgic Flux (Level 17)"
    },
@@ -8711,7 +8711,7 @@
     "Stone"
    ],
    "reward": {
-    "idx": 4938,
+    "idx": 4941,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel18",
     "name": "Thaumaturgic Flux (Level 18)"
    },
@@ -8740,7 +8740,7 @@
     "Arcane"
    ],
    "reward": {
-    "idx": 4939,
+    "idx": 4942,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel19",
     "name": "Thaumaturgic Flux (Level 19)"
    },
@@ -8771,7 +8771,7 @@
     "Oath"
    ],
    "reward": {
-    "idx": 4940,
+    "idx": 4943,
     "id": "Metadata/Items/Currency/CurrencySetKalguuranSkillGemLevel20",
     "name": "Thaumaturgic Flux (Level 20)"
    },

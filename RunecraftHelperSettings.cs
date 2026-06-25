@@ -57,6 +57,11 @@ namespace RunecraftHelper
         // map position (the same place Radar shows the socket count). Tinted by MonolithHighlightThreshold.
         public bool DrawMonolithValueOnMap = false;
 
+        // Hide the on-map value labels while the in-game Runeshape Combinations panel is open (the same
+        // panel the recipe overlay reads). Avoids cluttering the map with summary prices while the player
+        // is reading the panel + its per-recipe overlay. On by default.
+        public bool HideMapValueWhenPanelOpen = true;
+
         // Large-map projection tuning (mirrors Radar's calibration so the label lines up with the monolith).
         // Defaults match Radar's defaults; nudge these if your Radar large-map zoom/offsets are non-default.
         public float MapValueScaleMultiplier = 1f;

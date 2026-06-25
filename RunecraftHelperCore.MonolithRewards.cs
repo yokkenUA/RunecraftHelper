@@ -20,9 +20,11 @@ namespace RunecraftHelper
     //
     // device→station path (no heap scan, persists out of the network bubble — docs/re-findings.md §6.10):
     //   device → StateMachine component (SM) → listener vector at SM+0x20 (begin/end)
-    //          → for each node ptr N: station = *(N) − 0x98, verified by *(station+0x10) == device addr
+    //          → for each node ptr N: station = *(N) − 0xA0, verified by *(station+0x10) == device addr
+    //            (the sub-offset was 0x98 before the 2026-06-25 patch — see StationListenerSubOffset)
     // anchor (docs §6.8/6.10):
-    //   station+0x28 = rune row ptr; index = (rowPtr − runeTableBase)/0x6c (runeTableBase = *(*(station+0x30+0x28)))
+    //   station+0x28 = rune row ptr; index = (rowPtr − runeTableBase)/0x68 (runeTableBase = *(*(station+0x30+0x28)))
+    //   (rune stride was 0x6c before the 2026-06-25 patch — see ExpeditionRuneStride)
     //   station+0x3c = anchor hole index (0-based)
     public sealed partial class RunecraftHelperCore
     {
@@ -32,8 +34,16 @@ namespace RunecraftHelper
         private const int StationHoleCountOffset = 0x38;   // → N (recipe hole count)
         private const int StationAnchorPosOffset = 0x3c;   // → anchor hole index (0..5)
         private const int StateMachineListenerVecOffset = 0x20;
-        private const int StationListenerSubOffset = 0x98; // node[0] = station + 0x98
-        private const int ExpeditionRuneStride = 0x6c;
+        // node[0] = station + 0xA0. Was 0x98 until the 2026-06-25 patch inserted an 8-byte field into
+        // RuneStation between +0x48 and the listener sub-object (all earlier fields — owner +0x10,
+        // anchor +0x28, holder +0x30, sockets +0x38, anchor-pos +0x3c — kept their offsets). Re-verified
+        // live: sub − station == 0xA0, station+0x00 = in-module RuneStation vtable, station+0x10 = device.
+        private const int StationListenerSubOffset = 0xA0;
+        // Expedition2Runes row stride. Was 0x6c (108) until the 2026-06-25 patch shrank the .dat row to
+        // 104 bytes (dump logs "Expedition2Runes ROWLEN 104!=schema 108"); the in-memory rune table
+        // mirrors the .dat layout, so the live stride is now 0x68. Re-verified live: (rowPtr−tableBase)
+        // = 0x9C0 = 24 × 0x68 exactly (0x6c would be misaligned).
+        private const int ExpeditionRuneStride = 0x68;
         private const int RuneCount = 34;                  // Expedition2Runes rows 0..33
 
         private List<MonoRecipe> monolithRecipes = new();
@@ -86,7 +96,7 @@ namespace RunecraftHelper
         // Entry point: loads the catalog, rescans nearby monoliths on a timer, then draws whichever of
         // the two windows are enabled — the rewards list (ShowMonolithRewards) and/or the per-monolith
         // debug dump (ShowWindow, repurposed). Both read the same scanned this.monolithViews.
-        private void DrawMonolithRewards()
+        private void DrawMonolithRewards(bool combinationsPanelOpen)
         {
             if (!this.LoadMonolithData()) return;
 
@@ -97,7 +107,11 @@ namespace RunecraftHelper
                 this.nextMonolithScanUtc = now.AddMilliseconds(750);
             }
 
-            if (this.Settings.DrawMonolithValueOnMap) this.DrawMonolithMapLabels();
+            // Map value labels: optionally suppressed while the Runeshape Combinations panel is open so
+            // they don't clutter the map on top of the panel's own per-recipe overlay.
+            bool drawMapValues = this.Settings.DrawMonolithValueOnMap &&
+                !(this.Settings.HideMapValueWhenPanelOpen && combinationsPanelOpen);
+            if (drawMapValues) this.DrawMonolithMapLabels();
             if (this.Settings.ShowMonolithRewards) this.DrawMonolithRewardsWindow();
             if (this.Settings.ShowWindow) this.DrawMonolithDebugWindow();
         }
@@ -154,6 +168,13 @@ namespace RunecraftHelper
             foreach (var mv in this.monolithViews)
                 if (mv.Best > maxBest) maxBest = mv.Best;
 
+            // Plate behind the price: match the LootTracker map/hideout bars — the active theme's
+            // WindowBg colour with its alpha overridden to 0.55 (LootTracker's SetNextWindowBgAlpha
+            // default). Computed from the live style so it follows the theme like those bars do.
+            var bgCol = ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
+            bgCol.W = MonolithMapBgAlpha;
+            uint monoBg = ImGui.GetColorU32(bgCol);
+
             foreach (var v in this.monolithViews)
             {
                 if (!v.HasPos || v.Best <= 0) continue;
@@ -171,7 +192,7 @@ namespace RunecraftHelper
                 var ts = ImGui.CalcTextSize(text) * k;
                 var at = new Vector2(screen.X - (ts.X * 0.5f), screen.Y + 6f);
                 var pad = new Vector2(3f, 1f);
-                dl.AddRectFilled(at - pad, at + ts + pad, ColorMonolithMapBg, 2f);
+                dl.AddRectFilled(at - pad, at + ts + pad, monoBg, 2f);
                 dl.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
                 dl.AddText(font, fontPx, at, col, text);
             }
