@@ -162,6 +162,10 @@ namespace RunecraftHelper
 
             ImGui.SliderFloat("Price X offset", ref this.Settings.OverlayXOffset, -400f, 400f, "%.0f px");
 
+            ImGui.Checkbox("Highlight locked recipe (sealed monolith)", ref this.Settings.HighlightLockedRecipeInPanel);
+            if (this.Settings.HighlightLockedRecipeInPanel)
+                ImGui.TextDisabled("Gold border on the panel row of a sealed monolith's locked-in recipe.");
+
             ImGui.Spacing();
             ImGui.SeparatorText("Monolith rewards");
             ImGui.Checkbox("Show monolith reward window", ref this.Settings.ShowMonolithRewards);
@@ -253,9 +257,25 @@ namespace RunecraftHelper
             bool panelOpen = panel != IntPtr.Zero;
 
             // Monolith windows (rewards list + per-monolith debug dump). Both are driven by the same
-            // scan inside DrawMonolithRewards; ShowWindow now opens the monolith debug window.
-            if (this.Settings.ShowMonolithRewards || this.Settings.ShowWindow || this.Settings.DrawMonolithValueOnMap)
+            // scan inside DrawMonolithRewards; ShowWindow now opens the monolith debug window. The
+            // locked-recipe highlight also needs the scan (to know each nearby station's locked recipe).
+            bool wantLockHighlight = panelOpen && this.Settings.HighlightLockedRecipeInPanel;
+            if (this.Settings.ShowMonolithRewards || this.Settings.ShowWindow ||
+                this.Settings.DrawMonolithValueOnMap || wantLockHighlight)
                 this.DrawMonolithRewards(panelOpen);
+
+            // Which monolith's panel is open? Distance is NOT a discriminator — several monoliths can sit
+            // together and any be opened from one spot. The open monolith's station carries a panel-open
+            // listener (read in the scan); if that monolith is also sealed, take its locked recipe metaId.
+            if (wantLockHighlight)
+            {
+                this.ResolveLockedPanelReward();
+            }
+            else
+            {
+                this.lockedPanelMetaId = string.Empty;
+                this.lockedPanelName = string.Empty;
+            }
 
             if (!panelOpen)
             {
@@ -547,12 +567,13 @@ namespace RunecraftHelper
         private readonly Dictionary<long, UiElementBaseOffset> frameBaseCache = new();
 
         // Scratch list of resolved rows, rebuilt each frame (kept as a field to avoid per-frame allocs).
-        private readonly List<(Vector2 Pos, Vector2 Size, double Total)> overlayRows = new();
+        // Locked = this row is the sealed monolith's locked-in recipe (gold-bordered).
+        private readonly List<(Vector2 Pos, Vector2 Size, double Total, bool Locked)> overlayRows = new();
 
         // Priced rows for the current frame (RowAddress + total), built BEFORE geometry is resolved so
         // the Relative-mode median is computed over the full priced set, independent of whether any
-        // individual row's screen geometry read succeeds this frame.
-        private readonly List<(IntPtr Addr, double Total)> pricedScratch = new();
+        // individual row's screen geometry read succeeds this frame. Locked: see overlayRows.
+        private readonly List<(IntPtr Addr, double Total, bool Locked)> pricedScratch = new();
 
         // Last-good screen geometry per row UiElement. A single ReadProcessMemory miss on a live client
         // would otherwise blank or teleport that row's price for a frame; instead we reuse the previous
@@ -567,6 +588,16 @@ namespace RunecraftHelper
         private const uint ColorRed = 0xFF4040FFu;
         private const uint ColorShadow = 0xCC000000u;
         private const uint ColorPriceBg = 0xE6000000u; // 90%-opaque black plate behind the price text
+        private const uint ColorGold = 0xFF00D7FFu;     // gold border on the sealed monolith's locked row
+
+        // Reward metaId of the locked recipe for the sealed monolith the open panel belongs to (the
+        // closest monolith). Set each frame in DrawUI; a visible panel row whose MetaId matches gets a
+        // gold border. Empty = not a sealed monolith / highlight disabled → no border.
+        private string lockedPanelMetaId = string.Empty;
+        // Reward NAME of that locked recipe — the fallback match key. Rune/SoulCore rewards read an
+        // empty BaseItemType.Id (so MetaId is blank for the whole rune panel); the localized name is the
+        // only identity shared between the offline recipe catalog and the live panel rows for them.
+        private string lockedPanelName = string.Empty;
         // Alpha for the plate behind the monolith price on the large-map overlay. Matches the LootTracker
         // map/hideout bars (their BarOpacity default); the plate uses the theme's WindowBg colour at this
         // alpha, computed live in DrawMonolithMapLabels.
@@ -588,7 +619,16 @@ namespace RunecraftHelper
             this.pricedScratch.Clear();
             foreach (var r in this.recipes)
                 if (this.TryGetRecipePrice(in r, out var unit))
-                    this.pricedScratch.Add((r.RowAddress, unit * Math.Max(1, r.Count)));
+                {
+                    // Match the locked row on metaId when it's available, else fall back to the reward
+                    // name (rune/SoulCore rewards have a blank live MetaId — see lockedPanelName).
+                    bool locked =
+                        (this.lockedPanelMetaId.Length > 0 &&
+                         string.Equals(r.MetaId, this.lockedPanelMetaId, StringComparison.Ordinal)) ||
+                        (this.lockedPanelName.Length > 0 &&
+                         string.Equals(r.Name, this.lockedPanelName, StringComparison.Ordinal));
+                    this.pricedScratch.Add((r.RowAddress, unit * Math.Max(1, r.Count), locked));
+                }
             if (this.pricedScratch.Count == 0) return;
 
             double median = 0;
@@ -597,10 +637,10 @@ namespace RunecraftHelper
 
             // 2) Resolve each row's screen geometry, falling back to its last-good (pos, size) for a few
             //    frames on a read miss so the price doesn't blink out or teleport on a single bad read.
-            foreach (var (addr, total) in this.pricedScratch)
+            foreach (var (addr, total, locked) in this.pricedScratch)
             {
                 if (!this.TryResolveRowGeometry(addr, out var pos, out var size)) continue;
-                this.overlayRows.Add((pos, size, total));
+                this.overlayRows.Add((pos, size, total, locked));
             }
             if (this.overlayRows.Count == 0) return;
 
@@ -646,6 +686,13 @@ namespace RunecraftHelper
                 var at = new Vector2(x, y);
                 var bgPad = new Vector2(4f * k, 2f * k);
                 drawList.AddRectFilled(at - bgPad, at + ts + bgPad, ColorPriceBg, 3f * k);
+                if (row.Locked)
+                {
+                    // Sealed monolith: ring the locked-in recipe's price box in gold so it's obvious
+                    // which of the listed combinations the monolith will actually produce.
+                    drawList.AddRect(at - bgPad, at + ts + bgPad, ColorGold, 3f * k, ImDrawFlags.None, 2f * k);
+                }
+
                 drawList.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
                 drawList.AddText(font, fontPx, at, color, text);
             }
@@ -709,7 +756,7 @@ namespace RunecraftHelper
             }
         }
 
-        private static double MedianOf(List<(IntPtr Addr, double Total)> rows)
+        private static double MedianOf(List<(IntPtr Addr, double Total, bool Locked)> rows)
         {
             var arr = new double[rows.Count];
             for (int i = 0; i < arr.Length; i++) arr[i] = rows[i].Total;
