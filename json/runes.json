@@ -1,0 +1,942 @@
+{
+  "Fire": {
+    "translates": {
+      "english": "Fire Rune",
+      "french": "Fire Rune",
+      "german": "Feuerrune",
+      "spanish": "Runa de fuego",
+      "japanese": "火のルーン",
+      "korean": "화염 룬",
+      "portuguese": "Runa de Fogo",
+      "russian": "Руна огня",
+      "thai": "อักขระไฟ",
+      "traditional chinese": "火焰符文",
+      "simplified chinese": "火焰符文"
+    },
+    "effects": {
+      "english": "Extra Fire Damage",
+      "french": "Extra Fire Damage",
+      "german": "Zusätzlicher Feuerschaden",
+      "spanish": "Daño de fuego extra",
+      "japanese": "追加の炎ダメージ",
+      "korean": "추가 화염 피해",
+      "portuguese": "Dano de fogo adicional",
+      "russian": "Дополнительный урон от огня",
+      "thai": "เสริมความเสียหาย ไฟ",
+      "traditional chinese": "額外火焰傷害",
+      "simplified chinese": "额外火焰伤害"
+    }
+  },
+  "Cold": {
+    "translates": {
+      "english": "Cold Rune",
+      "french": "Cold Rune",
+      "german": "Kälterune",
+      "spanish": "Runa de hielo",
+      "japanese": "冷気のルーン",
+      "korean": "냉기 룬",
+      "portuguese": "Runa de Frio",
+      "russian": "Руна холода",
+      "thai": "อักขระน้ำแข็ง",
+      "traditional chinese": "冰冷符文",
+      "simplified chinese": "冰冷符文"
+    },
+    "effects": {
+      "english": "Extra Cold Damage",
+      "french": "Extra Cold Damage",
+      "german": "Zusätzlicher Kälteschaden",
+      "spanish": "Daño de hielo extra",
+      "japanese": "追加の冷気ダメージ",
+      "korean": "추가 냉기 피해",
+      "portuguese": "Dano de frio adicional",
+      "russian": "Дополнительный урон от холода",
+      "thai": "เสริมความเสียหาย น้ำแข็ง",
+      "traditional chinese": "額外冰冷傷害",
+      "simplified chinese": "额外冰冷伤害"
+    }
+  },
+  "Lightning": {
+    "translates": {
+      "english": "Lightning Rune",
+      "french": "Lightning Rune",
+      "german": "Blitzrune",
+      "spanish": "Runa de rayo",
+      "japanese": "雷のルーン",
+      "korean": "번개 룬",
+      "portuguese": "Runa Elétrica",
+      "russian": "Руна молнии",
+      "thai": "อักขระสายฟ้า",
+      "traditional chinese": "閃電符文",
+      "simplified chinese": "闪电符文"
+    },
+    "effects": {
+      "english": "Extra Lightning Damage",
+      "french": "Extra Lightning Damage",
+      "german": "Zusätzlicher Blitzschaden",
+      "spanish": "Daño de rayo extra",
+      "japanese": "追加の雷ダメージ",
+      "korean": "추가 번개 피해",
+      "portuguese": "Dano elétrico adicional",
+      "russian": "Дополнительный урон от молнии",
+      "thai": "เสริมความเสียหาย สายฟ้า",
+      "traditional chinese": "額外閃電傷害",
+      "simplified chinese": "额外闪电伤害"
+    }
+  },
+  "Tempest": {
+    "translates": {
+      "english": "Tempest Rune",
+      "french": "Tempest Rune",
+      "german": "Sturmwind-Rune",
+      "spanish": "Runa de tempestad",
+      "japanese": "嵐のルーン",
+      "korean": "폭풍 룬",
+      "portuguese": "Runa do Temporal",
+      "russian": "Руна бури",
+      "thai": "อักขระมรสุม",
+      "traditional chinese": "風暴符文",
+      "simplified chinese": "风暴符文"
+    },
+    "effects": {
+      "english": "Cannot be Shocked or Chilled · All Damage can Shock and Chill",
+      "french": "Cannot be Shocked or Chilled · All Damage can Shock and Chill",
+      "german": "Kann weder geschockt noch unterkühlt werden · Sämtlicher Schaden kann schocken und unterkühlen",
+      "spanish": "No lo pueden electrocutar ni escarchar · Todo el daño puede electrocutar y escarchar",
+      "japanese": "感電や冷却状態にならない · 全てのダメージは感電と冷却を与えることができる",
+      "korean": "몬스터가 다음 속성 획득 · 감전되거나 냉각될 수 없음 · 모든 피해가 감전 및 냉각 유발 가능",
+      "portuguese": "Não pode sofrer eletrificação ou esfriamento · Todo dano pode eletrificar e esfriar",
+      "russian": "Не может быть охлаждён или получить шок · Весь урон может охладить и наложить шок",
+      "thai": "ไม่ติดสถานะ ช็อคหรือหนาวเย็น · ความเสียหาย ทุกชนิด สร้างสถานะ ช็อคและหนาวเย็น ได้",
+      "traditional chinese": "無法被感電或冰緩 · 所有傷害都可以感電或冰緩",
+      "simplified chinese": "无法被感电或冰缓 · 所有伤害都可以感电或冰缓"
+    }
+  },
+  "Momentum": {
+    "translates": {
+      "english": "Momentum Rune",
+      "french": "Momentum Rune",
+      "german": "Momentumrune",
+      "spanish": "Runa de impulso",
+      "japanese": "勢いのルーン",
+      "korean": "기세 룬",
+      "portuguese": "Runa do Embalo",
+      "russian": "Руна импульса",
+      "thai": "อักขระแรงส่ง",
+      "traditional chinese": "動能符文",
+      "simplified chinese": "動能符文"
+    },
+    "effects": {
+      "english": "Increased Movement Speed · Movement Speed Cannot be Slowed below base",
+      "french": "Increased Movement Speed · Movement Speed Cannot be Slowed below base",
+      "german": "Erhöhte Bewegungsgeschwindigkeit · Bewegungsgeschwindigkeit kann nicht unter die Basisgeschwindigkeit verlangsamt werden",
+      "spanish": "Velocidad de movimiento aumentada · La velocidad de movimiento no se puede ralentizar por debajo de la base",
+      "japanese": "移動スピード増加 · 移動スピードは基礎値より低くならない",
+      "korean": "이동 속도 증가 · 이동 속도가 기본 속도 이하로 느려지지 않음",
+      "portuguese": "Velocidade de movimento aumentada · Velocidade de movimento não pode ser reduzida abaixo da velocidade base",
+      "russian": "Повышение скорости передвижения · Скорость передвижения не может быть ниже базовой",
+      "thai": "เพิ่มความเร็วในการเคลื่อนที่ · ความเร็วในการเคลื่อนที่ ไม่สามารถเชื่องช้าไปกว่าค่าพื้นฐานได้",
+      "traditional chinese": "增加移動速度 · 移動速度無法被減緩至基礎值以下",
+      "simplified chinese": "增加移動速度 · 移動速度无法被减缓至基礎值以下"
+    }
+  },
+  "Bloodletting": {
+    "translates": {
+      "english": "Bloodletting Rune",
+      "french": "Bloodletting Rune",
+      "german": "Aderlassrune",
+      "spanish": "Runa de sangría",
+      "japanese": "瀉血のルーン",
+      "korean": "출혈 과다 룬",
+      "portuguese": "Runa do Dessangramento",
+      "russian": "Руна кровопускания",
+      "thai": "อักขระหลั่งเลือด",
+      "traditional chinese": "放血符文",
+      "simplified chinese": "放血符文"
+    },
+    "effects": {
+      "english": "Life Leech · Cannot have Life Leeched from · Inflicts Corrupted Blood on Hit",
+      "french": "Life Leech · Cannot have Life Leeched from · Inflicts Corrupted Blood on Hit",
+      "german": "Lebensraub · Leben kann nicht geraubt werden · Verursacht bei Treffer Verderbtes Blut",
+      "spanish": "Absorción de vida · No se le puede absorber vida · Aplica sangre corrupta al impactar",
+      "japanese": "ライフリーチ · モンスターからライフをリーチできなくなる · ヒット時穢れた血を与える",
+      "korean": "생명력 흡수 · 생명력 흡수에 당하지 않음 · 명중 시 타락한 피를 유발함",
+      "portuguese": "Rouba vida · Não pode ter a vida roubada · Inflige Sangue Corrompido ao atingir",
+      "russian": "Похищение здоровья · У монстров нельзя похищать здоровье · Накладывает Осквернённую кровь при нанесении удара",
+      "thai": "ดูดพลังชีวิต · ไม่ถูก ดูดพลังชีวิต · สร้างสถานะ โลหิตมลทิน เมื่อปะทะ",
+      "traditional chinese": "生命偷取 · 生命無法被偷取 · 擊中時施加腐化之血",
+      "simplified chinese": "生命偷取 · 生命无法被偷取 · 击中时施加腐化之血"
+    }
+  },
+  "Stone": {
+    "translates": {
+      "english": "Stone Rune",
+      "french": "Stone Rune",
+      "german": "Steinrune",
+      "spanish": "Runa de piedra",
+      "japanese": "石のルーン",
+      "korean": "돌 룬",
+      "portuguese": "Runa de Pedra",
+      "russian": "Руна камня",
+      "thai": "อักขระศิลา",
+      "traditional chinese": "岩石符文",
+      "simplified chinese": "岩石符文"
+    },
+    "effects": {
+      "english": "Armoured · Increased Stun Threshold · Earthly Prison",
+      "french": "Armoured · Increased Stun Threshold · Earthly Prison",
+      "german": "Gepanzert · Erhöhte Betäubungsschwelle · Irdisches Gefängnis",
+      "spanish": "Blindado · Umbral de aturdimiento aumentado · Prisión terrestre",
+      "japanese": "アーマーが高い · スタン閾値増加 · 大地の牢獄",
+      "korean": "방어구를 갖춤 · 기절 한계치 증가 · 대지의 감옥",
+      "portuguese": "Blindagem · Resistência-limite a atordoamento aumentada · Prisão terrestre",
+      "russian": "Бронирование · Повышенный порог оглушения · Земляная тюрьма",
+      "thai": "หุ้มเกราะ · เพิ่มความยากในการติดสถานะ สตัน · คุกปฐพี",
+      "traditional chinese": "護甲 · 增加暈眩門檻 · 大地牢獄",
+      "simplified chinese": "护甲 · 增加晕眩門檻 · 大地牢獄"
+    }
+  },
+  "Adaptive": {
+    "translates": {
+      "english": "Adaptive Rune",
+      "french": "Adaptive Rune",
+      "german": "Anpassungsfähige Rune",
+      "spanish": "Runa adaptativa",
+      "japanese": "適応のルーン",
+      "korean": "적응형 룬",
+      "portuguese": "Runa Adaptativa",
+      "russian": "Руна адаптации",
+      "thai": "อักขระปรับตัว",
+      "traditional chinese": "適應符文",
+      "simplified chinese": "适应符文"
+    },
+    "effects": {
+      "english": "[Adaptation]",
+      "french": "[Adaptation]",
+      "german": "[Anpassung]",
+      "spanish": "Adaptación",
+      "japanese": "適応",
+      "korean": "적응",
+      "portuguese": "[Adaptação]",
+      "russian": "[Адаптация]",
+      "thai": "การปรับตัว",
+      "traditional chinese": "適應",
+      "simplified chinese": "適應"
+    }
+  },
+  "Arcane": {
+    "translates": {
+      "english": "Arcane Rune",
+      "french": "Arcane Rune",
+      "german": "Arkanrune",
+      "spanish": "Runa arcana",
+      "japanese": "アーケインのルーン",
+      "korean": "비전 룬",
+      "portuguese": "Runa Arcana",
+      "russian": "Руна колдовства",
+      "thai": "อักขระอาคม",
+      "traditional chinese": "祕法符文",
+      "simplified chinese": "秘法符文"
+    },
+    "effects": {
+      "english": "Extra Energy Shield · Trigger a Stunning nova when Energy Shield is depleted",
+      "french": "Extra Energy Shield · Trigger a Stunning nova when Energy Shield is depleted",
+      "german": "Extra Energieschild · Löst eine betäubende Nova aus, wenn der Energieschild aufgebraucht ist",
+      "spanish": "Escudo de energía extra · Activa una nova aturdidora cuando se vacía el escudo de energía",
+      "japanese": "エナジーシールド追加 · エナジーシールドが尽きた時にスタンを与えるノヴァをトリガー",
+      "korean": "추가 에너지 보호막 · 에너지 보호막이 고갈되면 기절을 유발하는 폭발 발동",
+      "portuguese": "Escudo de energia adicional · Ativa uma nova atordoante ao ficar sem escudo de energia",
+      "russian": "Дополнительный энергетический щит · Вызывает срабатывание оглушающего кольца при истощении энергетического щита",
+      "thai": "เสริมโล่พลังงาน · ทริกเกอร์ พลังกระจายที่สร้างสถานะ สตัน เมื่อโล่พลังงานหมด",
+      "traditional chinese": "額外能量護盾 · 當能量護盾耗盡時觸發暈眩新星",
+      "simplified chinese": "额外能量护盾 · 当能量护盾耗盡时触发晕眩新星"
+    }
+  },
+  "Toxic": {
+    "translates": {
+      "english": "Toxic Rune",
+      "french": "Toxic Rune",
+      "german": "Giftige Rune",
+      "spanish": "Runa tóxica",
+      "japanese": "毒のルーン",
+      "korean": "맹독성 룬",
+      "portuguese": "Runa Tóxica",
+      "russian": "Руна токсинов",
+      "thai": "อักขระสารพิษ",
+      "traditional chinese": "劇毒符文",
+      "simplified chinese": "剧毒符文"
+    },
+    "effects": {
+      "english": "Chance to Poison on Hit · Chance for Toxic Volatiles on death · All Damage from Hits can Poison",
+      "french": "Chance to Poison on Hit · Chance for Toxic Volatiles on death · All Damage from Hits can Poison",
+      "german": "Chance, bei Treffer zu vergiften · Erzeugt Giftige Explosionen bei Tod · Schaden durch Treffer kann vergiften",
+      "spanish": "Probabilidad de envenenar al impactar · Crea Volátiles tóxicos al morir · Todo el daño de los impactos puede envenenar",
+      "japanese": "ヒット時確率で毒を与える · 死亡時確率でトキシックボラタイルを生み出す · 全てのヒットによるダメージは毒を与えることができる",
+      "korean": "명중 시 일정 확률로 중독 유발 · 사망 시 맹독성 폭발물 생성 · 모든 명중 피해가 중독 유발 가능",
+      "portuguese": "Chance de envenenar ao atingir · Chance de Voláteis Tóxicos ao morrer · Todo o dano de ataques pode envenenar",
+      "russian": "Шанс отравить при нанесении удара · Создаёт токсичные нестабильности при смерти · Весь урон от ударов может отравить",
+      "thai": "มีโอกาสสร้างสถานะ พิษ เมื่อปะทะ · มีโอกาสสร้าง สารพิษไล่ระเบิด เมื่อตาย · ความเสียหาย ปะทะ ทุกชนิด สร้างสถานะ พิษ ได้",
+      "traditional chinese": "擊中時機率施加中毒 · 死亡時創造中毒易爆體 · 所有擊中傷害都可以中毒",
+      "simplified chinese": "击中时几率施加中毒 · 死亡时創造中毒易爆體 · 所有击中伤害都可以中毒"
+    }
+  },
+  "Electrocuting": {
+    "translates": {
+      "english": "Electrocuting Rune",
+      "french": "Electrocuting Rune",
+      "german": "Elektrisierungsrune",
+      "spanish": "Runa paralizante",
+      "japanese": "麻痺のルーン",
+      "korean": "전기 처형 룬",
+      "portuguese": "Runa Eletrocutante",
+      "russian": "Руна электризации",
+      "thai": "อักขระช็อตประสาท",
+      "traditional chinese": "電刑符文",
+      "simplified chinese": "电刑符文"
+    },
+    "effects": {
+      "english": "Extra Lightning Damage · Lightning Damage Electrocutes · Shocked Ground Trails",
+      "french": "Extra Lightning Damage · Lightning Damage Electrocutes · Shocked Ground Trails",
+      "german": "Zusätzlicher Blitzschaden · Blitzschaden elektrisiert · Spuren aus schockendem Boden",
+      "spanish": "Daño de rayo extra · El daño de rayo paraliza · Deja un rastro de suelo electrificado",
+      "japanese": "雷ダメージ追加 · 雷ダメージは麻痺を与える · 感電領域の足跡",
+      "korean": "추가 번개 피해 · 번개 피해가 전기 처형 유발 · 감전 지대가 남음",
+      "portuguese": "Dano elétrico adicional · Dano elétrico eletrocuta · Trechos de chão eletrificado",
+      "russian": "Дополнительный урон от молнии · Урон от молнии электризует · Следы из заряженной земли",
+      "thai": "เสริมความเสียหาย สายฟ้า · ความเสียหาย สายฟ้า สร้างสถานะ ช็อตประสาท ได้ · ทิ้ง พื้นช็อค เป็นทาง",
+      "traditional chinese": "額外閃電傷害 · 閃電傷害施加觸電 · 感電地面蹤跡",
+      "simplified chinese": "额外闪电伤害 · 闪电伤害施加触电 · 感电地面踪迹"
+    }
+  },
+  "Protective": {
+    "translates": {
+      "english": "Protective Rune",
+      "french": "Protective Rune",
+      "german": "Schützende Rune",
+      "spanish": "Runa protectora",
+      "japanese": "防御のルーン",
+      "korean": "보호 룬",
+      "portuguese": "Runa Protetora",
+      "russian": "Руна защиты",
+      "thai": "อักขระคุ้มครอง",
+      "traditional chinese": "守護符文",
+      "simplified chinese": "守护符文"
+    },
+    "effects": {
+      "english": "Periodically gain Verisium Proximity Shields",
+      "french": "Periodically gain Verisium Proximity Shields",
+      "german": "Erhaltet regelmäßig Verisium-Annäherungsschilde",
+      "spanish": "Gana escudos de proximidad de verisium periódicamente",
+      "japanese": "定期的にヴェリシウムの周辺シールドを得る",
+      "korean": "주기적으로 베리시움 근접 보호막 획득",
+      "portuguese": "Monstros ganham periodicamente escudos de proximidade de verísio",
+      "russian": "Периодически получает веризиевый защитный купол",
+      "thai": "ได้รับโล่ประชิดเวรีเซียม เป็นระยะ",
+      "traditional chinese": "間歇性的獲得維里西姆防護罩",
+      "simplified chinese": "间歇性的获得維里西姆防护罩"
+    }
+  },
+  "Cyclonic": {
+    "translates": {
+      "english": "Cyclonic Rune",
+      "french": "Cyclonic Rune",
+      "german": "Wirbelsturm-Rune",
+      "spanish": "Runa ciclónica",
+      "japanese": "竜巻のルーン",
+      "korean": "회오리바람 룬",
+      "portuguese": "Runa Ciclônica",
+      "russian": "Руна вихря",
+      "thai": "อักขระพายุหมุน",
+      "traditional chinese": "旋風符文",
+      "simplified chinese": "旋风符文"
+    },
+    "effects": {
+      "english": "Chance to inflict Exposure on Hit · Armour Break on Hit · Wither on Hit",
+      "french": "Chance to inflict Exposure on Hit · Armour Break on Hit · Wither on Hit",
+      "german": "Chance, bei Treffer Anfälligkeit zu verursachen · Rüstungsbruch bei Treffer · Verkümmern bei Treffer",
+      "spanish": "Probabilidad de aplicar exposición al impactar · Rotura de armadura al impactar · Marchitamiento al impactar",
+      "japanese": "ヒット時確率で暴露を与える · ヒット時アーマー破壊を与える · ヒット時衰弱を与える",
+      "korean": "명중 시 일정 확률로 노출 유발 · 명중 시 방어구 파괴 · 명중 시 위축",
+      "portuguese": "Chance de infligir Exposição ao atingir · Quebra armadura ao atingir · Atrofia ao atingir",
+      "russian": "Шанс наложить восприимчивость при нанесении удара · Разрушение брони при нанесении удара · Истощение при нанесении удара",
+      "thai": "มีโอกาสสร้างสถานะ พ่ายแก่ธาตุ เมื่อปะทะ · หักเกราะ เมื่อปะทะ · สร้างสถานะ เหี่ยวเฉา เมื่อปะทะ",
+      "traditional chinese": "擊中時機率施加曝曬 · 擊中時破壞護甲 · 擊中時施加凋零",
+      "simplified chinese": "击中时几率施加曝曬 · 击中时破坏护甲 · 击中时施加凋零"
+    }
+  },
+  "Vision": {
+    "translates": {
+      "english": "Vision Rune",
+      "french": "Vision Rune",
+      "german": "Visionsrune",
+      "spanish": "Runa de visión",
+      "japanese": "幻視のルーン",
+      "korean": "환영 룬",
+      "portuguese": "Runa da Visão",
+      "russian": "Руна видения",
+      "thai": "อักขระวิสัยทัศน์",
+      "traditional chinese": "視界符文",
+      "simplified chinese": "视界符文"
+    },
+    "effects": {
+      "english": "Reflect Curses · Chance to Reflect Shock · Chance to Reflect Chill",
+      "french": "Reflect Curses · Chance to Reflect Shock · Chance to Reflect Chill",
+      "german": "Reflektiert Flüche · Chance, Schocken zu reflektieren · Chance, Unterkühlen zu reflektieren",
+      "spanish": "Refleja maldiciones · Probabilidad de reflejar la electrocución · Probabilidad de reflejar el escarchamiento",
+      "japanese": "呪い反射 · 確率で感電反射 · 確率で冷却反射",
+      "korean": "일정 확률로 저주 반사 · 일정 확률로 감전 반사 · 일정 확률로 냉각 반사",
+      "portuguese": "Refletir maldições · Chance de refletir eletrificações · Chance de refletir esfriamentos",
+      "russian": "Отражение проклятий · Шанс отразить шок · Шанс отразить охлаждение",
+      "thai": "สะท้อนคำสาป · มีโอกาสสะท้อนสถานะ ช็อค · มีโอกาสสะท้อนสถานะ หนาวเย็น",
+      "traditional chinese": "反射詛咒 · 機率反射感電 · 機率反射冰緩",
+      "simplified chinese": "反射诅咒 · 几率反射感电 · 几率反射冰缓"
+    }
+  },
+  "Tidal": {
+    "translates": {
+      "english": "Tidal Rune",
+      "french": "Tidal Rune",
+      "german": "Gezeitenrune",
+      "spanish": "Runa de marea",
+      "japanese": "潮のルーン",
+      "korean": "해일 룬",
+      "portuguese": "Runa da Maré",
+      "russian": "Руна прилива",
+      "thai": "อักขระคลื่นทะเล",
+      "traditional chinese": "浪潮符文",
+      "simplified chinese": "浪潮符文"
+    },
+    "effects": {
+      "english": "Conjures Tidal Waves",
+      "french": "Conjures Tidal Waves",
+      "german": "Erzeugt Flutwellen",
+      "spanish": "Conjura maremotos",
+      "japanese": "津波を召喚する",
+      "korean": "해일 생성",
+      "portuguese": "Conjura Maremotos",
+      "russian": "Сотворяет Приливные волны",
+      "thai": "เสกคลื่นทะเล",
+      "traditional chinese": "引導浪潮",
+      "simplified chinese": "引导浪潮"
+    }
+  },
+  "Rebirth": {
+    "translates": {
+      "english": "Rebirth Rune",
+      "french": "Rebirth Rune",
+      "german": "Wiederbelebungsrune",
+      "spanish": "Runa de resurrección",
+      "japanese": "再誕のルーン",
+      "korean": "부활 룬",
+      "portuguese": "Runa do Renascimento",
+      "russian": "Руна перерождения",
+      "thai": "อักขระกำเนิดใหม่",
+      "traditional chinese": "重生符文",
+      "simplified chinese": "重生符文"
+    },
+    "effects": {
+      "english": "Chance to Rebirth on death",
+      "french": "Chance to Rebirth on death",
+      "german": "Chance, bei Tod wiedergeboren zu werden",
+      "spanish": "Probabilidad de resucitar al morir",
+      "japanese": "死亡時確率で蘇る",
+      "korean": "사망 시 일정 확률로 부활",
+      "portuguese": "Chance de renascer ao morrer",
+      "russian": "Шанс возродиться при смерти",
+      "thai": "มีโอกาสเกิดใหม่เมื่อตาย",
+      "traditional chinese": "死亡時機率重生",
+      "simplified chinese": "死亡时几率重生"
+    }
+  },
+  "Prismatic": {
+    "translates": {
+      "english": "Prismatic Rune",
+      "french": "Prismatic Rune",
+      "german": "Prismatische Rune",
+      "spanish": "Runa prismática",
+      "japanese": "虹色のルーン",
+      "korean": "분광 룬",
+      "portuguese": "Runa Prismática",
+      "russian": "Руна радуги",
+      "thai": "อักขระหลากสี",
+      "traditional chinese": "稜彩符文",
+      "simplified chinese": "棱彩符文"
+    },
+    "effects": {
+      "english": "All Damage can Shock · All Damage can Chill · All Damage can Ignite · All Elemental Resistance",
+      "french": "All Damage can Shock · All Damage can Chill · All Damage can Ignite · All Elemental Resistance",
+      "german": "Sämtlicher Schaden kann schocken · Sämtlicher Schaden kann unterkühlen · Sämtlicher Schaden kann entzünden · Erhöhte Elementarwiderstände",
+      "spanish": "Todo el daño puede electrocutar · Todo el daño puede escarchar · Todo el daño puede quemar · Resistencias elementales aumentadas",
+      "japanese": "全てのダメージで感電を付与できる · 全てのダメージは感電を付与できる · 全てのダメージは冷却を付与できる · 元素耐性が増加",
+      "korean": "모든 피해가 감전 유발 가능 · 모든 피해가 냉각 유발 가능 · 모든 피해가 점화 유발 가능 · 원소 저항 증가",
+      "portuguese": "Todo o dano pode eletrificar · Todo o dano pode esfriar · Todo o dano pode incendiar · Resistências elementais aumentadas",
+      "russian": "Весь урон может наложить шок · Весь урон может охладить · Весь урон может поджечь · Сопротивление всем стихиям",
+      "thai": "ความเสียหายทุกชนิดสร้างสถานะ ช็อค ได้ · ความเสียหายทุกชนิดสร้างสถานะ หนาวเย็น ได้ · ความเสียหายทุกชนิดสร้างสถานะ ลุกไหม้ ได้ · ต้านทาน ทุกธาตุ",
+      "traditional chinese": "所有傷害都可以感電 · 所有傷害都可以冰緩 · 所有傷害都可以點燃 · 增加全元素抗性",
+      "simplified chinese": "所有伤害都可以感电 · 所有伤害都可以冰缓 · 所有伤害都可以点燃 · 增加全元素抗性"
+    }
+  },
+  "Gasp": {
+    "translates": {
+      "english": "Volcanic Rune",
+      "french": "Volcanic Rune",
+      "german": "Vulkanische Rune",
+      "spanish": "Runa volcánica",
+      "japanese": "火山のルーン",
+      "korean": "화산의 룬",
+      "portuguese": "Runa Vulcânica",
+      "russian": "Руна вулкана",
+      "thai": "อักขระภูเขาไฟ",
+      "traditional chinese": "火山符文",
+      "simplified chinese": "火山符文"
+    },
+    "effects": {
+      "english": "Extra Fire Damage · All Damage can Ignite · Burning Ground Trails",
+      "french": "Extra Fire Damage · All Damage can Ignite · Burning Ground Trails",
+      "german": "Zusätzlicher Feuerschaden · Sämtlicher Schaden kann entzünden · Spuren aus brennendem Boden",
+      "spanish": "Daño de fuego extra · Todo el daño puede quemar · Deja un rastro de suelo incendiado",
+      "japanese": "炎ダメージ追加 · 全てのダメージが発火を与えることができる · 燃焼領域の足跡",
+      "korean": "추가 화염 피해 · 모든 피해가 점화 유발 가능 · 지나간 자리에 용암 지대를 남김",
+      "portuguese": "Dano de fogo adicional · Todo o dano pode incendiar · Trechos de chão ardente",
+      "russian": "Дополнительный урон от огня · Весь урон может поджечь · Следы из горящей земли",
+      "thai": "เสริมความเสียหาย ไฟ · ความเสียหายทุกชนิดสร้างสถานะ ลุกไหม้ ได้ · ทิ้ง พื้นลุกไหม้ เป็นทาง",
+      "traditional chinese": "額外火焰傷害 · 所有傷害都可以點燃 · 燃燒地面蹤跡",
+      "simplified chinese": "额外火焰伤害 · 所有伤害都可以点燃 · 燃烧地面踪迹"
+    }
+  },
+  "Moon": {
+    "translates": {
+      "english": "Moon Rune",
+      "french": "Moon Rune",
+      "german": "Mondrune",
+      "spanish": "Runa de luna",
+      "japanese": "月のルーン",
+      "korean": "달 룬",
+      "portuguese": "Rua da Lua",
+      "russian": "Руна луны",
+      "thai": "อักขระจันทรา",
+      "traditional chinese": "月亮符文",
+      "simplified chinese": "月亮符文"
+    },
+    "effects": {
+      "english": "Conjures moon beams",
+      "french": "Conjures moon beams",
+      "german": "Erzeugt Mondstrahlen",
+      "spanish": "Conjura rayos lunares",
+      "japanese": "ムーンビームを呼び出す",
+      "korean": "달의 광선을 불러냄",
+      "portuguese": "Conjura raios lunares",
+      "russian": "Сотворяет лунные лучи",
+      "thai": "เสกลำแสงจันทรา",
+      "traditional chinese": "引導映月光束",
+      "simplified chinese": "引导映月光束"
+    }
+  },
+  "Celestial": {
+    "translates": {
+      "english": "Celestial Rune",
+      "french": "Celestial Rune",
+      "german": "Himmlische Rune",
+      "spanish": "Runa celestial",
+      "japanese": "天のルーン",
+      "korean": "천공의 룬",
+      "portuguese": "Runa Celestial",
+      "russian": "Руна небес",
+      "thai": "อักขระดวงดารา",
+      "traditional chinese": "星界符文",
+      "simplified chinese": "星界符文"
+    },
+    "effects": {
+      "english": "Chance for a Fire Explosion on Death · Chance for a Cold Explosion on Death · Chance for a Lightning Explosion on Death",
+      "french": "Chance for a Fire Explosion on Death · Chance for a Cold Explosion on Death · Chance for a Lightning Explosion on Death",
+      "german": "Chance einer Feuerexplosion bei Tod · Chance einer Kälteexplosion bei Tod · Chance einer Blitzexplosion bei Tod",
+      "spanish": "Probabilidad de una explosión de fuego al morir · Probabilidad de una explosión de hielo al morir · Probabilidad de una explosión de rayo al morir",
+      "japanese": "死亡時確率で火の爆発 · 死亡時確率で冷気の爆発 · 死亡時確率で雷の爆発",
+      "korean": "사망 시 일정 확률로 화염 폭발 · 사망 시 일정 확률로 냉기 폭발 · 사망 시 일정 확률로 번개 폭발",
+      "portuguese": "Chance de explosão de fogo ao morrer · Chance de explosão fria ao morrer · Chance de explosão elétrica ao morrer",
+      "russian": "Шанс огненного взрыва при смерти · Шанс ледяного взрыва при смерти · Шанс грозового взрыва при смерти",
+      "thai": "มีโอกาสระเบิดไฟ เมื่อตาย · มีโอกาสระเบิดน้ำแข็ง เมื่อตาย · มีโอกาสระเบิดสายฟ้า เมื่อตาย",
+      "traditional chinese": "死亡時機率生成火焰爆炸 · 死亡時機率生成冰冷爆炸 · 死亡時機率生成閃電爆炸",
+      "simplified chinese": "死亡时几率生成火焰爆炸 · 死亡时几率生成冰冷爆炸 · 死亡时几率生成闪电爆炸"
+    }
+  },
+  "Opulent": {
+    "translates": {
+      "english": "Opulent Rune",
+      "french": "Opulent Rune",
+      "german": "Prunkrune",
+      "spanish": "Runa opulenta",
+      "japanese": "富のルーン",
+      "korean": "풍요 룬",
+      "portuguese": "Runa Opulenta",
+      "russian": "Руна богатства",
+      "thai": "อักขระมั่งคั่ง",
+      "traditional chinese": "奢華符文",
+      "simplified chinese": "奢華符文"
+    },
+    "effects": {
+      "english": "Increased Monster Rarity",
+      "french": "Increased Monster Rarity",
+      "german": "Erhöhte Monsterseltenheit",
+      "spanish": "Rareza de los monstruos aumentada",
+      "japanese": "モンスターのレアリティ増加",
+      "korean": "몬스터 희귀도 증가",
+      "portuguese": "Raridade de monstro aumentada",
+      "russian": "Повышенная редкость монстров",
+      "thai": "เพิ่มระดับความหายากของมอนสเตอร์",
+      "traditional chinese": "增加怪物稀有度",
+      "simplified chinese": "增加怪物稀有度"
+    }
+  },
+  "Rage": {
+    "translates": {
+      "english": "Rage Rune",
+      "french": "Rage Rune",
+      "german": "Rauschrune",
+      "spanish": "Runa de furia",
+      "japanese": "憤怒のルーン",
+      "korean": "격노 룬",
+      "portuguese": "Runa da Fúria",
+      "russian": "Руна ярости",
+      "thai": "อักขระคลั่ง",
+      "traditional chinese": "憤怒符文",
+      "simplified chinese": "愤怒符文"
+    },
+    "effects": {
+      "english": "Periodically Enrage",
+      "french": "Periodically Enrage",
+      "german": "Erzürnen regelmäßig",
+      "spanish": "Se enfurece periódicamente",
+      "japanese": "定期的に激怒",
+      "korean": "주기적으로 격앙됨",
+      "portuguese": "Monstro se enfurece periodicamente",
+      "russian": "Периодически впадает в ярость",
+      "thai": "เดือดดาล เป็นระยะ",
+      "traditional chinese": "週期性激怒",
+      "simplified chinese": "周期性激怒"
+    }
+  },
+  "Wisdom": {
+    "translates": {
+      "english": "Wisdom Rune",
+      "french": "Wisdom Rune",
+      "german": "Weisheitsrune",
+      "spanish": "Runa de sabiduría",
+      "japanese": "知恵のルーン",
+      "korean": "지혜 룬",
+      "portuguese": "Runa da Sabedoria",
+      "russian": "Руна мудрости",
+      "thai": "อักขระรอบรู้",
+      "traditional chinese": "智慧符文",
+      "simplified chinese": "智慧符文"
+    },
+    "effects": {
+      "english": "Increased Experience",
+      "french": "Increased Experience",
+      "german": "Erhöhter Erfahrungsgewinn",
+      "spanish": "Experiencia aumentada",
+      "japanese": "経験値増加",
+      "korean": "경험치 증가",
+      "portuguese": "Experiência aumentada",
+      "russian": "Увеличение опыта",
+      "thai": "เพิ่มค่าประสบการณ์",
+      "traditional chinese": "增加經驗值",
+      "simplified chinese": "增加经验值"
+    }
+  },
+  "Sky": {
+    "translates": {
+      "english": "Sky Rune",
+      "french": "Rune céleste",
+      "german": "Himmelsrune",
+      "spanish": "Runa de cielo",
+      "japanese": "空のルーン",
+      "korean": "하늘 룬",
+      "portuguese": "Runa do Céu",
+      "russian": "Руна неба",
+      "thai": "อักขระนภา",
+      "traditional chinese": "天空符文",
+      "simplified chinese": "天空符文"
+    },
+    "effects": {
+      "english": "Conjures Elemental Tornados",
+      "french": "Fait apparaître des Tornades élémentaires",
+      "german": "Erzeugt Elementartornados",
+      "spanish": "Conjura tornados elementales",
+      "japanese": "レムナントは以下を獲得 · 元素のトルネードを召喚する",
+      "korean": "원소 회오리 생성",
+      "portuguese": "Conjura tornados elementais",
+      "russian": "Призывает стихийные торнадо",
+      "thai": "เสกพายุธาตุสลาตัน",
+      "traditional chinese": "引導元素龍捲風",
+      "simplified chinese": "引导元素龙卷风"
+    }
+  },
+  "Earth": {
+    "translates": {
+      "english": "Earth Rune",
+      "french": "Rune tellurique",
+      "german": "Erdrune",
+      "spanish": "Runa de tierra",
+      "japanese": "大地のルーン",
+      "korean": "대지 룬",
+      "portuguese": "Runa da Terra",
+      "russian": "Руна земли",
+      "thai": "อักขระปฐพี",
+      "traditional chinese": "大地符文",
+      "simplified chinese": "大地符文"
+    },
+    "effects": {
+      "english": "Conjures Earthly Spires",
+      "french": "Fait apparaître des Pieux telluriques",
+      "german": "Erzeugt Erdstachel",
+      "spanish": "Conjura agujas terrestres",
+      "japanese": "大地の塔を召喚する",
+      "korean": "대지의 첨탑 생성",
+      "portuguese": "Conjura torres terrestres",
+      "russian": "Призывает земные шипы",
+      "thai": "เสกหินงอกจากปฐพี",
+      "traditional chinese": "引導大地尖塔",
+      "simplified chinese": "引导大地尖塔"
+    }
+  },
+  "Life": {
+    "translates": {
+      "english": "Life Rune",
+      "french": "Rune de Vie",
+      "german": "Lebensrune",
+      "spanish": "Runa de vida",
+      "japanese": "命のルーン",
+      "korean": "생명 룬",
+      "portuguese": "Runa da Vida",
+      "russian": "Руна жизни",
+      "thai": "อักขระชีวิต",
+      "traditional chinese": "生命符文",
+      "simplified chinese": "生命符文"
+    },
+    "effects": {
+      "english": "Shared Life",
+      "french": "Vie partagée",
+      "german": "Geteiltes Leben",
+      "spanish": "Vida compartida",
+      "japanese": "ライフ共有",
+      "korean": "생명력 공유",
+      "portuguese": "Vida compartilhada",
+      "russian": "Общее здоровье",
+      "thai": "ใช้พลังชีวิตร่วมกัน",
+      "traditional chinese": "共享生命",
+      "simplified chinese": "共享生命"
+    }
+  },
+  "Bond": {
+    "translates": {
+      "english": "Bond Rune",
+      "french": "Rune de Lien",
+      "german": "Bandrune",
+      "spanish": "Runa de vínculo",
+      "japanese": "絆のルーン",
+      "korean": "유대 룬",
+      "portuguese": "Runa de Vínculo",
+      "russian": "Руна связи",
+      "thai": "อักขระพันธะ",
+      "traditional chinese": "羈絆符文",
+      "simplified chinese": "羁绊符文"
+    },
+    "effects": {
+      "english": "Rare Monsters may transfer a Mod on death · Increased chance to spawn Rare Monsters · Rare Monsters have more Monster Modifiers",
+      "french": "Les Monstres Rares peuvent transférer un Mod en mourant · Une Augmentation des chances de générer des Monstres Rares · Les Monstres Rares ont une Davantage de Modificateurs de Monstre",
+      "german": "Seltene Monster können bei Tod einen Modifikator übertragen · Erhöhte Chance, seltene Monster zu beschwören · Seltene Monster haben mehr Monster-Modifikatoren",
+      "spanish": "Los monstruos raros pueden transferir un mod. al morir · Probabilidad aumentada de generar monstruos raros · Los monstruos raros tienen más modificadores de monstruo",
+      "japanese": "レアモンスターは死亡時にモッドを転移させることがある · レアモンスターのスポーン確率増加 · レアモンスターはモッドを多く持つ",
+      "korean": "희귀 몬스터 사망 시 속성이 옮겨 갈 수 있음 · 희귀 몬스터 생성 확률 증가 · 희귀 몬스터가 더 많은 몬스터 속성 보유",
+      "portuguese": "Monstros raros transferem um modificador ao morrer · Chance aumentada de gerar monstros raros · Monstros raros têm mais modificadores de monstro",
+      "russian": "Редкие монстры могут передать свойство при смерти · Повышенный шанс породить редких монстров · Редкие монстры имеют больше свойств",
+      "thai": "มอนสเตอร์แรร์อาจส่งม็อด 1 อย่าง เมื่อตาย · เพิ่มโอกาสเรียก มอนสเตอร์แรร์ · มอนสเตอร์แรร์ มีม็อดมอนสเตอร์ เพิ่มขึ้น อีก",
+      "traditional chinese": "稀有怪物死亡時可能轉移一條詞綴 · 機率生成稀有怪物群 · 稀有怪物擁有更多怪物詞綴機率",
+      "simplified chinese": "稀有怪物死亡时可能转移一条词缀 · 几率生成稀有怪物群 · 稀有怪物拥有更多怪物词缀几率"
+    }
+  },
+  "Ward": {
+    "translates": {
+      "english": "Ward Rune",
+      "french": "Rune de Sauvegarde",
+      "german": "Schutzrune",
+      "spanish": "Runa de barrera",
+      "japanese": "守護のルーン",
+      "korean": "수호 룬",
+      "portuguese": "Runa de Salvaguarda",
+      "russian": "Руна барьера",
+      "thai": "อักขระวอร์ด",
+      "traditional chinese": "保護符文",
+      "simplified chinese": "保护符文"
+    },
+    "effects": {
+      "english": "Protected by Runic Ward",
+      "french": "Protégés par de la Sauvegarde runique",
+      "german": "Durch Runenschutz geschützt",
+      "spanish": "Protegido por Barrera rúnica",
+      "japanese": "ルーンワードに守られる",
+      "korean": "룬 수호로 보호받음",
+      "portuguese": "Proteção de Salvaguarda Rúnica",
+      "russian": "Защищён руническим барьером",
+      "thai": "ได้รับการคุ้มครองจาก วอร์ดอักขระ",
+      "traditional chinese": "擁有符文保護",
+      "simplified chinese": "拥有符文保护"
+    }
+  },
+  "Soul": {
+    "translates": {
+      "english": "Soul Rune",
+      "french": "Rune d'Âme",
+      "german": "Seelenrune",
+      "spanish": "Runa de alma",
+      "japanese": "魂のルーン",
+      "korean": "영혼 룬",
+      "portuguese": "Runa da Alma",
+      "russian": "Руна души",
+      "thai": "อักขระวิญญาณ",
+      "traditional chinese": "靈魂符文",
+      "simplified chinese": "灵魂符文"
+    },
+    "effects": {
+      "english": "Union of Souls",
+      "french": "Union des Âmes",
+      "german": "Einheit der Seelen",
+      "spanish": "Unión de almas",
+      "japanese": "魂の団結",
+      "korean": "영혼의 결합",
+      "portuguese": "União das Almas",
+      "russian": "Единение душ",
+      "thai": "สามัคคีรวมวิญญาณ",
+      "traditional chinese": "聚魂",
+      "simplified chinese": "聚魂"
+    }
+  },
+  "Death": {
+    "translates": {
+      "english": "Death Rune",
+      "french": "Rune de Mort",
+      "german": "Todesrune",
+      "spanish": "Runa de muerte",
+      "japanese": "死のルーン",
+      "korean": "죽음 룬",
+      "portuguese": "Runa da Morte",
+      "russian": "Руна смерти",
+      "thai": "อักขระมรณะ",
+      "traditional chinese": "死亡符文",
+      "simplified chinese": "死亡符文"
+    },
+    "effects": {
+      "english": "Slain Monsters may merge into stronger Monsters",
+      "french": "Les Monstres tués peuvent fusionner et engendrer des Monstres plus forts",
+      "german": "Getötete Monster können zu stärkeren Monstern verschmelzen",
+      "spanish": "Los monstruos derrotados pueden fusionarse en monstruos más fuertes",
+      "japanese": "倒されたモンスターは融合しより強いモンスターになることがある",
+      "korean": "처치된 몬스터가 더 강한 몬스터로 합쳐짐",
+      "portuguese": "Monstros mortos podem se fundir para criar monstros mais fortes",
+      "russian": "Убитые монстры могут слиться в более сильных монстров",
+      "thai": "มอนสเตอร์ที่ถูกสังหารอาจรวมตัวเป็น มอนสเตอร์ที่แข็งแกร่ง",
+      "traditional chinese": "被擊殺的怪物會匯聚成更強大的怪物",
+      "simplified chinese": "被击杀的怪物会汇聚成更强大的怪物"
+    }
+  },
+  "Oath": {
+    "translates": {
+      "english": "Oath Rune",
+      "french": "Rune de Serment",
+      "german": "Schwurrune",
+      "spanish": "Runa de juramento",
+      "japanese": "誓約のルーン",
+      "korean": "서약 룬",
+      "portuguese": "Runa do Juramento",
+      "russian": "Руна клятвы",
+      "thai": "อักขระปฏิญาณ",
+      "traditional chinese": "效忠符文",
+      "simplified chinese": "效忠符文"
+    },
+    "effects": {
+      "english": "A Monster summons Allies",
+      "french": "Un Monstre invoque des Alliés",
+      "german": "Ein Monster beschwört Verbündete",
+      "spanish": "Un monstruo invoca aliados",
+      "japanese": "モンスターが味方を召喚する",
+      "korean": "몬스터가 동료 소환",
+      "portuguese": "Um monstro invoca aliados",
+      "russian": "Монстр призывает союзников",
+      "thai": "มอนสเตอร์ตัวหนึ่งอัญเชิญเพื่อน",
+      "traditional chinese": "一名怪物將召喚友方",
+      "simplified chinese": "一名怪物将召唤友方"
+    }
+  },
+  "Time": {
+    "translates": {
+      "english": "Time Rune",
+      "french": "Rune du Temps",
+      "german": "Zeitrune",
+      "spanish": "Runa de tiempo",
+      "japanese": "時のルーン",
+      "korean": "시간 룬",
+      "portuguese": "Runa do Tempo",
+      "russian": "Руна времени",
+      "thai": "อักขระกาลเวลา",
+      "traditional chinese": "時間符文",
+      "simplified chinese": "时间符文"
+    },
+    "effects": {
+      "english": "Slain Monsters may respawn as a higher Rarity",
+      "french": "Les Monstres tués peuvent revenir à la vie avec une Rareté plus élevée",
+      "german": "Getötete Monster können mit höherer Seltenheit wieder beschworen werden",
+      "spanish": "Los monstruos derrotados pueden revivir con una rareza mayor",
+      "japanese": "倒されたモンスターは時々より高いレアリティで復活することがある",
+      "korean": "처치된 몬스터가 더 높은 희귀도로 재소환될 수 있음",
+      "portuguese": "Monstros mortos podem ressurgir com uma raridade maior",
+      "russian": "Убитые монстры могут возродиться с более высокой редкостью",
+      "thai": "มอนสเตอร์ที่ถูกสังหารอาจเกิดใหม่เป็น มอนสเตอร์ที่มีระดับความหายากสูงขึ้น",
+      "traditional chinese": "被擊殺的怪物偶爾會以更高稀有度重生",
+      "simplified chinese": "被击杀的怪物偶尔会以更高稀有度重生"
+    }
+  },
+  "Power": {
+    "translates": {
+      "english": "Power Rune",
+      "french": "Rune de Puissance",
+      "german": "Machtrune",
+      "spanish": "Runa de poder",
+      "japanese": "力のルーン",
+      "korean": "권능 룬",
+      "portuguese": "Runa do Poder",
+      "russian": "Руна силы",
+      "thai": "อักขระพลัง",
+      "traditional chinese": "力量符文",
+      "simplified chinese": "力量符文"
+    },
+    "effects": {
+      "english": "Empowered",
+      "french": "Améliorées",
+      "german": "Ermächtigt",
+      "spanish": "Potenciada",
+      "japanese": "強化される",
+      "korean": "강화됨",
+      "portuguese": "Fortalecida",
+      "russian": "Усиление",
+      "thai": "การเสริมฤทธิ์",
+      "traditional chinese": "強化",
+      "simplified chinese": "强化"
+    }
+  },
+  "Bait": {
+    "translates": {
+      "english": "Bait Rune",
+      "french": "Bait",
+      "german": "Bait",
+      "spanish": "Bait",
+      "japanese": "Bait",
+      "korean": "Bait",
+      "portuguese": "Bait",
+      "russian": "Bait",
+      "thai": "Bait",
+      "traditional chinese": "Bait",
+      "simplified chinese": "Bait"
+    },
+    "effects": {}
+  }
+}

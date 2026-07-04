@@ -5,6 +5,7 @@ namespace RunecraftHelper
     using System.IO;
     using System.Numerics;
     using GameHelper;
+    using GameHelper.Localization;
     using GameHelper.RemoteEnums.Entity;
     using GameHelper.RemoteObjects.Components;
     using GameHelper.RemoteObjects.States.InGameStateObjects;
@@ -118,10 +119,85 @@ namespace RunecraftHelper
         // Watch-table rows the user can toggle off but not delete (seeded on first use).
         private static readonly string[] DefaultGlowRuneNames = { "Time", "Death", "Bond", "Power", "Opulent" };
 
-        // Rune display name for an Expedition2Runes index (json map first, static fallback).
-        private string? RuneNameByIndex(int idx) =>
+        // Canonical rune id for an Expedition2Runes index (json map first, static fallback). These ids are
+        // deliberately English and language-independent because settings persist them across client languages.
+        private string? RuneIdByIndex(int idx) =>
             this.runeNames.TryGetValue(idx, out var nm) ? nm
             : (idx >= 0 && idx < AllRuneNames.Length ? AllRuneNames[idx] : null);
+
+        private string RuneDisplayName(string rune)
+        {
+            if (string.IsNullOrEmpty(rune)) return rune;
+            if (this.TryGetLocalizedRuneName(rune, out var localizedName))
+                return ShortRuneDisplayName(localizedName);
+
+            int idx = Array.IndexOf(AllRuneNames, rune);
+            this.BuildLiveRuneNamesIfNeeded();
+            if (idx >= 0 && this.liveRuneNames.TryGetValue(idx, out var liveName))
+                return ShortRuneDisplayName(liveName);
+
+            return ShortRuneDisplayName(rune);
+        }
+
+        private string RuneEffectText(string rune) =>
+            this.TryGetLocalizedRuneEffect(rune, out var effect)
+                ? effect
+            : RuneEffects.TryGetValue(rune, out var eff)
+                ? this.PluginText.T($"rune.{RuneKey(rune)}.effect", eff)
+                : string.Empty;
+
+        private string LocalizedRunePattern(MonoRecipe rec)
+        {
+            if (rec.runeIdx == null || rec.runeIdx.Count == 0)
+                return rec.runes != null ? string.Join(" · ", rec.runes.ConvertAll(this.RuneDisplayName)) : string.Empty;
+
+            var parts = new List<string>(rec.runeIdx.Count);
+            foreach (var idx in rec.runeIdx)
+                parts.Add(this.RuneDisplayName(this.RuneIdByIndex(idx) ?? $"#{idx}"));
+            return string.Join(" · ", parts);
+        }
+
+        private static string RuneKey(string rune) => rune.ToLowerInvariant();
+
+        private static string ShortRuneDisplayName(string value)
+        {
+            var text = value.Trim();
+            if (text.EndsWith(" Rune", StringComparison.OrdinalIgnoreCase))
+                return text[..^5].Trim();
+            if (text.EndsWith("符文", StringComparison.Ordinal))
+                return text[..^2].Trim();
+            if (text.EndsWith(" 룬", StringComparison.Ordinal))
+                return text[..^2].Trim();
+            if (text.EndsWith("룬", StringComparison.Ordinal))
+                return text[..^1].Trim();
+            if (text.StartsWith("รูน", StringComparison.Ordinal))
+                return text[3..].Trim();
+            if (text.EndsWith("のルーン", StringComparison.Ordinal))
+                return text[..^4].Trim();
+            if (text.StartsWith("Руна ", StringComparison.OrdinalIgnoreCase))
+                return text[5..].Trim();
+            if (text.StartsWith("Rune d'", StringComparison.OrdinalIgnoreCase))
+                return text[7..].Trim();
+            if (text.StartsWith("Rune de ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Rune du ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Rune des ", StringComparison.OrdinalIgnoreCase))
+                return text[9..].Trim();
+            if (text.StartsWith("Runa de ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Runa do ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Runa da ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Runa del ", StringComparison.OrdinalIgnoreCase))
+                return text[9..].Trim();
+            if (text.StartsWith("อักขระ", StringComparison.Ordinal))
+                return text[6..].Trim();
+            if (text.EndsWith("rune", StringComparison.OrdinalIgnoreCase) && text.Length > 4)
+                return text[..^4].Trim();
+            return text;
+        }
 
         // Ensure the default glow-rune rows exist (add any missing default; never resets existing show/weight,
         // so a default that was toggled off stays off). Guarantees defaults can't be lost from the table.
@@ -135,6 +211,9 @@ namespace RunecraftHelper
         private List<MonoRecipe> monolithRecipes = new();
         private readonly List<double> monoPriceScratch = new(); // per-reward totals → row-total colour median
         private Dictionary<int, string> runeNames = new();
+        private Dictionary<string, RuneInfo> localizedRuneInfo = new(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<int, string> liveRuneNames = new();
+        private DateTime liveRuneNamesNextTryUtc = DateTime.MinValue;
         // (anchorRune, pos1based, size) → min area level at which that partial size is offered.
         // Built from Expedition2RunesWeights; gates which size<N recipes a monolith can roll.
         private Dictionary<long, int> partialMinLevel = new();
@@ -161,6 +240,8 @@ namespace RunecraftHelper
                     foreach (var kv in file.runes)
                         if (int.TryParse(kv.Key, out var k)) this.runeNames[k] = kv.Value;
 
+                this.LoadRuneTranslations();
+
                 this.partialMinLevel = new Dictionary<long, int>();
                 if (file.runeWeights != null)
                     foreach (var w in file.runeWeights)
@@ -177,6 +258,85 @@ namespace RunecraftHelper
                 return false;
             }
         }
+
+        private void LoadRuneTranslations()
+        {
+            var path = Path.Join(this.DllDirectory, "json", "runes.json");
+            if (!File.Exists(path))
+                return;
+
+            try
+            {
+                var contents = JsonConvert.DeserializeObject<Dictionary<string, RuneInfo>>(File.ReadAllText(path));
+                if (contents == null)
+                    return;
+
+                this.localizedRuneInfo = new Dictionary<string, RuneInfo>(contents, StringComparer.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RunecraftHelper] rune translation json load failed: {ex.Message}");
+            }
+        }
+
+        private bool TryGetLocalizedRuneName(string rune, out string name)
+        {
+            name = string.Empty;
+            if (!this.localizedRuneInfo.TryGetValue(rune, out var info) || info.Translates == null)
+                return false;
+
+            var lang = RuneTranslationLanguageKey(OverlayLocalization.CurrentLanguage);
+            if (info.Translates.TryGetValue(lang, out var translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                name = translated;
+                return true;
+            }
+
+            if (info.Translates.TryGetValue("english", out translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                name = translated;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryGetLocalizedRuneEffect(string rune, out string effect)
+        {
+            effect = string.Empty;
+            if (!this.localizedRuneInfo.TryGetValue(rune, out var info) || info.Effects == null)
+                return false;
+
+            var lang = RuneTranslationLanguageKey(OverlayLocalization.CurrentLanguage);
+            if (info.Effects.TryGetValue(lang, out var translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                effect = translated;
+                return true;
+            }
+
+            if (info.Effects.TryGetValue("english", out translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                effect = translated;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static string RuneTranslationLanguageKey(OverlayLanguage language) => language switch
+        {
+            OverlayLanguage.French => "french",
+            OverlayLanguage.German => "german",
+            OverlayLanguage.SpanishSpain => "spanish",
+            OverlayLanguage.Japanese => "japanese",
+            OverlayLanguage.Korean => "korean",
+            OverlayLanguage.PortugueseBrazil => "portuguese",
+            OverlayLanguage.Russian => "russian",
+            OverlayLanguage.Thai => "thai",
+            OverlayLanguage.ChineseSimplified => "simplified chinese",
+            OverlayLanguage.ChineseTraditional => "traditional chinese",
+            _ => "english",
+        };
 
         // ── window ───────────────────────────────────────────────────────────
         // Entry point: loads the catalog, rescans nearby monoliths on a timer, then draws whichever of
@@ -334,7 +494,13 @@ namespace RunecraftHelper
             // as recipe tables are expanded/collapsed. The constraint keeps width sane and caps height so a
             // long list can't run off-screen (it scrolls past the cap instead).
             ImGui.SetNextWindowSizeConstraints(new Vector2(260, 0), new Vector2(640, 900));
-            if (ImGui.Begin("Monolith Rewards", ImGuiWindowFlags.AlwaysAutoResize))
+            if (!ImGui.Begin(this.PluginText.Title("window.monolith_rewards", "Monolith Rewards", "RunecraftMonolithRewards"), ImGuiWindowFlags.AlwaysAutoResize))
+            {
+                ImGui.End();
+                return;
+            }
+
+            try
             {
                 float min = this.Settings.MonolithRewardsMinExalted;
 
@@ -378,13 +544,13 @@ namespace RunecraftHelper
                     string panelMark = v.PanelOpen ? "▶ " : string.Empty;
                     if (v.IsRerolled && v.Candidates.Count > 0)
                         // Sealed: recipe locked — show the one reward + its value, not "best of N".
-                        hdr = $"{panelMark}[locked] {v.Candidates[0].Reward}  ·  {v.Distance:F0}  ·  {best:F0} ex###m{v.EntityId}";
+                        hdr = this.PluginText.F("monolith.header.locked", "{0}[locked] {1} - {2:F0} - {3:F0} ex", panelMark, v.Candidates[0].Reward, v.Distance, best) + $"###m{v.EntityId}";
                     else if (v.IsUnique)
-                        hdr = $"{panelMark}Unique Monolith  ·  {v.HoleCount} holes  ·  {v.Distance:F0}  ·  best {best:F0} ex###m{v.EntityId}";
+                        hdr = this.PluginText.F("monolith.header.unique", "{0}Unique Monolith - {1} holes - {2:F0} - best {3:F0} ex", panelMark, v.HoleCount, v.Distance, best) + $"###m{v.EntityId}";
                     else if (v.AnchorIdx >= 0)
-                        hdr = $"{panelMark}{v.AnchorName}  ·  hole {v.AnchorPos + 1}/{v.HoleCount}  ·  {v.Distance:F0}  ·  best {best:F0} ex###m{v.EntityId}";
+                        hdr = this.PluginText.F("monolith.header.anchored", "{0}{1} - hole {2}/{3} - {4:F0} - best {5:F0} ex", panelMark, v.AnchorName, v.AnchorPos + 1, v.HoleCount, v.Distance, best) + $"###m{v.EntityId}";
                     else
-                        hdr = $"{panelMark}(anchor ?)  ·  {v.HoleCount} holes  ·  {v.Distance:F0}###m{v.EntityId}";
+                        hdr = this.PluginText.F("monolith.header.no_anchor", "{0}(anchor ?) - {1} holes - {2:F0}", panelMark, v.HoleCount, v.Distance) + $"###m{v.EntityId}";
 
                     // Header tint via the shared helper so it matches the map-overlay label exactly.
                     uint hdrColor = this.MonolithValueColor(best, maxBest, out bool colorHdr);
@@ -396,7 +562,7 @@ namespace RunecraftHelper
 
                     if (v.AnchorIdx < 0 && !v.IsUnique && !(v.IsRerolled && v.Candidates.Count > 0))
                     {
-                        ImGui.TextDisabled("  anchor not resolved (station unavailable)");
+                        ImGui.TextDisabled(this.PluginText.T("monolith.anchor_unresolved", "  anchor not resolved (station unavailable)"));
                         continue;
                     }
 
@@ -406,10 +572,10 @@ namespace RunecraftHelper
                             ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.SizingStretchProp,
                             new Vector2(430f, 0f)))
                     {
-                        ImGui.TableSetupColumn("Reward", ImGuiTableColumnFlags.WidthStretch);
+                        ImGui.TableSetupColumn(this.PluginText.T("table.reward", "Reward"), ImGuiTableColumnFlags.WidthStretch);
                         ImGui.TableSetupColumn("x", ImGuiTableColumnFlags.WidthFixed, 26f);
-                        ImGui.TableSetupColumn("Unit", ImGuiTableColumnFlags.WidthFixed, 58f);
-                        ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.WidthFixed, 62f);
+                        ImGui.TableSetupColumn(this.PluginText.T("table.unit", "Unit"), ImGuiTableColumnFlags.WidthFixed, 58f);
+                        ImGui.TableSetupColumn(this.PluginText.T("table.total", "Total"), ImGuiTableColumnFlags.WidthFixed, 62f);
                         ImGui.TableHeadersRow();
 
                         int shown = 0;
@@ -445,15 +611,17 @@ namespace RunecraftHelper
                         {
                             ImGui.TableNextRow();
                             ImGui.TableSetColumnIndex(0);
-                            ImGui.TextDisabled("(nothing above threshold)");
+                            ImGui.TextDisabled(this.PluginText.T("monolith.nothing_above_threshold", "(nothing above threshold)"));
                         }
 
                         ImGui.EndTable();
                     }
                 }
             }
-
-            ImGui.End();
+            finally
+            {
+                ImGui.End();
+            }
         }
 
         // ── debug window (repurposes the "Show debug list window" toggle) ──────
@@ -465,32 +633,33 @@ namespace RunecraftHelper
         private void DrawMonolithDebugWindow()
         {
             ImGui.SetNextWindowSize(new Vector2(680, 460), ImGuiCond.FirstUseEver);
-            if (!ImGui.Begin("Monolith Debug###RunecraftMonolithDebug"))
+            if (!ImGui.Begin(this.PluginText.Title("window.monolith_debug", "Monolith Debug", "RunecraftMonolithDebug")))
             {
                 ImGui.End();
                 return;
             }
 
-            if (this.monolithViews.Count == 0)
+            try
             {
-                ImGui.TextDisabled("No monoliths detected in this area.");
-                ImGui.End();
-                return;
-            }
+                if (this.monolithViews.Count == 0)
+                {
+                    ImGui.TextDisabled(this.PluginText.T("debug.no_monoliths", "No monoliths detected in this area."));
+                    return;
+                }
 
-            var labels = new string[this.monolithViews.Count];
-            for (int i = 0; i < labels.Length; i++)
-            {
-                var mv = this.monolithViews[i];
-                labels[i] = mv.IsUnique
-                    ? $"Unique  {mv.HoleCount}h  ({mv.Distance:F0})"
-                    : mv.AnchorIdx >= 0
-                        ? $"{mv.AnchorName}  hole {mv.AnchorPos + 1}/{mv.HoleCount}  ({mv.Distance:F0})"
-                        : $"(anchor ?)  {mv.HoleCount}h  ({mv.Distance:F0})";
-            }
-            if (this.monolithDebugSel < 0 || this.monolithDebugSel >= labels.Length) this.monolithDebugSel = 0;
-            ImGui.SetNextItemWidth(420f);
-            ImGui.Combo("Monolith", ref this.monolithDebugSel, labels, labels.Length);
+                var labels = new string[this.monolithViews.Count];
+                for (int i = 0; i < labels.Length; i++)
+                {
+                    var mv = this.monolithViews[i];
+                    labels[i] = mv.IsUnique
+                        ? this.PluginText.F("debug.label.unique", "Unique  {0}h  ({1:F0})", mv.HoleCount, mv.Distance)
+                        : mv.AnchorIdx >= 0
+                            ? this.PluginText.F("debug.label.anchored", "{0}  hole {1}/{2}  ({3:F0})", mv.AnchorName, mv.AnchorPos + 1, mv.HoleCount, mv.Distance)
+                            : this.PluginText.F("debug.label.no_anchor", "(anchor ?)  {0}h  ({1:F0})", mv.HoleCount, mv.Distance);
+                }
+                if (this.monolithDebugSel < 0 || this.monolithDebugSel >= labels.Length) this.monolithDebugSel = 0;
+                ImGui.SetNextItemWidth(420f);
+                ImGui.Combo(this.PluginText.Label("debug.monolith", "Monolith", "RunecraftMonolithDebugSelector"), ref this.monolithDebugSel, labels, labels.Length);
 
             var v = this.monolithViews[this.monolithDebugSel];
             var red = new Vector4(1f, 0.45f, 0.45f, 1f);
@@ -498,47 +667,47 @@ namespace RunecraftHelper
 
             ImGui.Separator();
             if (v.IsUnique)
-                ImGui.Text($"Unique monolith (no anchor) — offers all recipes with size <= N ({v.HoleCount}).");
+                ImGui.Text(this.PluginText.F("debug.unique_summary", "Unique monolith (no anchor) - offers all recipes with size <= N ({0}).", v.HoleCount));
             else if (v.AnchorIdx < 0)
             {
-                ImGui.TextColored(red, "Anchor not resolved — no recipes.");
+                ImGui.TextColored(red, this.PluginText.T("debug.anchor_not_resolved", "Anchor not resolved - no recipes."));
                 if (!string.IsNullOrEmpty(v.StationDiag))
-                    ImGui.TextColored(red, $"  why: {v.StationDiag}");
+                    ImGui.TextColored(red, this.PluginText.F("debug.why", "  why: {0}", v.StationDiag));
             }
             else
-                ImGui.Text($"Anchor: {v.AnchorName} (idx {v.AnchorIdx})    p={v.AnchorPos}  (hole {v.AnchorPos + 1})");
+                ImGui.Text(this.PluginText.F("debug.anchor_summary", "Anchor: {0} (idx {1})    p={2}  (hole {3})", v.AnchorName, v.AnchorIdx, v.AnchorPos, v.AnchorPos + 1));
 
             // N: station +0x38 vs StateMachine "sockets" — flag the under-read case.
             if (v.SocketsState >= 0 && v.SocketsState != v.HoleCount)
-                ImGui.TextColored(red, $"N = {v.HoleCount}  (station +0x38)    sockets state = {v.SocketsState}   <- differ");
+                ImGui.TextColored(red, this.PluginText.F("debug.n_differs", "N = {0}  (station +0x38)    sockets state = {1}   <- differ", v.HoleCount, v.SocketsState));
             else
-                ImGui.Text($"N = {v.HoleCount}    sockets state = {v.SocketsState}");
+                ImGui.Text(this.PluginText.F("debug.n_summary", "N = {0}    sockets state = {1}", v.HoleCount, v.SocketsState));
 
-            ImGui.Text($"Area level: {v.AreaLevel}");
+            ImGui.Text(this.PluginText.F("debug.area_level", "Area level: {0}", v.AreaLevel));
             if (v.IsForeign)
-                ImGui.TextColored(red, "FOREIGN monolith (recipe-mode 0) — standalone \"additional\", not part of the Expedition dig, excluded from the route");
+                ImGui.TextColored(red, this.PluginText.T("debug.foreign_monolith", "FOREIGN monolith (recipe-mode 0) - standalone \"additional\", not part of the Expedition dig, excluded from the route"));
             ImGui.TextColored(grey, $"device 0x{v.EntityId:X}   station 0x{v.StationAddr:X}   mode={v.RecipeMode}   activated={v.Activated}   glow={v.GlowCount}   +0x40={FmtI(v.Field40)}  +0x44={FmtI(v.Field44)}");
             if (!string.IsNullOrEmpty(v.SmStates))
-                ImGui.TextColored(grey, $"SM states: {v.SmStates}");
+                ImGui.TextColored(grey, this.PluginText.F("debug.sm_states", "SM states: {0}", v.SmStates));
 
-            if (ImGui.Button("Copy report"))
+            if (ImGui.Button(this.PluginText.Label("button.copy_report", "Copy report", "RunecraftCopyReport")))
                 ImGui.SetClipboardText(BuildDebugReport(v));
             ImGui.SameLine();
-            ImGui.TextDisabled($"{v.Candidates.Count} recipe(s) offered");
+            ImGui.TextDisabled(this.PluginText.F("debug.recipes_offered", "{0} recipe(s) offered", v.Candidates.Count));
 
             ImGui.Separator();
             if (ImGui.BeginTable("mdbg", 8,
                     ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY |
                     ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable))
             {
-                ImGui.TableSetupColumn("row", ImGuiTableColumnFlags.WidthFixed, 44f);
-                ImGui.TableSetupColumn("sz", ImGuiTableColumnFlags.WidthFixed, 26f);
-                ImGui.TableSetupColumn("gate", ImGuiTableColumnFlags.WidthFixed, 40f);
-                ImGui.TableSetupColumn("cat", ImGuiTableColumnFlags.WidthFixed, 28f);
-                ImGui.TableSetupColumn("reward", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("FK / Id", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("lvl", ImGuiTableColumnFlags.WidthFixed, 56f);
-                ImGui.TableSetupColumn("holes (anchor in [])", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.row", "row"), ImGuiTableColumnFlags.WidthFixed, 44f);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.size", "sz"), ImGuiTableColumnFlags.WidthFixed, 26f);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.gate", "gate"), ImGuiTableColumnFlags.WidthFixed, 40f);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.category", "cat"), ImGuiTableColumnFlags.WidthFixed, 28f);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.reward", "reward"), ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.fk_id", "FK / Id"), ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.level", "lvl"), ImGuiTableColumnFlags.WidthFixed, 56f);
+                ImGui.TableSetupColumn(this.PluginText.T("debug.table.holes", "holes (anchor in [])"), ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
 
@@ -559,13 +728,17 @@ namespace RunecraftHelper
                 {
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(4);
-                    ImGui.TextDisabled("(no recipes)");
+                    ImGui.TextDisabled(this.PluginText.T("debug.no_recipes", "(no recipes)"));
                 }
 
                 ImGui.EndTable();
             }
 
-            ImGui.End();
+            }
+            finally
+            {
+                ImGui.End();
+            }
         }
 
         // Standalone window dumping the live Runeshape Combinations panel rows exactly as the price OVERLAY
@@ -575,42 +748,47 @@ namespace RunecraftHelper
         private void DrawOverlayRowsDebugWindow()
         {
             ImGui.SetNextWindowSize(new Vector2(640, 320), ImGuiCond.FirstUseEver);
-            if (!ImGui.Begin("Overlay Rows Debug###RunecraftOverlayRowsDebug"))
+            if (!ImGui.Begin(this.PluginText.Title("window.overlay_rows_debug", "Overlay Rows Debug", "RunecraftOverlayRowsDebug")))
             {
                 ImGui.End();
                 return;
             }
 
-            ImGui.Text($"Combinations panel rows: {this.recipes.Count}  (open the panel to populate)");
-            if (this.recipes.Count > 0 && ImGui.BeginTable("ovrows", 6,
-                    ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY |
-                    ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable))
+            try
             {
-                ImGui.TableSetupColumn("x", ImGuiTableColumnFlags.WidthFixed, 24f);
-                ImGui.TableSetupColumn("parsed name", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("MetaId", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("DdsArt", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("ex", ImGuiTableColumnFlags.WidthFixed, 64f);
-                ImGui.TableSetupColumn("branch", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupScrollFreeze(0, 1);
-                ImGui.TableHeadersRow();
-
-                foreach (var r in this.recipes)
+                ImGui.Text(this.PluginText.F("debug.overlay_rows_count", "Combinations panel rows: {0}  (open the panel to populate)", this.recipes.Count));
+                if (this.recipes.Count > 0 && ImGui.BeginTable("ovrows", 6,
+                        ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY |
+                        ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Resizable))
                 {
-                    var (price, branch) = this.TraceRecipePrice(in r);
-                    ImGui.TableNextRow();
-                    ImGui.TableSetColumnIndex(0); ImGui.Text(r.Count.ToString());
-                    ImGui.TableSetColumnIndex(1); ImGui.Text(r.Name);
-                    ImGui.TableSetColumnIndex(2); ImGui.Text(string.IsNullOrEmpty(r.MetaId) ? "—" : r.MetaId);
-                    ImGui.TableSetColumnIndex(3); ImGui.Text(string.IsNullOrEmpty(r.DdsArt) ? "—" : r.DdsArt);
-                    ImGui.TableSetColumnIndex(4); ImGui.Text(price > 0 ? price.ToString("0.###") : "—");
-                    ImGui.TableSetColumnIndex(5); ImGui.Text(branch);
+                    ImGui.TableSetupColumn("x", ImGuiTableColumnFlags.WidthFixed, 24f);
+                    ImGui.TableSetupColumn(this.PluginText.T("debug.overlay.parsed_name", "parsed name"), ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("MetaId", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("DdsArt", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("ex", ImGuiTableColumnFlags.WidthFixed, 64f);
+                    ImGui.TableSetupColumn(this.PluginText.T("debug.overlay.branch", "branch"), ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupScrollFreeze(0, 1);
+                    ImGui.TableHeadersRow();
+
+                    foreach (var r in this.recipes)
+                    {
+                        var (price, branch) = this.TraceRecipePrice(in r);
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0); ImGui.Text(r.Count.ToString());
+                        ImGui.TableSetColumnIndex(1); ImGui.Text(r.Name);
+                        ImGui.TableSetColumnIndex(2); ImGui.Text(string.IsNullOrEmpty(r.MetaId) ? "—" : r.MetaId);
+                        ImGui.TableSetColumnIndex(3); ImGui.Text(string.IsNullOrEmpty(r.DdsArt) ? "—" : r.DdsArt);
+                        ImGui.TableSetColumnIndex(4); ImGui.Text(price > 0 ? price.ToString("0.###") : "—");
+                        ImGui.TableSetColumnIndex(5); ImGui.Text(branch);
+                    }
+
+                    ImGui.EndTable();
                 }
-
-                ImGui.EndTable();
             }
-
-            ImGui.End();
+            finally
+            {
+                ImGui.End();
+            }
         }
 
         private static string FmtI(int x) => x == int.MinValue ? "?" : x.ToString();
@@ -756,7 +934,7 @@ namespace RunecraftHelper
                     {
                         v.AnchorIdx = aidx;
                         v.AnchorPos = apos;
-                        v.AnchorName = this.runeNames.TryGetValue(aidx, out var nm) ? nm : $"#{aidx}";
+                        v.AnchorName = this.RuneDisplayName(this.RuneIdByIndex(aidx) ?? $"#{aidx}");
                         this.BuildCandidates(v, areaLevel);
                     }
                     else
@@ -945,7 +1123,7 @@ namespace RunecraftHelper
             {
                 Size = rec.size,
                 Count = Math.Max(1, rec.rewardCount),
-                Runes = rec.runes != null ? string.Join(" · ", rec.runes) : string.Empty,
+                Runes = this.LocalizedRunePattern(rec),
                 Row = rec.row,
                 Category = rec.category,
                 RewardIdx = rec.reward?.idx ?? -1,
@@ -1016,6 +1194,77 @@ namespace RunecraftHelper
             }
 
             if (dict.Count > 0) this.metaToLocalName = dict;
+        }
+
+        // Build {Expedition2Runes row index -> localized display name} from the game's live dat table.
+        // This keeps rune labels in the same language as the client without shipping translated names in
+        // the plugin. The exact display-name column can drift, so detect it by scanning pointer fields at
+        // a common offset across the 34 rune rows and choosing the column that looks like UI text.
+        private void BuildLiveRuneNamesIfNeeded()
+        {
+            if (this.liveRuneNames.Count == RuneCount) return;
+            var now = DateTime.UtcNow;
+            if (now < this.liveRuneNamesNextTryUtc) return;
+            this.liveRuneNamesNextTryUtc = now.AddSeconds(2);
+            if (!this.EnsureProcess()) return;
+
+            var fileRoot = Core.CurrentAreaLoadedFiles.Address;
+            if (fileRoot == IntPtr.Zero) return;
+            var runeTable = this.FindRuneTableHandle(fileRoot);
+            if (runeTable == IntPtr.Zero) return;
+
+            var vec = this.ReadPtr(runeTable + TableRowsVectorOffset);
+            var begin = this.ReadPtr(vec);
+            var end = this.ReadPtr(vec + 8);
+            if (begin == IntPtr.Zero || (long)end <= (long)begin) return;
+            long count = ((long)end - (long)begin) / ExpeditionRuneStride;
+            if (count < RuneCount || count > 512) return;
+
+            var best = new Dictionary<int, string>();
+            int bestScore = 0;
+            for (int offset = 0; offset + 8 <= ExpeditionRuneStride; offset += 8)
+            {
+                var candidate = new Dictionary<int, string>();
+                int score = 0;
+                for (int i = 0; i < RuneCount; i++)
+                {
+                    var row = begin + (nint)(i * ExpeditionRuneStride);
+                    var value = this.ReadUtf16Z(this.ReadPtr(row + offset), 64).Trim();
+                    if (!LooksLikeRuneDisplayName(value)) continue;
+                    candidate[i] = value;
+                    score += 10;
+                    if (value.EndsWith("Rune", StringComparison.OrdinalIgnoreCase) ||
+                        value.EndsWith("符文", StringComparison.Ordinal) ||
+                        value.Contains("룬", StringComparison.Ordinal) ||
+                        value.Contains("руна", StringComparison.OrdinalIgnoreCase))
+                        score += 2;
+                }
+
+                if (candidate.Count < 20) continue;
+                score += candidate.Count;
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = candidate;
+                }
+            }
+
+            if (best.Count > 0) this.liveRuneNames = best;
+        }
+
+        private IntPtr FindRuneTableHandle(IntPtr root) =>
+            this.FindDatHandle(root, IntPtr.Zero,
+                s => s.EndsWith("Balance/Expedition2Runes.dat", StringComparison.Ordinal));
+
+        private static bool LooksLikeRuneDisplayName(string value)
+        {
+            if (value.Length < 2 || value.Length > 48) return false;
+            if (value.Contains('/') || value.Contains('\\') || value.Contains('.') || value.Contains('_')) return false;
+            if (value.Contains("Metadata", StringComparison.OrdinalIgnoreCase)) return false;
+            if (value.Contains("Expedition", StringComparison.OrdinalIgnoreCase)) return false;
+            if (value.Contains("Remnant", StringComparison.OrdinalIgnoreCase)) return false;
+            if (value.Contains("Rune", StringComparison.OrdinalIgnoreCase) && value.Length > 24) return false;
+            return true;
         }
 
         // True if Expedition2RunesWeights enables a partial recipe of `size` for anchor `idx` at hole
@@ -1155,7 +1404,7 @@ namespace RunecraftHelper
             var matched = new List<(string name, float w)>();
             foreach (var ri in runeIdxAtGlow)
             {
-                var name = this.RuneNameByIndex(ri);
+                var name = this.RuneIdByIndex(ri);
                 if (name == null) continue;
                 var e = this.Settings.GlowRunes.Find(
                     g => g.Show && string.Equals(g.Rune, name, StringComparison.Ordinal));
@@ -1165,7 +1414,11 @@ namespace RunecraftHelper
             }
 
             foreach (var m in matched)
-                if (m.w >= best && !v.GlowRuneLabels.Contains(m.name)) v.GlowRuneLabels.Add(m.name);
+                if (m.w >= best)
+                {
+                    var displayName = this.RuneDisplayName(m.name);
+                    if (!v.GlowRuneLabels.Contains(displayName)) v.GlowRuneLabels.Add(displayName);
+                }
         }
 
         // For the open Combinations panel: the watched rune name a given recipe would place on the open
@@ -1181,10 +1434,10 @@ namespace RunecraftHelper
             foreach (var g in open.GlowSockets)
             {
                 if (g < 0 || g >= mr.runeIdx.Count) continue;
-                var name = this.RuneNameByIndex(mr.runeIdx[g]);
+                var name = this.RuneIdByIndex(mr.runeIdx[g]);
                 if (name != null &&
                     this.Settings.GlowRunes.Exists(e => e.Show && string.Equals(e.Rune, name, StringComparison.Ordinal)))
-                    return name;
+                    return this.RuneDisplayName(name);
             }
 
             return string.Empty;
@@ -1200,10 +1453,10 @@ namespace RunecraftHelper
                     ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
                     new Vector2(0f, Math.Min(runes.Count + 1, 10) * ImGui.GetFrameHeightWithSpacing())))
             {
-                ImGui.TableSetupColumn("Show", ImGuiTableColumnFlags.WidthFixed, 40f);
-                ImGui.TableSetupColumn("Weight", ImGuiTableColumnFlags.WidthFixed, 66f);
-                ImGui.TableSetupColumn("Rune", ImGuiTableColumnFlags.WidthFixed, 92f);
-                ImGui.TableSetupColumn("Effect", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("table.show", "Show"), ImGuiTableColumnFlags.WidthFixed, 40f);
+                ImGui.TableSetupColumn(this.PluginText.T("table.weight", "Weight"), ImGuiTableColumnFlags.WidthFixed, 66f);
+                ImGui.TableSetupColumn(this.PluginText.T("table.rune", "Rune"), ImGuiTableColumnFlags.WidthFixed, 92f);
+                ImGui.TableSetupColumn(this.PluginText.T("table.effect", "Effect"), ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableSetupColumn("##rm", ImGuiTableColumnFlags.WidthFixed, 22f);
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
@@ -1224,17 +1477,17 @@ namespace RunecraftHelper
 
                     ImGui.TableSetColumnIndex(2);
                     ImGui.AlignTextToFramePadding();
-                    ImGui.TextUnformatted(g.Rune);
+                    ImGui.TextUnformatted(this.RuneDisplayName(g.Rune));
 
                     ImGui.TableSetColumnIndex(3);
                     ImGui.AlignTextToFramePadding();
-                    ImGui.TextDisabled(RuneEffects.TryGetValue(g.Rune, out var eff) ? eff : string.Empty);
+                    ImGui.TextDisabled(this.RuneEffectText(g.Rune));
 
                     ImGui.TableSetColumnIndex(4);
                     if (Array.IndexOf(DefaultGlowRuneNames, g.Rune) < 0)   // defaults can't be removed
                     {
                         if (ImGui.SmallButton("×")) removeKey = g.Rune;
-                        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Remove from table");
+                        if (ImGui.IsItemHovered()) ImGui.SetTooltip(this.PluginText.T("button.remove_from_table", "Remove from table"));
                     }
 
                     ImGui.PopID();
@@ -1247,13 +1500,14 @@ namespace RunecraftHelper
                 runes.RemoveAll(g => string.Equals(g.Rune, removeKey, StringComparison.Ordinal));
 
             // Add a rune not already in the table (all 34, with their effect).
-            if (ImGui.BeginCombo("Add rune", "+ add…", ImGuiComboFlags.HeightLarge))
+            if (ImGui.BeginCombo(this.PluginText.Label("settings.add_rune", "Add rune", "RunecraftAddRune"), this.PluginText.T("button.add", "+ add..."), ImGuiComboFlags.HeightLarge))
             {
                 foreach (var name in AllRuneNames)
                 {
                     if (runes.Exists(g => string.Equals(g.Rune, name, StringComparison.Ordinal))) continue;
-                    var eff = RuneEffects.TryGetValue(name, out var e) ? e : string.Empty;
-                    if (ImGui.Selectable($"{name}  —  {eff}"))
+                    var displayName = this.RuneDisplayName(name);
+                    var effect = this.RuneEffectText(name);
+                    if (ImGui.Selectable($"{displayName}  -  {effect}"))
                         runes.Add(new GlowRuneEntry { Rune = name, Weight = 100f, Show = true });
                 }
 
@@ -1308,6 +1562,15 @@ namespace RunecraftHelper
             public int pos { get; set; }   // 1-based anchor position
             public int size { get; set; }
             public int minLevel { get; set; }
+        }
+
+        private sealed class RuneInfo
+        {
+            [JsonProperty("translates")]
+            public Dictionary<string, string>? Translates { get; set; }
+
+            [JsonProperty("effects")]
+            public Dictionary<string, string>? Effects { get; set; }
         }
 
         private sealed class MonoRecipe

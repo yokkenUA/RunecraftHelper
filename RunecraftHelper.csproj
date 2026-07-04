@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GameHelper\GameHelper.csproj">
+    <ProjectReference Include="$(GameHelperCoreDir)\GameHelper\GameHelper.csproj">
       <Private>false</Private>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </ProjectReference>
@@ -33,6 +33,11 @@
     <Content Include="relic_mods_en.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- Rune display names extracted from the local game Mods.datc64 language data. -->
+    <Content Include="json\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>json\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
     <!-- Reward-marker icons sliced from the game minimap sheet by extract_minimap_icons.py. -->
     <Content Include="icons\**\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -41,11 +46,13 @@
   </ItemGroup>
 
   <Target Name="CopyFiles" AfterTargets="Build">
-    <Copy SourceFiles="$(OutDir)$(TargetName)$(TargetExt);$(OutDir)$(TargetName).pdb;$(OutDir)expedition2_recipes.json;$(OutDir)relic_mods_en.json;" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(OutDir)$(TargetName)$(TargetExt);$(OutDir)$(TargetName).pdb;$(OutDir)expedition2_recipes.json;$(OutDir)relic_mods_en.json;" DestinationFolder="$(GameHelperPluginDeployDir)" SkipUnchangedFiles="true" />
     <ItemGroup>
+      <RuneJsonFiles Include="$(OutDir)json\**\*.json" />
       <RewardIconFiles Include="$(OutDir)icons\**\*.png" />
     </ItemGroup>
-    <Copy SourceFiles="@(RewardIconFiles)" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)\icons\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RuneJsonFiles)" DestinationFolder="$(GameHelperPluginDeployDir)\json\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(RewardIconFiles)" DestinationFolder="$(GameHelperPluginDeployDir)\icons\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

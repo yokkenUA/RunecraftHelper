@@ -397,6 +397,7 @@ namespace RunecraftHelper
         private readonly object expResultLock = new();
         private ExpRouteResult? expPendingResult;
         private string expPendingFingerprint = string.Empty;
+        private int expComputeGeneration;
 
         // Last-plan instrumentation (surfaced in the planner window), set on apply from the finished result.
         private double expLastComputeMs;
@@ -678,7 +679,12 @@ namespace RunecraftHelper
 
                 // Drop any in-flight / pending background plan from the previous area (a late result would be
                 // stale; the fingerprint would flag it anyway, but clear so the button doesn't stick on "Cooking").
-                lock (this.expResultLock) { this.expPendingResult = null; }
+                lock (this.expResultLock)
+                {
+                    this.expComputeGeneration++;
+                    this.expPendingResult = null;
+                    this.expPendingFingerprint = string.Empty;
+                }
                 this.expComputing = false;
 
                 // Map modifiers are per-map (read off the new map) — reset to 0 each area so they DON'T carry
@@ -1317,71 +1323,76 @@ namespace RunecraftHelper
                 return;
             }
 
-            ImGui.Text($"Scan: {this.expScanStatus}");
-            ImGui.Separator();
-
-            if (this.expHasDetonator)
-                ImGui.Text($"Detonator: ({this.expDetonatorPos.X:F0}, {this.expDetonatorPos.Y:F0})");
-            else
-                ImGui.TextDisabled("Detonator: not found");
-
-            if (this.expCtrlResolved)
+            try
             {
-                int remaining = this.expTotalCharges - this.expPlacedFromCtrl;
-                ImGui.Text($"Charges: total {this.expTotalCharges}  ·  placed {this.expPlacedFromCtrl} (ctrl) / " +
-                           $"{this.expPlacedFromEntities} (entities)  ·  remaining {remaining}");
-                ImGui.TextDisabled($"controller source: {this.expCtrlSource}");
-            }
-            else
-            {
-                ImGui.TextDisabled($"Charges: controller not resolved  ·  placed {this.expPlacedFromEntities} (entities)");
-            }
+                ImGui.Text($"Scan: {this.expScanStatus}");
+                ImGui.Separator();
 
-            int chests = 0, markers = 0, remnants = 0, monos = 0;
-            foreach (var it in this.expItems)
-            {
-                switch (it.Kind)
+                if (this.expHasDetonator)
+                    ImGui.Text($"Detonator: ({this.expDetonatorPos.X:F0}, {this.expDetonatorPos.Y:F0})");
+                else
+                    ImGui.TextDisabled("Detonator: not found");
+
+                if (this.expCtrlResolved)
                 {
-                    case ExpKind.Chest: chests++; break;
-                    case ExpKind.Marker: markers++; break;
-                    case ExpKind.Remnant: remnants++; break;
-                    case ExpKind.Monolith: monos++; break;
+                    int remaining = this.expTotalCharges - this.expPlacedFromCtrl;
+                    ImGui.Text($"Charges: total {this.expTotalCharges}  ·  placed {this.expPlacedFromCtrl} (ctrl) / " +
+                               $"{this.expPlacedFromEntities} (entities)  ·  remaining {remaining}");
+                    ImGui.TextDisabled($"controller source: {this.expCtrlSource}");
                 }
-            }
+                else
+                {
+                    ImGui.TextDisabled($"Charges: controller not resolved  ·  placed {this.expPlacedFromEntities} (entities)");
+                }
 
-            ImGui.Separator();
-            ImGui.Text($"Targets — chests {chests} · markers {markers} · remnants {remnants} · monoliths {monos}");
-            ImGui.TextDisabled("charges: S/P/C = straight / A* path / A* raw-cost, from the PREVIOUS chain node");
-            ImGui.Spacing();
-
-            if (ImGui.BeginTable("expitems", 6,
-                    ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY))
-            {
-                ImGui.TableSetupColumn("kind", ImGuiTableColumnFlags.WidthFixed, 64f);
-                ImGui.TableSetupColumn("grid", ImGuiTableColumnFlags.WidthFixed, 88f);
-                ImGui.TableSetupColumn("S", ImGuiTableColumnFlags.WidthFixed, 42f);
-                ImGui.TableSetupColumn("P", ImGuiTableColumnFlags.WidthFixed, 42f);
-                ImGui.TableSetupColumn("C", ImGuiTableColumnFlags.WidthFixed, 42f);
-                ImGui.TableSetupColumn("info", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupScrollFreeze(0, 1);
-                ImGui.TableHeadersRow();
-
+                int chests = 0, markers = 0, remnants = 0, monos = 0;
                 foreach (var it in this.expItems)
                 {
-                    ImGui.TableNextRow();
-                    ImGui.TableSetColumnIndex(0); ImGui.Text(it.Kind == ExpKind.Charge ? $"chg#{it.ChainIndex}" : it.Kind.ToString());
-                    ImGui.TableSetColumnIndex(1); ImGui.Text($"{it.Pos.X:F0}, {it.Pos.Y:F0}");
-                    ImGui.TableSetColumnIndex(2); ImGui.Text(it.Straight >= 0f ? it.Straight.ToString("F0") : "-");
-                    ImGui.TableSetColumnIndex(3); ImGui.Text(it.Path >= 0f ? it.Path.ToString("F0") : "-");
-                    ImGui.TableSetColumnIndex(4); ImGui.Text(it.Cost >= 0f ? it.Cost.ToString("F0") : "-");
-                    ImGui.TableSetColumnIndex(5);
-                    ImGui.Text(it.Value > 0 ? $"{it.Info}  ({it.Value:F0} ex)" : it.Info);
+                    switch (it.Kind)
+                    {
+                        case ExpKind.Chest: chests++; break;
+                        case ExpKind.Marker: markers++; break;
+                        case ExpKind.Remnant: remnants++; break;
+                        case ExpKind.Monolith: monos++; break;
+                    }
                 }
 
-                ImGui.EndTable();
-            }
+                ImGui.Separator();
+                ImGui.Text($"Targets — chests {chests} · markers {markers} · remnants {remnants} · monoliths {monos}");
+                ImGui.TextDisabled("charges: S/P/C = straight / A* path / A* raw-cost, from the PREVIOUS chain node");
+                ImGui.Spacing();
 
-            ImGui.End();
+                if (ImGui.BeginTable("expitems", 6,
+                        ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY))
+                {
+                    ImGui.TableSetupColumn("kind", ImGuiTableColumnFlags.WidthFixed, 64f);
+                    ImGui.TableSetupColumn("grid", ImGuiTableColumnFlags.WidthFixed, 88f);
+                    ImGui.TableSetupColumn("S", ImGuiTableColumnFlags.WidthFixed, 42f);
+                    ImGui.TableSetupColumn("P", ImGuiTableColumnFlags.WidthFixed, 42f);
+                    ImGui.TableSetupColumn("C", ImGuiTableColumnFlags.WidthFixed, 42f);
+                    ImGui.TableSetupColumn("info", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupScrollFreeze(0, 1);
+                    ImGui.TableHeadersRow();
+
+                    foreach (var it in this.expItems)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableSetColumnIndex(0); ImGui.Text(it.Kind == ExpKind.Charge ? $"chg#{it.ChainIndex}" : it.Kind.ToString());
+                        ImGui.TableSetColumnIndex(1); ImGui.Text($"{it.Pos.X:F0}, {it.Pos.Y:F0}");
+                        ImGui.TableSetColumnIndex(2); ImGui.Text(it.Straight >= 0f ? it.Straight.ToString("F0") : "-");
+                        ImGui.TableSetColumnIndex(3); ImGui.Text(it.Path >= 0f ? it.Path.ToString("F0") : "-");
+                        ImGui.TableSetColumnIndex(4); ImGui.Text(it.Cost >= 0f ? it.Cost.ToString("F0") : "-");
+                        ImGui.TableSetColumnIndex(5);
+                        ImGui.Text(it.Value > 0 ? $"{it.Info}  ({it.Value:F0} ex)" : it.Info);
+                    }
+
+                    ImGui.EndTable();
+                }
+            }
+            finally
+            {
+                ImGui.End();
+            }
         }
 
         private const float ExpWorldPerGrid = 250f / 23f;
@@ -1698,10 +1709,12 @@ namespace RunecraftHelper
                 foreach (var kv in new SortedDictionary<string, float>(bp.Weights, StringComparer.Ordinal))
                     bb.Append(kv.Key).Append('=').Append(kv.Value.ToString("F2")).Append(',');
 
+            var markerTierWeights = $"{s.ExpMarkerWeightWhite},{s.ExpMarkerWeightMagic},{s.ExpMarkerWeightGold},{s.ExpMarkerWeightLogbook}";
+
             return $"{s.ExpPlacementDistancePct}|{s.ExpBlastRadiusPct}|{s.ExpMonolithMinEx}|" +
                    $"{wb}|{mb}|{monoN}|{monoSum:F0}|{anchor.X:F0},{anchor.Y:F0}|" +
-                   $"{this.ExpEffectiveTotal()}|{this.expCtrlResolved}|{this.expHasDetonator}|" +
-                   $"{s.ExpMinMarkersPerSpareCharge}|{bb}|{rb}";
+                   $"{this.ExpEffectiveTotal()}|{this.expCtrlResolved}|{this.expHudResolved}|{this.ExpCurrentIsGrand()}|{this.expHasDetonator}|" +
+                   $"{s.ExpMinMarkersPerSpareCharge}|{markerTierWeights}|{bb}|{rb}";
         }
 
         // Total charges to plan for: controller count if resolved → else the HUD-counter total (remaining +
@@ -1854,6 +1867,13 @@ namespace RunecraftHelper
         {
             if (this.expComputing) return;
             var inp = this.BuildRouteInputs();
+            int generation;
+            lock (this.expResultLock)
+            {
+                generation = this.expComputeGeneration;
+                this.expPendingResult = null;
+                this.expPendingFingerprint = string.Empty;
+            }
             this.expComputing = true;
             Task.Run(() =>
             {
@@ -1862,6 +1882,7 @@ namespace RunecraftHelper
                 catch { res = new ExpRouteResult(); }   // a bg-thread throw must never take the plugin down
                 lock (this.expResultLock)
                 {
+                    if (generation != this.expComputeGeneration) return;
                     this.expPendingResult = res;
                     this.expPendingFingerprint = fingerprint;
                 }
@@ -3145,8 +3166,8 @@ namespace RunecraftHelper
         private void DrawExpeditionTargetProfileSettings()
         {
             var s = this.Settings;
-            ImGui.TextDisabled("Weight each reward marker (0 = ignore, blank types default to 1). Monoliths are\n" +
-                "valued by their real reward price — this profile only weights the markers.");
+            ImGui.TextDisabled(this.PluginText.T("expedition.target_profile_help", "Weight each reward marker (0 = ignore, blank types default to 1). Monoliths are\n" +
+                "valued by their real reward price - this profile only weights the markers."));
 
             this.ExpActiveTargetProfile();   // ensure migration / non-empty before the picker
             var profile = this.ExpProfilePicker("target", s.ExpTargetProfiles, ref s.ExpActiveTargetProfile, "Default");
@@ -3174,14 +3195,14 @@ namespace RunecraftHelper
             float iconSz = ImGui.GetTextLineHeight() + 4f;
             if (rewardRows.Count == 0)
             {
-                ImGui.TextDisabled("(no reward markers discovered yet)");
+                ImGui.TextDisabled(this.PluginText.T("expedition.no_reward_markers", "(no reward markers discovered yet)"));
             }
             else if (ImGui.BeginTable("exprewards", 3,
                          ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
                          new Vector2(0f, Math.Min(rewardRows.Count + 1, 9) * ImGui.GetFrameHeightWithSpacing())))
             {
-                ImGui.TableSetupColumn("Reward", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("Weight", ImGuiTableColumnFlags.WidthFixed, 120f);
+                ImGui.TableSetupColumn(this.PluginText.T("table.reward", "Reward"), ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("table.weight", "Weight"), ImGuiTableColumnFlags.WidthFixed, 120f);
                 ImGui.TableSetupColumn("##rm", ImGuiTableColumnFlags.WidthFixed, 22f);
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
@@ -3222,7 +3243,7 @@ namespace RunecraftHelper
                     if (profile.Weights.ContainsKey(icon))
                     {
                         if (ImGui.SmallButton($"×##rm_{icon}")) removeKey = icon;
-                        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Remove from table");
+                        if (ImGui.IsItemHovered()) ImGui.SetTooltip(this.PluginText.T("button.remove_from_table", "Remove from table"));
                     }
                 }
 
@@ -3230,7 +3251,7 @@ namespace RunecraftHelper
                 if (removeKey != null) profile.Weights.Remove(removeKey);
             }
 
-            if (ImGui.BeginCombo("Add reward type", "+ add…", ImGuiComboFlags.HeightLarge))
+            if (ImGui.BeginCombo(this.PluginText.Label("settings.add_reward_type", "Add reward type", "RunecraftAddRewardType"), this.PluginText.T("button.add", "+ add..."), ImGuiComboFlags.HeightLarge))
             {
                 foreach (var kv in ExpRewardLabels)
                 {
@@ -3244,9 +3265,9 @@ namespace RunecraftHelper
             }
 
             ImGui.SameLine();
-            if (ImGui.SmallButton("reset values")) profile.Weights.Clear();
+            if (ImGui.SmallButton(this.PluginText.Label("button.reset_values", "reset values", "RunecraftResetRewardValues"))) profile.Weights.Clear();
             ImGui.SameLine();
-            if (ImGui.SmallButton("reload icons")) this.expRewardIconCache.Clear();
+            if (ImGui.SmallButton(this.PluginText.Label("button.reload_icons", "reload icons", "RunecraftReloadRewardIcons"))) this.expRewardIconCache.Clear();
         }
 
         // Combo-only profile selector for the planner window (management — new/rename/delete — lives in settings).
@@ -3305,9 +3326,9 @@ namespace RunecraftHelper
         {
             var s = this.Settings;
             this.LoadRelicModNamesIfNeeded();
-            ImGui.TextDisabled("Weight each relic mod (a plain weight, not ex). A relic becomes a route target when its\n" +
-                "Σ(+ weights) − Σ(− weights) is > 0; otherwise it's ignored. Both columns take positive\n" +
-                "numbers — the − column is an avoidance penalty. Stored by internal mod id (any language).");
+            ImGui.TextDisabled(this.PluginText.T("expedition.buff_profile_help", "Weight each relic mod (a plain weight, not ex). A relic becomes a route target when its\n" +
+                "sum(+ weights) - sum(- weights) is > 0; otherwise it's ignored. Both columns take positive\n" +
+                "numbers - the - column is an avoidance penalty. Stored by internal mod id (any language)."));
 
             var profile = this.ExpProfilePicker("buff", s.ExpBuffProfiles, ref s.ExpActiveBuffProfile, "Default");
             var w = profile.Weights;
@@ -3317,8 +3338,8 @@ namespace RunecraftHelper
                     ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
                     new Vector2(0f, Math.Min(rows + 1, 8) * ImGui.GetFrameHeightWithSpacing())))
             {
-                ImGui.TableSetupColumn("Upside  (+)", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("Downside  (−)", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("table.upside", "Upside  (+)"), ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(this.PluginText.T("table.downside", "Downside  (-)"), ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
 
@@ -3336,7 +3357,7 @@ namespace RunecraftHelper
                 ImGui.EndTable();
             }
 
-            if (ImGui.SmallButton("clear weights##buff")) w.Clear();
+            if (ImGui.SmallButton(this.PluginText.Label("button.clear_weights", "clear weights", "RunecraftClearBuffWeights"))) w.Clear();
         }
 
         // One relic-mod cell: a narrow weight input + the (localized) mod label. 0 removes the entry (keeps the
@@ -3376,15 +3397,15 @@ namespace RunecraftHelper
 
             // new / rename open a name-entry popup (seeded with "" / the current name); dup + del act at once.
             ImGui.SameLine();
-            if (ImGui.SmallButton($"new##{id}")) { this.expProfileInput = string.Empty; ImGui.OpenPopup($"newprofile##{id}"); }
+            if (ImGui.SmallButton(this.PluginText.Label("button.new", "new", $"RunecraftNewProfile_{id}"))) { this.expProfileInput = string.Empty; ImGui.OpenPopup($"newprofile##{id}"); }
             ImGui.SameLine();
-            if (ImGui.SmallButton($"rename##{id}")) { this.expProfileInput = profiles[sel].Name; ImGui.OpenPopup($"renameprofile##{id}"); }
+            if (ImGui.SmallButton(this.PluginText.Label("button.rename", "rename", $"RunecraftRenameProfile_{id}"))) { this.expProfileInput = profiles[sel].Name; ImGui.OpenPopup($"renameprofile##{id}"); }
             ImGui.SameLine();
-            if (ImGui.SmallButton($"dup##{id}"))
+            if (ImGui.SmallButton(this.PluginText.Label("button.duplicate_short", "dup", $"RunecraftDuplicateProfile_{id}")))
             {
                 var copy = new WeightProfile
                 {
-                    Name = profiles[sel].Name + " copy",
+                    Name = profiles[sel].Name + " " + this.PluginText.T("profile.copy_suffix", "copy"),
                     Weights = new Dictionary<string, float>(profiles[sel].Weights, StringComparer.Ordinal),
                 };
                 profiles.Add(copy); sel = profiles.Count - 1; activeName = copy.Name;
@@ -3392,7 +3413,7 @@ namespace RunecraftHelper
 
             ImGui.SameLine();
             ImGui.BeginDisabled(profiles.Count <= 1);
-            if (ImGui.SmallButton($"del##{id}"))
+            if (ImGui.SmallButton(this.PluginText.Label("button.delete_short", "del", $"RunecraftDeleteProfile_{id}")))
             {
                 profiles.RemoveAt(sel);
                 sel = Math.Clamp(sel, 0, profiles.Count - 1);
@@ -3401,14 +3422,14 @@ namespace RunecraftHelper
 
             ImGui.EndDisabled();
 
-            if (ExpProfileNamePopup($"newprofile##{id}", "New profile name", ref this.expProfileInput, out var created)
+            if (this.ExpProfileNamePopup($"newprofile##{id}", this.PluginText.T("profile.new_name", "New profile name"), ref this.expProfileInput, out var created)
                 && !ProfileNameExists(profiles, created))
             {
                 profiles.Add(new WeightProfile { Name = created });
                 sel = profiles.Count - 1; activeName = created;
             }
 
-            if (ExpProfileNamePopup($"renameprofile##{id}", "Rename profile", ref this.expProfileInput, out var renamed)
+            if (this.ExpProfileNamePopup($"renameprofile##{id}", this.PluginText.T("profile.rename", "Rename profile"), ref this.expProfileInput, out var renamed)
                 && (string.Equals(renamed, profiles[sel].Name, StringComparison.Ordinal) || !ProfileNameExists(profiles, renamed)))
             {
                 profiles[sel].Name = renamed; activeName = renamed;
@@ -3422,7 +3443,7 @@ namespace RunecraftHelper
 
         // A small name-entry popup: text box + Save/Cancel, Enter = save. Returns true (with the trimmed name in
         // `result`) only on the frame the user confirms a non-blank name. Auto-focuses the field when it opens.
-        private static bool ExpProfileNamePopup(string popupId, string label, ref string buf, out string result)
+        private bool ExpProfileNamePopup(string popupId, string label, ref string buf, out string result)
         {
             result = string.Empty;
             bool confirmed = false;
@@ -3432,9 +3453,9 @@ namespace RunecraftHelper
                 if (ImGui.IsWindowAppearing()) ImGui.SetKeyboardFocusHere();
                 ImGui.SetNextItemWidth(220f);
                 bool enter = ImGui.InputText($"##{popupId}_in", ref buf, 48, ImGuiInputTextFlags.EnterReturnsTrue);
-                bool save = ImGui.Button($"Save##{popupId}") || enter;
+                bool save = ImGui.Button(this.PluginText.Label("button.save", "Save", $"Save_{popupId}")) || enter;
                 ImGui.SameLine();
-                bool cancel = ImGui.Button($"Cancel##{popupId}");
+                bool cancel = ImGui.Button(this.PluginText.Label("button.cancel", "Cancel", $"Cancel_{popupId}"));
                 if (save && !string.IsNullOrWhiteSpace(buf)) { result = buf.Trim(); confirmed = true; ImGui.CloseCurrentPopup(); }
                 else if (cancel) ImGui.CloseCurrentPopup();
                 ImGui.EndPopup();
@@ -3468,13 +3489,15 @@ namespace RunecraftHelper
             this.DrawExpeditionNextPointWorld();
 
             ImGui.SetNextWindowSize(new Vector2(340f, 0f), ImGuiCond.FirstUseEver);
-            if (!ImGui.Begin("Expedition Planner###RunecraftExpeditionPlanner"))
+            if (!ImGui.Begin(this.PluginText.Title("window.expedition_planner", "Expedition Planner", "RunecraftExpeditionPlanner")))
             {
                 ImGui.End();
                 return;
             }
 
-            var s = this.Settings;
+            try
+            {
+                var s = this.Settings;
 
             // The plan is "stale" when anything it depends on changed since the last Run (or after an area
             // change, which clears the stored fingerprint). The Run button is the ONLY thing that recomputes.
@@ -3484,18 +3507,18 @@ namespace RunecraftHelper
             if (this.expCtrlResolved)
             {
                 int left = this.expTotalCharges - this.expPlacedFromCtrl;
-                ImGui.Text($"Charges: {left} left / {this.expTotalCharges} total" +
-                           (ExpIsGrand(this.expTotalCharges) ? "  (Grand)" : string.Empty));
+                ImGui.Text(this.PluginText.F("expedition.charges.ctrl", "Charges: {0} left / {1} total{2}", left, this.expTotalCharges,
+                    ExpIsGrand(this.expTotalCharges) ? this.PluginText.T("expedition.grand_suffix", "  (Grand)") : string.Empty));
             }
             else if (this.expHudResolved)
             {
                 int left = Math.Max(0, this.expHudTotal - this.expPlacedFromEntities);
-                ImGui.Text($"Charges: {left} left / {this.expHudTotal} total (HUD) · {this.expPlacedFromEntities} placed");
+                ImGui.Text(this.PluginText.F("expedition.charges.hud", "Charges: {0} left / {1} total (HUD) - {2} placed", left, this.expHudTotal, this.expPlacedFromEntities));
             }
             else
             {
                 int left = Math.Max(0, s.ExpTotalChargesManual - this.expPlacedFromEntities);
-                ImGui.Text($"Charges: {left} left / {s.ExpTotalChargesManual} (manual) · {this.expPlacedFromEntities} placed");
+                ImGui.Text(this.PluginText.F("expedition.charges.manual", "Charges: {0} left / {1} (manual) - {2} placed", left, s.ExpTotalChargesManual, this.expPlacedFromEntities));
             }
 
             // Run button, right-aligned on the header line. While the background planner runs it reads
@@ -3507,7 +3530,7 @@ namespace RunecraftHelper
             if (this.expComputing)
             {
                 ImGui.BeginDisabled();
-                ImGui.Button("Cooking...", new Vector2(runW, 0f));
+                ImGui.Button(this.PluginText.Label("button.cooking", "Cooking...", "RunecraftRouteCooking"), new Vector2(runW, 0f));
                 ImGui.EndDisabled();
             }
             else
@@ -3519,7 +3542,9 @@ namespace RunecraftHelper
                     ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.16f, 0.45f, 0.16f, 1f));
                 }
 
-                if (ImGui.Button(routeStale ? "Run*" : "Run", new Vector2(runW, 0f)))
+                if (ImGui.Button(routeStale
+                        ? this.PluginText.Label("button.run_stale", "Run*", "RunecraftRunRoute")
+                        : this.PluginText.Label("button.run", "Run", "RunecraftRunRoute"), new Vector2(runW, 0f)))
                 {
                     this.LaunchRouteCompute(routeFp);
                 }
@@ -3527,8 +3552,8 @@ namespace RunecraftHelper
                 if (routeStale) ImGui.PopStyleColor(3);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(routeStale
-                        ? "Settings changed — click to (re)build the route."
-                        : "Route is up to date.");
+                        ? this.PluginText.T("tooltip.route_stale", "Settings changed - click to (re)build the route.")
+                        : this.PluginText.T("tooltip.route_current", "Route is up to date."));
             }
 
             // Neither the controller nor the HUD counter could be read this scan — let the player set the total so
@@ -3536,39 +3561,39 @@ namespace RunecraftHelper
             if (!this.expCtrlResolved && !this.expHudResolved)
             {
                 ImGui.SetNextItemWidth(120f);
-                if (ImGui.InputInt("Total charges (manual)", ref s.ExpTotalChargesManual) && s.ExpTotalChargesManual < 1)
+                if (ImGui.InputInt(this.PluginText.Label("settings.total_charges_manual", "Total charges (manual)", "RunecraftTotalChargesManual"), ref s.ExpTotalChargesManual) && s.ExpTotalChargesManual < 1)
                     s.ExpTotalChargesManual = 1;
-                ImGui.TextDisabled("Controller + HUD unreadable — set total to match the in-game counter, then Run.");
+                ImGui.TextDisabled(this.PluginText.T("settings.total_charges_manual_help", "Controller + HUD unreadable - set total to match the in-game counter, then Run."));
             }
 
             if (this.expLastComputeMs > 0)
             {
-                ImGui.TextDisabled($"last plan: {this.expLastComputeMs:F0} ms · A* {this.expLastAStarCalls} run = {this.expLastAStarMs:F0} ms · {this.expLastAStarHits} cached");
+                ImGui.TextDisabled(this.PluginText.F("expedition.last_plan", "last plan: {0:F0} ms - A* {1} run = {2:F0} ms - {3} cached", this.expLastComputeMs, this.expLastAStarCalls, this.expLastAStarMs, this.expLastAStarHits));
                 if (this.expLastPhase.Length > 0) ImGui.TextDisabled(this.expLastPhase);
             }
 
-            ImGui.SeparatorText("Map modifiers");
-            ImGui.SliderInt("Placement dist +%", ref s.ExpPlacementDistancePct, 0, 100);
-            ImGui.SliderInt("Blast radius +%", ref s.ExpBlastRadiusPct, 0, 100);
+            ImGui.SeparatorText(this.PluginText.T("section.map_modifiers", "Map modifiers"));
+            ImGui.SliderInt(this.PluginText.Label("settings.placement_dist_pct", "Placement dist +%", "RunecraftPlacementDistPct"), ref s.ExpPlacementDistancePct, 0, 100);
+            ImGui.SliderInt(this.PluginText.Label("settings.blast_radius_pct", "Blast radius +%", "RunecraftBlastRadiusPct"), ref s.ExpBlastRadiusPct, 0, 100);
             float effDist = this.ExpBasePlacementDistance() * (1f + (s.ExpPlacementDistancePct / 100f));
             float effRadius = this.ExpBaseBlastRadius() * (1f + (s.ExpBlastRadiusPct / 100f));
-            ImGui.TextDisabled($"→ distance {effDist:F0} grid · radius {effRadius:F0} grid · " +
-                               $"{(this.ExpCurrentIsGrand() ? "Grand" : "normal")} base  (reset each map)");
+            ImGui.TextDisabled(this.PluginText.F("expedition.effective_mods", "distance {0:F0} grid - radius {1:F0} grid - {2} base  (reset each map)",
+                effDist, effRadius, this.ExpCurrentIsGrand() ? this.PluginText.T("expedition.type.grand", "Grand") : this.PluginText.T("expedition.type.normal", "normal")));
 
-            ImGui.SeparatorText("Targets to route");
+            ImGui.SeparatorText(this.PluginText.T("section.targets_to_route", "Targets to route"));
 
-            ImGui.InputFloat("Monolith min (ex)", ref s.ExpMonolithMinEx, 1f, 10f, "%.0f");
+            ImGui.InputFloat(this.PluginText.Label("settings.monolith_min_ex", "Monolith min (ex)", "RunecraftMonolithMinEx"), ref s.ExpMonolithMinEx, 1f, 10f, "%.0f");
             if (s.ExpMonolithMinEx < 0f) s.ExpMonolithMinEx = 0f;
-            ImGui.TextDisabled("Monoliths with best reward ≥ this are routed.");
+            ImGui.TextDisabled(this.PluginText.T("settings.monolith_min_ex_help", "Monoliths with best reward at or above this are routed."));
 
             // Weight profiles (Reward + Buff) exist only on Grand expeditions — a normal Expedition has no
             // reward/buff tables to weight, so the controls are hidden once we know the current map is normal.
             if (!this.ExpCurrentIsNormal())
             {
                 ImGui.Spacing();
-                ImGui.TextDisabled("Weight profiles (create / edit the tables in Settings → Show route planner):");
-                this.ExpProfileCombo("plantarget", s.ExpTargetProfiles, ref s.ExpActiveTargetProfile, "Reward profile", "Default");
-                this.ExpProfileCombo("planbuff", s.ExpBuffProfiles, ref s.ExpActiveBuffProfile, "Buff profile", "Default");
+                ImGui.TextDisabled(this.PluginText.T("settings.weight_profiles_help", "Weight profiles (create / edit the tables in Settings -> Show route planner):"));
+                this.ExpProfileCombo("plantarget", s.ExpTargetProfiles, ref s.ExpActiveTargetProfile, this.PluginText.T("profile.reward", "Reward profile"), "Default");
+                this.ExpProfileCombo("planbuff", s.ExpBuffProfiles, ref s.ExpActiveBuffProfile, this.PluginText.T("profile.buff", "Buff profile"), "Default");
 
                 // Spare-charge marker gate: leftover charges after the monoliths only land where one blast covers
                 // ≥ N markers — so they hit dense clusters, never single (possibly-trash) markers. We can't tier
@@ -3576,10 +3601,10 @@ namespace RunecraftHelper
                 // Expedition this is forced to 1 in ExpComputeRoute (see MinMarkers there), so the knob is hidden.
                 ImGui.Spacing();
                 ImGui.SetNextItemWidth(120f);
-                ImGui.SliderInt("Min markers / spare charge", ref s.ExpMinMarkersPerSpareCharge, 1, 3);
+                ImGui.SliderInt(this.PluginText.Label("settings.min_markers_per_spare_charge", "Min markers / spare charge", "RunecraftMinMarkersPerSpareCharge"), ref s.ExpMinMarkersPerSpareCharge, 1, 3);
                 if (s.ExpMinMarkersPerSpareCharge < 1) s.ExpMinMarkersPerSpareCharge = 1;
                 if (s.ExpMinMarkersPerSpareCharge > 3) s.ExpMinMarkersPerSpareCharge = 3;
-                ImGui.TextDisabled("After monoliths, a spare charge is used only if it covers this many\nmarkers at once (normal maps; Grand routes every weighted target).");
+                ImGui.TextDisabled(this.PluginText.T("settings.min_markers_per_spare_charge_help", "After monoliths, a spare charge is used only if it covers this many\nmarkers at once (normal maps; Grand routes every weighted target)."));
             }
 
             // Expedition targets (reward-flag value by height tier). Normal-expedition only — flags/height
@@ -3587,18 +3612,22 @@ namespace RunecraftHelper
             if (!this.ExpCurrentIsGrand())
             {
                 ImGui.Spacing();
-                ImGui.SeparatorText("Expedition targets");
+                ImGui.SeparatorText(this.PluginText.T("section.expedition_targets", "Expedition targets"));
                 ImGui.SetNextItemWidth(120f);
-                ImGui.SliderInt("White remnant chests",   ref s.ExpMarkerWeightWhite,   0, 500);
+                ImGui.SliderInt(this.PluginText.Label("settings.marker_weight_white", "White remnant chests", "RunecraftMarkerWeightWhite"), ref s.ExpMarkerWeightWhite, 0, 500);
                 ImGui.SetNextItemWidth(120f);
-                ImGui.SliderInt("Magic remnant chests",   ref s.ExpMarkerWeightMagic,   0, 500);
+                ImGui.SliderInt(this.PluginText.Label("settings.marker_weight_magic", "Magic remnant chests", "RunecraftMarkerWeightMagic"), ref s.ExpMarkerWeightMagic, 0, 500);
                 ImGui.SetNextItemWidth(120f);
-                ImGui.SliderInt("Gold remnant chests",    ref s.ExpMarkerWeightGold,    0, 500);
+                ImGui.SliderInt(this.PluginText.Label("settings.marker_weight_gold", "Gold remnant chests", "RunecraftMarkerWeightGold"), ref s.ExpMarkerWeightGold, 0, 500);
                 ImGui.SetNextItemWidth(120f);
-                ImGui.SliderInt("Logbook flag (tall 2▲)", ref s.ExpMarkerWeightLogbook, 0, 1000);
+                ImGui.SliderInt(this.PluginText.Label("settings.marker_weight_logbook", "Logbook flag (tall 2)", "RunecraftMarkerWeightLogbook"), ref s.ExpMarkerWeightLogbook, 0, 1000);
             }
 
-            ImGui.End();
+            }
+            finally
+            {
+                ImGui.End();
+            }
         }
     }
 }
