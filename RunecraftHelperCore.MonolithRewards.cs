@@ -5,6 +5,7 @@ namespace RunecraftHelper
     using System.IO;
     using System.Numerics;
     using GameHelper;
+    using GameHelper.Localization;
     using GameHelper.RemoteEnums.Entity;
     using GameHelper.RemoteObjects.Components;
     using GameHelper.RemoteObjects.States.InGameStateObjects;
@@ -117,6 +118,156 @@ namespace RunecraftHelper
 
         // Watch-table rows the user can toggle off but not delete (seeded on first use).
         private static readonly string[] DefaultGlowRuneNames = { "Time", "Death", "Bond", "Power", "Opulent" };
+
+        // Optional localized names/effects from json/runes.json (poe2-style translates/effects maps).
+        // Loaded lazily so the settings glow-rune table works before any monolith scan.
+        private Dictionary<string, RuneInfo> localizedRuneInfo = new(StringComparer.OrdinalIgnoreCase);
+        private bool runeTranslationsLoadTried;
+
+        private void EnsureRuneTranslationsLoaded()
+        {
+            if (this.runeTranslationsLoadTried)
+                return;
+
+            this.runeTranslationsLoadTried = true;
+            this.LoadRuneTranslations();
+        }
+
+        private void LoadRuneTranslations()
+        {
+            var path = Path.Join(this.DllDirectory, "json", "runes.json");
+            if (!File.Exists(path))
+                return;
+
+            try
+            {
+                var contents = JsonConvert.DeserializeObject<Dictionary<string, RuneInfo>>(File.ReadAllText(path));
+                if (contents == null)
+                    return;
+
+                this.localizedRuneInfo = new Dictionary<string, RuneInfo>(contents, StringComparer.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RunecraftHelper] rune translation json load failed: {ex.Message}");
+            }
+        }
+
+        private static string RuneTranslationLanguageKey(OverlayLanguage language) => language switch
+        {
+            OverlayLanguage.French => "french",
+            OverlayLanguage.German => "german",
+            OverlayLanguage.SpanishSpain => "spanish",
+            OverlayLanguage.Japanese => "japanese",
+            OverlayLanguage.Korean => "korean",
+            OverlayLanguage.PortugueseBrazil => "portuguese",
+            OverlayLanguage.Russian => "russian",
+            OverlayLanguage.Thai => "thai",
+            OverlayLanguage.ChineseSimplified => "simplified chinese",
+            OverlayLanguage.ChineseTraditional => "traditional chinese",
+            _ => "english",
+        };
+
+        private bool TryGetLocalizedRuneName(string rune, out string name)
+        {
+            name = string.Empty;
+            if (!this.localizedRuneInfo.TryGetValue(rune, out var info) || info.Translates == null)
+                return false;
+
+            var lang = RuneTranslationLanguageKey(OverlayLocalization.CurrentLanguage);
+            if (info.Translates.TryGetValue(lang, out var translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                name = translated;
+                return true;
+            }
+
+            if (info.Translates.TryGetValue("english", out translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                name = translated;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryGetLocalizedRuneEffect(string rune, out string effect)
+        {
+            effect = string.Empty;
+            if (!this.localizedRuneInfo.TryGetValue(rune, out var info) || info.Effects == null)
+                return false;
+
+            var lang = RuneTranslationLanguageKey(OverlayLocalization.CurrentLanguage);
+            if (info.Effects.TryGetValue(lang, out var translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                effect = translated;
+                return true;
+            }
+
+            if (info.Effects.TryGetValue("english", out translated) && !string.IsNullOrWhiteSpace(translated))
+            {
+                effect = translated;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static string ShortRuneDisplayName(string value)
+        {
+            var text = value.Trim();
+            if (text.EndsWith(" Rune", StringComparison.OrdinalIgnoreCase))
+                return text[..^5].Trim();
+            if (text.EndsWith("符文", StringComparison.Ordinal))
+                return text[..^2].Trim();
+            if (text.EndsWith(" 룬", StringComparison.Ordinal))
+                return text[..^2].Trim();
+            if (text.EndsWith("룬", StringComparison.Ordinal))
+                return text[..^1].Trim();
+            if (text.StartsWith("รูน", StringComparison.Ordinal))
+                return text[3..].Trim();
+            if (text.EndsWith("のルーン", StringComparison.Ordinal))
+                return text[..^4].Trim();
+            if (text.StartsWith("Руна ", StringComparison.OrdinalIgnoreCase))
+                return text[5..].Trim();
+            if (text.StartsWith("Rune d'", StringComparison.OrdinalIgnoreCase))
+                return text[7..].Trim();
+            if (text.StartsWith("Rune de ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Rune du ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Rune des ", StringComparison.OrdinalIgnoreCase))
+                return text[9..].Trim();
+            if (text.StartsWith("Runa de ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Runa do ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Runa da ", StringComparison.OrdinalIgnoreCase))
+                return text[8..].Trim();
+            if (text.StartsWith("Runa del ", StringComparison.OrdinalIgnoreCase))
+                return text[9..].Trim();
+            if (text.StartsWith("อักขระ", StringComparison.Ordinal))
+                return text[6..].Trim();
+            if (text.EndsWith("rune", StringComparison.OrdinalIgnoreCase) && text.Length > 4)
+                return text[..^4].Trim();
+            return text;
+        }
+
+        private string RuneDisplayName(string rune)
+        {
+            if (string.IsNullOrEmpty(rune)) return rune;
+            this.EnsureRuneTranslationsLoaded();
+            if (this.TryGetLocalizedRuneName(rune, out var localizedName))
+                return ShortRuneDisplayName(localizedName);
+            return ShortRuneDisplayName(rune);
+        }
+
+        private string RuneEffectText(string rune)
+        {
+            this.EnsureRuneTranslationsLoaded();
+            if (this.TryGetLocalizedRuneEffect(rune, out var effect))
+                return effect;
+            return RuneEffects.TryGetValue(rune, out var eff) ? eff : string.Empty;
+        }
 
         // Rune display name for an Expedition2Runes index (json map first, static fallback).
         private string? RuneNameByIndex(int idx) =>
@@ -1194,6 +1345,10 @@ namespace RunecraftHelper
         // DrawSettings under the "Show glow runes" toggle. Defaults can be toggled off but not deleted.
         private void DrawGlowRuneTable()
         {
+            // Settings can open before any monolith scan; load runes.json here so names/effects
+            // are localized without waiting for LoadMonolithData().
+            this.EnsureRuneTranslationsLoaded();
+
             var runes = this.Settings.GlowRunes;
             string? removeKey = null;
             if (ImGui.BeginTable("glowrunes", 5,
@@ -1224,11 +1379,11 @@ namespace RunecraftHelper
 
                     ImGui.TableSetColumnIndex(2);
                     ImGui.AlignTextToFramePadding();
-                    ImGui.TextUnformatted(g.Rune);
+                    ImGui.TextUnformatted(this.RuneDisplayName(g.Rune));
 
                     ImGui.TableSetColumnIndex(3);
                     ImGui.AlignTextToFramePadding();
-                    ImGui.TextDisabled(RuneEffects.TryGetValue(g.Rune, out var eff) ? eff : string.Empty);
+                    ImGui.TextDisabled(this.RuneEffectText(g.Rune));
 
                     ImGui.TableSetColumnIndex(4);
                     if (Array.IndexOf(DefaultGlowRuneNames, g.Rune) < 0)   // defaults can't be removed
@@ -1252,8 +1407,7 @@ namespace RunecraftHelper
                 foreach (var name in AllRuneNames)
                 {
                     if (runes.Exists(g => string.Equals(g.Rune, name, StringComparison.Ordinal))) continue;
-                    var eff = RuneEffects.TryGetValue(name, out var e) ? e : string.Empty;
-                    if (ImGui.Selectable($"{name}  —  {eff}"))
+                    if (ImGui.Selectable($"{this.RuneDisplayName(name)}  —  {this.RuneEffectText(name)}"))
                         runes.Add(new GlowRuneEntry { Rune = name, Weight = 100f, Show = true });
                 }
 
@@ -1363,6 +1517,15 @@ namespace RunecraftHelper
             public List<string> GlowRuneLabels = new(); // watched runes on glowing sockets to label on the map (weight-filtered)
             public List<int> GlowSockets = new();        // raw glowing socket indices (station+0x40); used by the panel rune overlay
             public List<MonoRecipe> Offered = new();     // recipes this monolith can roll (for glow-rune scan when no recipe is selected)
+        }
+
+        private sealed class RuneInfo
+        {
+            [JsonProperty("translates")]
+            public Dictionary<string, string>? Translates { get; set; }
+
+            [JsonProperty("effects")]
+            public Dictionary<string, string>? Effects { get; set; }
         }
 
         private sealed class MonoCand

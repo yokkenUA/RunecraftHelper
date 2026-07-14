@@ -33,6 +33,11 @@
     <Content Include="relic_mods_en.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- Optional localized rune names/effects for the glow-rune settings table. -->
+    <Content Include="json\runes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>json\runes.json</Link>
+    </Content>
     <!-- Reward-marker icons sliced from the game minimap sheet by extract_minimap_icons.py. -->
     <Content Include="icons\**\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -54,6 +59,10 @@
     </ItemGroup>
     <Copy SourceFiles="@(RewardIconFiles)" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)\icons\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(LocalizationFiles)" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)\Localization\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <RuneJsonFiles Include="$(OutDir)json\**\*.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RuneJsonFiles)" DestinationFolder="..\..\GameHelper\$(OutDir)Plugins\$(ProjectName)\json\%(RecursiveDir)" SkipUnchangedFiles="true" Condition="'@(RuneJsonFiles)' != ''" />
   </Target>
 
 </Project>
