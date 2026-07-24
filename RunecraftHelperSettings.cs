@@ -102,6 +102,11 @@ namespace RunecraftHelper
         public float MapValueXOffset = 0f;
         public float MapValueYOffset = 0f;
 
+        // Local co-op map centering (mirrors Radar's co-op map centering).
+        public bool AutoDetectCoopMode = true;
+        public bool EnableCoopMode = false;
+
+
         // ── Expedition planner (WIP, built brick-by-brick) ───────────────────
         // Brick 1: read-only debug window listing the detonator, explosive counts (from the in-game
         // controller), placed charges, and candidate targets. No map drawing / planning yet.

@@ -3,6 +3,7 @@ namespace RunecraftHelper
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Numerics;
     using System.Runtime.InteropServices;
     using System.Text;
@@ -10,6 +11,7 @@ namespace RunecraftHelper
     using GameHelper.Localization;
     using GameHelper.Plugin;
     using GameHelper.RemoteEnums;
+    using GameHelper.RemoteEnums.Entity;
     using GameHelper.RemoteObjects.Components;
     using GameHelper.RemoteObjects.States.InGameStateObjects;
     using GameOffsets.Natives;
@@ -281,6 +283,11 @@ namespace RunecraftHelper
                         ImGui.SliderFloat(this.L("mono.map_scale", "Map value scale"), ref this.Settings.MapValueScaleMultiplier, 0.1f, 3f, "%.2f");
                         ImGui.SliderFloat(this.L("mono.map_x", "Map value X offset"), ref this.Settings.MapValueXOffset, -200f, 200f, "%.0f");
                         ImGui.SliderFloat(this.L("mono.map_y", "Map value Y offset"), ref this.Settings.MapValueYOffset, -200f, 200f, "%.0f");
+                        ImGui.Checkbox(this.L("mono.auto_coop", "Auto-detect local co-op mode"), ref this.Settings.AutoDetectCoopMode);
+                        if (!this.Settings.AutoDetectCoopMode)
+                        {
+                            ImGui.Checkbox(this.L("mono.enable_coop", "Enable local co-op map centering"), ref this.Settings.EnableCoopMode);
+                        }
                     }
                 }
 
@@ -442,15 +449,87 @@ namespace RunecraftHelper
 
         // ── Panel resolution ──────────────────────────────────────────────
 
-        // Walk from GameUi.Address down to the recipes container by matching each step's Flags
-        // fingerprint (IsVisible bit masked), backtracking across sibling matches.
+        // Walk from GameUi.Address (or LeftPanel/RightPanel in co-op mode) down to the recipes container
+        // by matching each step's Flags fingerprint (IsVisible bit masked), backtracking across sibling matches.
         private IntPtr ResolvePanel()
         {
             var gameUi = Core.States.InGameStateObject.GameUi.Address;
             this.resolvedViewport = IntPtr.Zero;
             if (gameUi == IntPtr.Zero) return IntPtr.Zero;
-            return this.WalkFp(gameUi, PanelFlagFingerprints, GateStep, 0);
+
+            // 1. Single player mode (GameUi direct children)
+            var res = this.WalkFp(gameUi, PanelFlagFingerprints, GateStep, 0);
+            if (res != IntPtr.Zero) return res;
+
+            // 2. Co-op mode (LeftPanel -> 3 -> 8 -> 0 or search under LeftPanel)
+            var leftPanel = Core.States.InGameStateObject.GameUi.LeftPanel.Address;
+            if (leftPanel != IntPtr.Zero)
+            {
+                var coopRoot = this.GetChildPath(leftPanel, 3, 8, 0);
+                if (coopRoot != IntPtr.Zero)
+                {
+                    res = this.WalkFp(coopRoot, PanelFlagFingerprints, GateStep, 0);
+                    if (res != IntPtr.Zero) return res;
+                }
+
+                res = this.SearchPanelUnderRoot(leftPanel, 4);
+                if (res != IntPtr.Zero) return res;
+            }
+
+            // 3. Co-op mode (RightPanel -> 3 -> 8 -> 0 or search under RightPanel)
+            var rightPanel = Core.States.InGameStateObject.GameUi.RightPanel.Address;
+            if (rightPanel != IntPtr.Zero)
+            {
+                var coopRoot = this.GetChildPath(rightPanel, 3, 8, 0);
+                if (coopRoot != IntPtr.Zero)
+                {
+                    res = this.WalkFp(coopRoot, PanelFlagFingerprints, GateStep, 0);
+                    if (res != IntPtr.Zero) return res;
+                }
+
+                res = this.SearchPanelUnderRoot(rightPanel, 4);
+                if (res != IntPtr.Zero) return res;
+            }
+
+            return IntPtr.Zero;
         }
+
+        private IntPtr GetChildPath(IntPtr addr, params int[] indices)
+        {
+            var curr = addr;
+            foreach (var idx in indices)
+            {
+                if (curr == IntPtr.Zero) return IntPtr.Zero;
+                curr = this.GetChild(curr, idx);
+            }
+
+            return curr;
+        }
+
+        private IntPtr SearchPanelUnderRoot(IntPtr root, int maxDepth)
+        {
+            if (root == IntPtr.Zero || maxDepth < 0) return IntPtr.Zero;
+            var res = this.WalkFp(root, PanelFlagFingerprints, GateStep, 0);
+            if (res != IntPtr.Zero) return res;
+
+            if (maxDepth == 0) return IntPtr.Zero;
+
+            if (!this.TryReadStdVector(root + UiElementChildrenOffset, out var first, out var last))
+                return IntPtr.Zero;
+            long n = ((long)last - (long)first) / 8;
+            if (n <= 0 || n > 100) return IntPtr.Zero;
+
+            for (int i = 0; i < n; i++)
+            {
+                var child = this.ReadPtr(first + (nint)(i * 8));
+                if (child == IntPtr.Zero) continue;
+                res = this.SearchPanelUnderRoot(child, maxDepth - 1);
+                if (res != IntPtr.Zero) return res;
+            }
+
+            return IntPtr.Zero;
+        }
+
 
         // Recursive backtracking fp-walk. At `step`, scan `parent`'s children for ones whose
         // Flags (IsVisible bit masked) match fps[step], trying visible candidates before
@@ -1533,5 +1612,64 @@ namespace RunecraftHelper
         // DdsArt: .dds art filename = poe.ninja image-id (fallback price key).
         // Name: localized reward name — kept only as an English-client price fallback, never shown.
         private readonly record struct Recipe(int Count, IntPtr RowAddress, string MetaId, string DdsArt, string Name, string Id);
+
+        private bool GetTrackingPosAndHeight(out Vector2 trackingPos, out float trackingHeight)
+        {
+            trackingPos = Vector2.Zero;
+            trackingHeight = 0f;
+
+            var area = Core.States.InGameStateObject.CurrentAreaInstance;
+            if (area?.Player == null || !area.Player.TryGetComponent<Render>(out var playerRender))
+            {
+                return false;
+            }
+
+            trackingPos = new Vector2(playerRender.GridPosition.X, playerRender.GridPosition.Y);
+            trackingHeight = playerRender.TerrainHeight;
+
+            var playerOther = area.AwakeEntities.Values
+                .FirstOrDefault(e => e.EntitySubtype == EntitySubtypes.PlayerOther);
+
+            if (this.IsLocalCoopActive(playerRender, playerOther != null))
+            {
+                if (playerOther != null && playerOther.TryGetComponent<Render>(out var pOtherRender))
+                {
+                    trackingPos = (trackingPos + new Vector2(pOtherRender.GridPosition.X, pOtherRender.GridPosition.Y)) / 2f;
+                    trackingHeight = (trackingHeight + pOtherRender.TerrainHeight) / 2f;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsLocalCoopActive(Render playerRender, bool hasOtherPlayer)
+        {
+            if (!this.Settings.AutoDetectCoopMode)
+            {
+                return this.Settings.EnableCoopMode;
+            }
+
+            if (!Core.GHSettings.EnableControllerMode || !hasOtherPlayer)
+            {
+                return false;
+            }
+
+            var worldData = Core.States.InGameStateObject.CurrentWorldInstance;
+            if (worldData == null || worldData.Address == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            var screenPos = worldData.WorldToScreen(playerRender.WorldPosition, playerRender.TerrainHeight);
+            if (screenPos == Vector2.Zero)
+            {
+                return false;
+            }
+
+            var screenCenter = new Vector2(
+                Core.Process.WindowArea.Width / 2f,
+                Core.Process.WindowArea.Height / 2f);
+            return Vector2.Distance(screenPos, screenCenter) > 35f;
+        }
     }
 }
