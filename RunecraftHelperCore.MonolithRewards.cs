@@ -1,4 +1,4 @@
-namespace RunecraftHelper
+﻿namespace RunecraftHelper
 {
     using System;
     using System.Collections.Generic;
@@ -45,6 +45,14 @@ namespace RunecraftHelper
         // and the current league's standalone "additional" monolith=0. Used to drop the foreigner from
         // the route (see EnumerateMonoliths). NOT reward-based — it's the game's own monolith-type field.
         private const int StationRecipeModeOffset = 0x58;
+        // Server byte "the runes on this station are EMPOWERED" — i.e. a Power rune is already in effect /
+        // was propagated into this station. Read verbatim from the net-state (RuneStation_DeserializeNetState
+        // op0, right after +0x5c). Ghidra-confirmed via Expedition2_SetRowRunesEmpowered (0x14061d900,
+        // 0.5.4FHF): the panel draws every rune slot with its EMPOWERED art when
+        //     (selected recipe contains Expedition2Runes index 0x20 == "Power")  OR  (byte +0x5d != 0)
+        // so the client does expose Power-in-chain — no need to ask the player. Used by the rune-chain
+        // valuation (RunecraftHelperCore.RuneChain.cs).
+        private const int StationRunesEmpoweredOffset = 0x5d;
         // → listener registered by the open Runeshape Combinations panel (an in-module vtable ptr). Set
         // only while THIS station's panel is open, null otherwise — the direct "which monolith is the
         // player browsing" signal (distance/SM-range don't discriminate; several monoliths cluster and
@@ -517,7 +525,7 @@ namespace RunecraftHelper
             ImGui.Text($"Area level: {v.AreaLevel}");
             if (v.IsForeign)
                 ImGui.TextColored(red, "FOREIGN monolith (recipe-mode 0) — standalone \"additional\", not part of the Expedition dig, excluded from the route");
-            ImGui.TextColored(grey, $"device 0x{v.EntityId:X}   station 0x{v.StationAddr:X}   mode={v.RecipeMode}   activated={v.Activated}   glow={v.GlowCount}   +0x40={FmtI(v.Field40)}  +0x44={FmtI(v.Field44)}");
+            ImGui.TextColored(grey, $"device 0x{v.EntityId:X}   station 0x{v.StationAddr:X}   mode={v.RecipeMode}   emp={v.RunesEmpowered}   chainFrame={RuneChainHighlightActive(v)}   activated={v.Activated}   glow={v.GlowCount}   +0x40={FmtI(v.Field40)}  +0x44={FmtI(v.Field44)}");
             if (!string.IsNullOrEmpty(v.SmStates))
                 ImGui.TextColored(grey, $"SM states: {v.SmStates}");
 
@@ -630,7 +638,7 @@ namespace RunecraftHelper
         {
             var sb = new System.Text.StringBuilder();
             sb.AppendLine($"Monolith: {v.AnchorName} (idx {v.AnchorIdx})  p={v.AnchorPos} hole{v.AnchorPos + 1}  " +
-                          $"N={v.HoleCount} (sockets={v.SocketsState})  areaLvl={v.AreaLevel}  mode={v.RecipeMode}{(v.IsForeign ? " FOREIGN(mode=0)" : "")}  activated={v.Activated}  glow={v.GlowCount}  +0x40={FmtI(v.Field40)} +0x44={FmtI(v.Field44)}");
+                          $"N={v.HoleCount} (sockets={v.SocketsState})  areaLvl={v.AreaLevel}  mode={v.RecipeMode}{(v.IsForeign ? " FOREIGN(mode=0)" : "")}  emp={v.RunesEmpowered}  chainFrame={RuneChainHighlightActive(v)}  activated={v.Activated}  glow={v.GlowCount}  +0x40={FmtI(v.Field40)} +0x44={FmtI(v.Field44)}");
             sb.AppendLine($"device 0x{v.EntityId:X}  station 0x{v.StationAddr:X}");
             if (!string.IsNullOrEmpty(v.SmStates))
                 sb.AppendLine($"SM states: {v.SmStates}");
@@ -739,6 +747,10 @@ namespace RunecraftHelper
                     // "additional" monolith=0. Live-confirmed: dig 1297/1299 = mode 1, standalone 1383 = mode 0.
                     if (this.TryReadI32(station + StationRecipeModeOffset, out var rmode)) v.RecipeMode = rmode;
 
+                    // Power-empowered flag (station+0x5d) — see StationRunesEmpoweredOffset.
+                    if (this.TryReadU8(station + StationRunesEmpoweredOffset, out var emp))
+                        v.RunesEmpowered = emp != 0;
+
                     // Panel-open listener: an in-module vtable ptr only while THIS monolith's Combinations
                     // panel is open (null on the others). Direct signal of which monolith the player is
                     // browsing — used to anchor the locked-recipe highlight to the right one.
@@ -796,6 +808,10 @@ namespace RunecraftHelper
                 foreach (var c in v.Candidates)
                     if (c.Priced) best = Math.Max(best, c.UnitEx * c.Count);
                 v.Best = best;
+
+                // Rune-chain value: the offered recipe with the highest JOINT (reward + propagated-rune)
+                // value. No-op unless the feature is on. See RunecraftHelperCore.RuneChain.cs.
+                this.RuneChainResolveBest(v);
 
                 // Foreign standalone monolith (current "modified Expedition" league): NOT part of the explosive
                 // dig — the player collects it by hand, so the chain planner must never anchor to it. The game's
@@ -1110,7 +1126,11 @@ namespace RunecraftHelper
         {
             v.GlowRuneLabels.Clear();
             v.GlowSockets.Clear();
-            if (!this.Settings.ShowGlowRunes || station == IntPtr.Zero) return;
+            // GlowSockets (the gold-frame POSITIONS) also feed the rune-chain valuation, which is a separate
+            // feature from the scouting labels — read them when either wants them, but only run the watch-table
+            // matching (the labels) when scouting is actually on.
+            bool wantLabels = this.Settings.ShowGlowRunes;
+            if ((!wantLabels && !this.Settings.RuneChainEnabled) || station == IntPtr.Zero) return;
 
             IntPtr gFirst = this.ReadPtr(station + 0x40);
             IntPtr gLast = this.ReadPtr(station + 0x48);
@@ -1148,7 +1168,7 @@ namespace RunecraftHelper
                 foreach (var rec in v.Offered)
                     if (rec.runeIdx != null && socket < rec.runeIdx.Count) Consider(rec.runeIdx[socket]);
             }
-            if (runeIdxAtGlow.Count == 0) return;
+            if (!wantLabels || runeIdxAtGlow.Count == 0) return;
 
             // Match against the watch table (Show only); keep the highest weight, show all ties.
             float best = float.NegativeInfinity;
@@ -1294,6 +1314,16 @@ namespace RunecraftHelper
             return true;
         }
 
+        private bool TryReadU8(IntPtr addr, out byte val)
+        {
+            val = 0;
+            if (addr == IntPtr.Zero) return false;
+            var buf = new byte[1];
+            if (!ReadProcessMemory(this.processHandle, addr, buf, 1, out _)) return false;
+            val = buf[0];
+            return true;
+        }
+
         // ── models ────────────────────────────────────────────────────────────
         private sealed class MonoFile
         {
@@ -1359,6 +1389,12 @@ namespace RunecraftHelper
             public string SelectedRecipeId = string.Empty; // locked recipe Id (station+0x60), when sealed
             public string StationDiag = string.Empty; // why station/anchor failed to resolve (debug)
             public string SmStates = string.Empty;     // all StateMachine states "name=value" (debug)
+            public bool RunesEmpowered;    // station+0x5d — a Power rune is already in effect on this station
+            // Rune-chain valuation (RunecraftHelperCore.RuneChain.cs; all zero/empty unless RuneChainEnabled).
+            public double BestCombined;                    // best joint reward+chain value (falls back to Best)
+            public double ChainBestEx;                     // the chain part of that joint best
+            public string ChainBestRune = string.Empty;    // rune the joint-best recipe would propagate
+            public string ChainBestRecipeId = string.Empty; // that recipe's Expedition2Recipes Id
             public List<MonoCand> Candidates = new();
             public List<string> GlowRuneLabels = new(); // watched runes on glowing sockets to label on the map (weight-filtered)
             public List<int> GlowSockets = new();        // raw glowing socket indices (station+0x40); used by the panel rune overlay

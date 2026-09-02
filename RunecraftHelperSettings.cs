@@ -36,6 +36,26 @@ namespace RunecraftHelper
         public bool Show = true;
     }
 
+    // One rune's PROLIFERATION value. The gold-framed socket of a monolith marks the rune that
+    // propagates to every pack of monsters unearthed AFTER that monolith (official 0.5.4 patch notes:
+    // "Remnants now randomly choose which Rune slot will propagate to further Monsters"), and buffing
+    // those monsters raises THEIR drops (Opulent = "Increases Monster Rarity"). So a rune carries an
+    // ex-equivalent value on top of the recipe's own reward — the two ADD UP.
+    //
+    // LootMult = multiplier on the loot of every downstream pack. 1.0 = no effect (most runes are pure
+    // danger). BELOW 1.0 encodes a net cost: Oath seeds immortal, loot-less waves and, because the chain
+    // waits for kills, it slows the whole run. Rune = the language-independent Expedition2Runes Id.
+    //
+    // Magnitudes are SERVER-SIDE — they are not in the .dat and cannot be read from the client. These are
+    // calibratable defaults ordered by the community tier list (Opulent > Bond > Power > Time > Death >
+    // Rebirth); measure and re-tune. See obsidian poe2/mehanics/expedition-rune-chain.md.
+    public sealed class RuneChainEntry
+    {
+        public string Rune = string.Empty;
+        public float LootMult = 1f;
+        public bool Avoid = false;    // never worth propagating (Oath / Wisdom / Bait) — flagged in the UI
+    }
+
     public sealed class RunecraftHelperSettings : IPSettings
     {
         // poe.ninja PoE2 league slug as it appears in the API "league" parameter (spaces become '+').
@@ -67,6 +87,39 @@ namespace RunecraftHelper
         // and can be toggled off but not removed. Off by default.
         public bool ShowGlowRunes = false;
         public List<GlowRuneEntry> GlowRunes = new();
+
+        // ── Rune chain (proliferation) valuation ─────────────────────────────
+        // Master toggle. When on, every offered recipe is scored as
+        //     total = rewardEx(recipe) + chainEx(rune it would put in the gold socket)
+        // instead of by its reward price alone, and the combined best row is framed in the panel. The
+        // gold socket is a POSITION (station+0x40), known before the player picks anything, so for each
+        // offered recipe we already know which rune it would propagate: runes[glowSocket].
+        public bool RuneChainEnabled = false;
+
+        // Expected loot of ONE pack of Runic monsters, in Exalted. The whole chain value scales linearly
+        // with this, so it is the main calibration knob: chainEx = baseMonsterEx × downstreamPacks ×
+        // (effMult − 1). Measure it (LootTracker over a few runs) rather than trusting the default.
+        public float RuneChainBaseMonsterEx = 2f;
+
+        // A propagated Power rune empowers the OTHER runes in the chain (official 0.5.4 fix: "Runes were
+        // not being empowered by Power Runes that were propagated from previously unearthed Remnants").
+        // This is READ per monolith from station+0x5d — the very flag the game uses to draw the empowered
+        // rune art (Ghidra Expedition2_SetRowRunesEmpowered). The setting below is only a manual OVERRIDE
+        // that forces the empowerment on everywhere, for when you know Power is live but the byte reads 0.
+        public bool RuneChainPowerInChain = false;
+        public float RuneChainPowerFactor = 1.5f;
+
+        // Per-rune proliferation value (see RuneChainEntry). Seeded on first use with the tier-list
+        // defaults; runes absent from the table are worth 1.0 (no loot effect). Edit / add / remove from
+        // the settings table.
+        public List<RuneChainEntry> RuneChainWeights = new();
+
+        // Route planner: add each monolith's best achievable chain value to its route weight, so the
+        // planner prefers monoliths that can seed a strong chain and not only expensive rewards. This is
+        // a POSITION-INDEPENDENT upper bound (the real value depends on how many packs are raised after
+        // that monolith, which is only known once the order is fixed) — order-aware routing is a separate
+        // step. Off by default so the tuned router keeps its current behaviour until you opt in.
+        public bool RuneChainAffectsRoute = false;
 
         // Show the per-monolith debug window: pick a nearby monolith and dump everything the offer
         // rule uses (anchor/p/N, sockets-vs-station N, area level, addresses, and the full offered

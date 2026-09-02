@@ -717,7 +717,14 @@ namespace RunecraftHelper
                 // Standalone non-Expedition monolith (activated==1): collected by hand, NOT by the explosive
                 // chain — drop it from the route value map entirely so it can never become an anchor.
                 if (mv.IsForeign) { foreignMonos.Add(mv.EntityId); continue; }
-                monoByAddr[mv.EntityId] = mv.Best;
+                // Rune chain opted into routing: value the monolith by the best JOINT (reward + propagated
+                // rune) recipe instead of the reward alone, so a monolith that can seed a strong chain can
+                // outrank a slightly pricier one that cannot. Upper bound — the true chain value depends on
+                // the detonation order, which the router only fixes later. Off ⇒ reward price, as before.
+                monoByAddr[mv.EntityId] =
+                    (this.Settings.RuneChainEnabled && this.Settings.RuneChainAffectsRoute)
+                        ? Math.Max(mv.Best, mv.BestCombined)
+                        : mv.Best;
             }
 
             // Pass 1: collect non-charge items + the detonator; charges go to a separate list (chained by Id).
@@ -1760,10 +1767,17 @@ namespace RunecraftHelper
                 foreach (var kv in new SortedDictionary<string, float>(bp.Weights, StringComparer.Ordinal))
                     bb.Append(kv.Key).Append('=').Append(kv.Value.ToString("F2")).Append(',');
 
+            // Rune chain: only the knobs that can change a monolith's routed weight. monoSum above already
+            // reflects the (possibly chain-boosted) values, but the toggles/factors are included so flipping
+            // one re-plans even when the sum happens to land the same.
+            var rc = (s.RuneChainEnabled && s.RuneChainAffectsRoute)
+                ? $"1,{s.RuneChainBaseMonsterEx:F2},{s.RuneChainPowerInChain},{s.RuneChainPowerFactor:F2}"
+                : "0";
+
             return $"{s.ExpPlacementDistancePct}|{s.ExpBlastRadiusPct}|{s.ExpMonolithMinEx}|" +
                    $"{wb}|{mb}|{monoN}|{monoSum:F0}|{anchor.X:F0},{anchor.Y:F0}|" +
                    $"{this.ExpEffectiveTotal()}|{this.expCtrlResolved}|{this.expHasDetonator}|" +
-                   $"{s.ExpMinMarkersPerSpareCharge}|{bb}|{rb}";
+                   $"{s.ExpMinMarkersPerSpareCharge}|{bb}|{rb}|{rc}";
         }
 
         // Total charges to plan for: controller count if resolved → else the HUD-counter total (remaining +
