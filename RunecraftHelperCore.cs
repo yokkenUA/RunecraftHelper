@@ -64,14 +64,14 @@ namespace RunecraftHelper
         // child as the list scrolls (Y goes negative scrolling down); it is NOT reflected in the content
         // child's RelativePosition/PositionModifier. Read directly here (not via GameOffsets) so the
         // plugin stays self-contained across GH versions. Verified live on PoE2 0.5.x (docs/re-findings.md §3).
-        private const int ScrollOffsetFieldOffset = 0x120;
+        private const int ScrollOffsetFieldOffset = 0x108;   // 0.5.5: -0x18 (was 0x120)
         // The resolved viewport's scroll offset, re-read once per frame in DrawOverlay and added to the
         // content rows' positions (see TryGetUnscaledPosition).
         private Vector2 viewportScrollOffset;
 
-        private const int NameWStringOffset = 0x390;
+        private const int NameWStringOffset = 0x378;         // 0.5.5: -0x18 (was 0x390)
         private const int UiElementChildrenOffset = 0x10;
-        private const int UiElementFlagsOffset = 0x180;
+        private const int UiElementFlagsOffset = 0x168;      // 0.5.5: -0x18 (was 0x180), measured
         private const int IsVisibleBit = 0x0B;
         private const uint IsVisibleMask = 1u << IsVisibleBit; // = 0x800
 
@@ -289,7 +289,7 @@ namespace RunecraftHelper
                     // in-game Runeshape Combinations panel (the monolith reward overlay).
                     int colorMode = (int)this.Settings.ColorMode;
                     // Combo items are null-separated for ImGui; keep the \0 joins in C# and localize each item on
-                    // its own key (avoids fragile   escapes inside the JSON dictionaries).
+                    // its own key (avoids fragile \0 escapes inside the JSON dictionaries).
                     string priceItems = this.L("mono.price_off", "Off") + "\0" +
                                         this.L("mono.price_relative", "Relative (vs. median on screen)") + "\0" +
                                         this.L("mono.price_absolute", "Absolute (Exalted thresholds)") + "\0";

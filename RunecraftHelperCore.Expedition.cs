@@ -38,7 +38,7 @@ namespace RunecraftHelper
     public sealed partial class RunecraftHelperCore
     {
         private static readonly int[] ExpWidgetPath = { 97, 9, 17, 1 };
-        private const int ExpControllerOffset = 0x378;
+        private const int ExpControllerOffset = 0x360;      // 0.5.5: -0x18 (was 0x378), UI-element field
         private const int ExpCtrlTotalOffset = 0x2b0;       // byte: total explosives
         private const int ExpCtrlPlacedVecOffset = 0x220;   // std::vector<placed charge> {begin,end}
 
@@ -828,7 +828,8 @@ namespace RunecraftHelper
                     e.TryGetComponent<TriggerableBlockage>(out var tb))
                 {
                     blockers.Add(((int)Math.Round(pos.X), (int)Math.Round(pos.Y), world.Z, tb.IsBlocked, e.Id));
-                    // fall through: a blocker won't match any of the target classifications below.
+                    // Fall through on purpose: the Gully DevourerSegment is BOTH the path gate and a remnant
+                    // ("Dormant Burrower"), so it must also reach the remnant classification below.
                 }
 
                 if (path.Equals(ExpDetonatorPath, StringComparison.OrdinalIgnoreCase))
@@ -912,6 +913,25 @@ namespace RunecraftHelper
                         : "marker";
                     others.Add((ExpKind.Marker, pos, world, icon, 0));
                     this.expTargetCache[(long)e.Id] = new ExpCachedTarget(pos, world, ExpKind.Marker, icon, 0, groundZ);
+                    continue;
+                }
+
+                // Per-logbook terrain remnant (Sulphite Stalagmite, Runic Henge, ...) -- a relic in behaviour and
+                // in the data, but not the generic ExpeditionRelic entity, so it needs its own match. Its type
+                // pins the mod (one per type), and we still prefer whatever the entity itself carries in case a
+                // future build starts rolling them like ordinary relics. See ExpeditionRelicCatalog.LogbookRemnants.
+                if (ExpeditionRelicCatalog.TryMatchLogbookRemnant(path, out _, out var typeMod))
+                {
+                    string lrMods = string.Empty;
+                    if (e.TryGetComponent<ObjectMagicProperties>(out var lrOmp))
+                    {
+                        lrMods = string.Join(';', lrOmp.ModNames);
+                        if (this.Settings.ShowExpeditionDebug) relics.Add((pos, lrOmp));
+                    }
+
+                    if (string.IsNullOrEmpty(lrMods)) lrMods = typeMod;
+                    others.Add((ExpKind.Remnant, pos, world, lrMods, 0));
+                    this.expTargetCache[(long)e.Id] = new ExpCachedTarget(pos, world, ExpKind.Remnant, lrMods, 0);
                     continue;
                 }
 
@@ -1421,7 +1441,7 @@ namespace RunecraftHelper
             }
 
             // Counter glyphs live at +0x4C0; fall back to the +0x390 duplicate if that's empty.
-            string txt = this.ReadStdWString(leaf + 0x4C0);
+            string txt = this.ReadStdWString(leaf + 0x4A8);   // 0.5.5: -0x18 (was 0x4C0)
             if (string.IsNullOrEmpty(txt)) txt = this.ReadStdWString(leaf + NameWStringOffset);
             if (string.IsNullOrEmpty(txt)) return false;
 
