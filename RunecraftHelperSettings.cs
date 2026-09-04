@@ -98,7 +98,13 @@ namespace RunecraftHelper
         // instead of by its reward price alone, and the combined best row is framed in the panel. The
         // gold socket is a POSITION (station+0x40), known before the player picks anything, so for each
         // offered recipe we already know which rune it would propagate: runes[glowSocket].
-        public bool RuneChainEnabled = false;
+        //
+        // ALWAYS ON: the toggle left the settings UI, so it is [JsonIgnore]'d as well -- otherwise a
+        // config saved while it was off would strand the feature off with no control left to switch it
+        // back on. Kept as a field rather than a get-only property because Sim/ assigns it to run the
+        // with-chain / without-chain comparison.
+        [JsonIgnore]
+        public bool RuneChainEnabled = true;
 
         // Expected loot of ONE pack of Runic monsters, in Exalted. The whole chain value scales linearly
         // with this, so it is the main calibration knob: chainEx = baseMonsterEx × downstreamPacks ×
@@ -118,7 +124,12 @@ namespace RunecraftHelper
         // This is READ per monolith from station+0x5d — the very flag the game uses to draw the empowered
         // rune art (Ghidra Expedition2_SetRowRunesEmpowered). The setting below is only a manual OVERRIDE
         // that forces the empowerment on everywhere, for when you know Power is live but the byte reads 0.
+        // Both left the settings UI and are [JsonIgnore]'d so a stale config cannot change them: the
+        // override stays OFF (the per-monolith flag read from the station is the real source), and the
+        // factor is fixed at 1.5.
+        [JsonIgnore]
         public bool RuneChainPowerInChain = false;
+        [JsonIgnore]
         public float RuneChainPowerFactor = 1.5f;
 
         // Per-rune proliferation value (see RuneChainEntry). Seeded on first use with the tier-list
@@ -130,8 +141,13 @@ namespace RunecraftHelper
         // planner prefers monoliths that can seed a strong chain and not only expensive rewards. This is
         // a POSITION-INDEPENDENT upper bound (the real value depends on how many packs are raised after
         // that monolith, which is only known once the order is fixed) — order-aware routing is a separate
-        // step. Off by default so the tuned router keeps its current behaviour until you opt in.
-        public bool RuneChainAffectsRoute = false;
+        // step.
+        //
+        // ALWAYS ON, and [JsonIgnore]'d for the same reason as RuneChainEnabled above: the toggle is gone
+        // from the UI, and it used to default to off, so any config saved before this change would keep
+        // it off forever. Sim/ still assigns it to compare the router with and without chain steering.
+        [JsonIgnore]
+        public bool RuneChainAffectsRoute = true;
 
         // Show the per-monolith debug window: pick a nearby monolith and dump everything the offer
         // rule uses (anchor/p/N, sockets-vs-station N, area level, addresses, and the full offered

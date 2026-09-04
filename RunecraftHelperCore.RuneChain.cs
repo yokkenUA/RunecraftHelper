@@ -543,8 +543,12 @@ namespace RunecraftHelper
         {
             var s = this.Settings;
 
-            ImGui.Checkbox(this.L("runechain.enable", "Value the rune chain (proliferation)"), ref s.RuneChainEnabled);
-            if (!s.RuneChainEnabled) return;
+            // Four of this section's controls are no longer user-facing: the master toggle and the
+            // route-steering toggle are always on, the Power empowerment factor is fixed at 1.5, and the
+            // Power override stays off (whether Power is live is READ per monolith from the station, which
+            // is the authoritative source -- the override only ever existed to paper over a misread). All
+            // four are [JsonIgnore]'d in RunecraftHelperSettings so a config saved while a toggle was off
+            // cannot strand the feature off now that there is no control left to switch it back on.
             this.EnsureRuneChainDefaults();
 
             ImGui.TextDisabled(this.L("runechain.enable_hint",
@@ -558,20 +562,6 @@ namespace RunecraftHelper
             ImGui.TextDisabled(this.L("runechain.base_ex_hint",
                 "Expected drop value of ONE pack of Runic monsters. The chain value scales linearly with\n" +
                 "this, so it is the main calibration knob — measure it, don't trust the default."));
-
-            ImGui.SliderFloat(this.L("runechain.power_factor", "Power empowerment factor"), ref s.RuneChainPowerFactor, 1f, 4f, "%.2f");
-            ImGui.TextDisabled(this.L("runechain.power_factor_hint",
-                "A propagated Power rune empowers the other runes in the chain (official 0.5.4 fix). Whether\n" +
-                "Power is live is READ per monolith from the station (the same flag the game uses to draw the\n" +
-                "empowered rune art), so this only says by how much it multiplies their uplift."));
-            ImGui.Checkbox(this.L("runechain.power_in_chain", "Force Power empowerment (override)"), ref s.RuneChainPowerInChain);
-
-            ImGui.Checkbox(this.L("runechain.affects_route", "Let the chain value steer the route"), ref s.RuneChainAffectsRoute);
-            if (s.RuneChainAffectsRoute)
-                ImGui.TextDisabled(this.L("runechain.affects_route_hint",
-                    "Adds each monolith's best achievable chain value to its route weight. This is an UPPER\n" +
-                    "BOUND — the real value depends on how many packs come after that monolith, which is\n" +
-                    "only known once the order is fixed. Off keeps the router exactly as it is today."));
 
             ImGui.Separator();
             ImGui.Spacing();
