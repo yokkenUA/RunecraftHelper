@@ -3,6 +3,7 @@ namespace RunecraftHelper
     using System;
     using System.Collections.Generic;
     using GameHelper.Plugin;
+    using Newtonsoft.Json;
 
     // How the per-row price text is tinted to signal reward value at a glance.
     //   Off       — single neutral colour.
@@ -23,17 +24,6 @@ namespace RunecraftHelper
     {
         public string Name = "Default";
         public Dictionary<string, float> Weights = new(StringComparer.Ordinal);
-    }
-
-    // One watched glow-rune row. Rune = the language-independent Expedition2Runes Id (e.g. "Opulent").
-    // Show gates whether a match is labelled on the map; Weight decides which of several matched runes on
-    // one monolith is shown (highest wins; ties show all). The default rows can only be toggled off, not
-    // removed (see RunecraftHelperCore glow-rune helpers).
-    public sealed class GlowRuneEntry
-    {
-        public string Rune = string.Empty;
-        public float Weight = 100f;
-        public bool Show = true;
     }
 
     // One rune's PROLIFERATION value. The gold-framed socket of a monolith marks the rune that
@@ -89,15 +79,18 @@ namespace RunecraftHelper
 
         // When the Runeshape Combinations panel is open at a SEALED (rerolled) monolith, draw a gold
         // border around the row of the locked-in recipe (the one the monolith will produce) so it's
-        // obvious which of the listed combinations is fixed. On by default.
-        public bool HighlightLockedRecipeInPanel = true;
+        // obvious which of the listed combinations is fixed. Always on: it left the settings UI, so it is
+        // a get-only property (and JsonIgnore'd) to guarantee a stale saved "false" cannot strand it off
+        // with no way left to switch it back on.
+        [JsonIgnore]
+        public bool HighlightLockedRecipeInPanel => true;
 
-        // Show glow-rune scouting: when a watched rune sits on a glowing socket of a monolith, label the
-        // monolith on the large map (above its price) with that rune's name. GlowRunes is the watch table
-        // (rune → weight + show); the default rows (Time/Death/Bond/Power/Opulent) are seeded on first use
-        // and can be toggled off but not removed. Off by default.
+        // Show glow-rune scouting: label a monolith on the large map (above its price) with the rune(s) it
+        // would propagate from its gold socket(s), so you can see from the map which monoliths are worth
+        // routing the chain through. "Worth showing" is decided by the rune-chain weight table below
+        // (LootMult above 1 = gains loot) — there is deliberately no second rune list to keep in sync.
+        // Several runes are joined with " | ". Off by default.
         public bool ShowGlowRunes = false;
-        public List<GlowRuneEntry> GlowRunes = new();
 
         // ── Rune chain (proliferation) valuation ─────────────────────────────
         // Master toggle. When on, every offered recipe is scored as
@@ -109,8 +102,16 @@ namespace RunecraftHelper
 
         // Expected loot of ONE pack of Runic monsters, in Exalted. The whole chain value scales linearly
         // with this, so it is the main calibration knob: chainEx = baseMonsterEx × downstreamPacks ×
-        // (effMult − 1). Measure it (LootTracker over a few runs) rather than trusting the default.
-        public float RuneChainBaseMonsterEx = 2f;
+        // (effMult − 1).
+        //
+        // MEASURED 2026-09-02 (T15+ Grand, recipe rewards excluded — those are unaffected by runes):
+        //   • 8-wave (8/8) encounter → ~180-250 ex of monster loot ⇒ ~22-31 ex per wave;
+        //   • ~6-wave encounter      → ~740-790 ex, but 440 of that was a single Divine; without that
+        //                              spike ~300-350 ex ⇒ ~50-58 ex per wave.
+        // 30 sits in that range, deliberately at the low end: n=1 per condition and the two samples
+        // disagree ~2x. The previous 2.0 default was a pure guess and wrong by an order of magnitude,
+        // which made the chain value look like rounding error next to reward prices. It is not.
+        public float RuneChainBaseMonsterEx = 30f;
 
         // A propagated Power rune empowers the OTHER runes in the chain (official 0.5.4 fix: "Runes were
         // not being empowered by Power Runes that were propagated from previously unearthed Remnants").
@@ -157,14 +158,27 @@ namespace RunecraftHelper
 
         // Hide the on-map value labels while the in-game Runeshape Combinations panel is open (the same
         // panel the recipe overlay reads). Avoids cluttering the map with summary prices while the player
-        // is reading the panel + its per-recipe overlay. On by default.
-        public bool HideMapValueWhenPanelOpen = true;
+        // is reading the panel + its per-recipe overlay. Always on (no longer a settings-UI choice).
+        [JsonIgnore]
+        public bool HideMapValueWhenPanelOpen => true;
 
         // Large-map projection tuning (mirrors Radar's calibration so the label lines up with the monolith).
-        // Defaults match Radar's defaults; nudge these if your Radar large-map zoom/offsets are non-default.
-        public float MapValueScaleMultiplier = 1f;
-        public float MapValueXOffset = 0f;
-        public float MapValueYOffset = 0f;
+        // These three sliders left the settings UI: the Radar defaults they mirror are the values that
+        // actually line up, so they are fixed rather than tunable.
+        [JsonIgnore]
+        public float MapValueScaleMultiplier => 1f;
+
+        [JsonIgnore]
+        public float MapValueXOffset => 0f;
+
+        [JsonIgnore]
+        public float MapValueYOffset => 0f;
+
+        // Text size of BOTH large-map labels (the monolith's price and its propagating rune names), as a
+        // multiple of the ambient ImGui font size. 1.5 was the old hard-coded value and read far too big;
+        // 1.0 (= the ambient UI font) is what we ship, so this is fixed rather than a slider.
+        [JsonIgnore]
+        public float MapLabelFontScale => 1.0f;
 
         // ── Expedition planner (WIP, built brick-by-brick) ───────────────────
         // Brick 1: read-only debug window listing the detonator, explosive counts (from the in-game

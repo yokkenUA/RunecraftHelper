@@ -12,6 +12,7 @@ namespace RunecraftHelper
     using GameHelper.RemoteEnums.Entity;
     using GameHelper.RemoteObjects.Components;
     using GameHelper.RemoteObjects.States.InGameStateObjects;
+    using GameHelper.Utils;
     using GameOffsets.Natives;
     using GameOffsets.Objects.UiElement;
     using ImGuiNET;
@@ -242,13 +243,53 @@ namespace RunecraftHelper
         // When unconfirmed we default to NORMAL physics: it's the safe direction (90<108 reach, 28<35 radius never
         // suggests an illegal/over-reaching point), and it flips to Grand the moment the controller/HUD resolves.
         private bool ExpCurrentIsGrand() =>
-            (this.expCtrlResolved || this.expHudResolved) && ExpIsGrand(this.ExpEffectiveTotal());
+            this.ExpAreaIsLogbook() ||
+            ((this.expCtrlResolved || this.expHudResolved) && ExpIsGrand(this.ExpEffectiveTotal()));
+
+        // AUTHORITATIVE half of the Grand/Normal physics decision: a Logbook expedition is its own
+        // WorldArea (`ExpeditionLogBook_*`, plus the `ExpeditionSubArea_*Boss` zones), and every one of
+        // them carries the "expedition" tag in GameHelper's Data/WorldAreaTags.json — a locale-free zone
+        // identity available the instant the area loads, long before the explosive controller exists.
+        //
+        // Why this is needed: the engine picks 108/37 vs 90/30 by an AREA-TYPE test (the same test in both
+        // ExpeditionExplosive_BuildPlacementPath and ComputeBlastRadius), while `ExpIsGrand(total)` is only
+        // a charge-count PROXY for it — and the proxy fails in both directions. Live case that exposed it:
+        // ExpeditionLogBook_Tropical ("Lush Isle", area level 80) read as "normal base 90/30" and the drawn
+        // blast ring came out visibly smaller than the game's own circle. The reverse failure is worse — a
+        // normal map pushed to 10+ charges by the atlas would claim Grand reach and the planner would
+        // propose points the game refuses to place.
+        //
+        // Charge count is kept as the fallback for the case this cannot see: a Grand Expedition rolled as
+        // CONTENT on an ordinary map WorldArea, whose id carries no expedition tag. Replacing that half too
+        // needs the engine's actual area-type predicate out of Ghidra.
+        // Cached per area id: this is called from the physics getters, i.e. every frame that draws a ring and
+        // every route computation, while the answer only changes on a zone load.
+        private string expAreaTagId = string.Empty;
+        private bool expAreaTagIsLogbook;
+
+        private bool ExpAreaIsLogbook()
+        {
+            var id = Core.States.InGameStateObject.CurrentWorldInstance.AreaDetails.Id;
+            if (string.IsNullOrEmpty(id)) return false;
+            if (string.Equals(id, this.expAreaTagId, StringComparison.Ordinal)) return this.expAreaTagIsLogbook;
+
+            bool found = false;
+            var tags = WorldAreaTags.GetMeta(id)?.Tags;
+            if (tags != null)
+                for (int i = 0; i < tags.Count; i++)
+                    if (string.Equals(tags[i], "expedition", StringComparison.Ordinal)) { found = true; break; }
+
+            this.expAreaTagId = id;
+            this.expAreaTagIsLogbook = found;
+            return found;
+        }
 
         // Confirmed-normal = an expedition IS resolved AND it is not Grand. Distinct from !ExpCurrentIsGrand()
         // (which is also true when nothing is resolved yet). Used to hide the Grand-only route-planner controls
         // (Reward/Buff weight profiles, Min-markers gate) only once we KNOW the current map is a normal
         // Expedition — so those controls stay available out of a map (unresolved) for setup.
         private bool ExpCurrentIsNormal() =>
+            !this.ExpAreaIsLogbook() &&
             (this.expCtrlResolved || this.expHudResolved) && !ExpIsGrand(this.ExpEffectiveTotal());
 
         private float ExpBasePlacementDistance() =>
@@ -721,10 +762,7 @@ namespace RunecraftHelper
                 // rune) recipe instead of the reward alone, so a monolith that can seed a strong chain can
                 // outrank a slightly pricier one that cannot. Upper bound — the true chain value depends on
                 // the detonation order, which the router only fixes later. Off ⇒ reward price, as before.
-                monoByAddr[mv.EntityId] =
-                    (this.Settings.RuneChainEnabled && this.Settings.RuneChainAffectsRoute)
-                        ? Math.Max(mv.Best, mv.BestCombined)
-                        : mv.Best;
+                monoByAddr[mv.EntityId] = this.ExpMonolithRouteValue(mv);
             }
 
             // Pass 1: collect non-charge items + the detonator; charges go to a separate list (chained by Id).
@@ -1873,6 +1911,18 @@ namespace RunecraftHelper
                 sentinelWorthwhile = hasLogbookFlag;
             }
 
+            this.ExpFillRouteTargets(inp, markerBaseline, sentinelWorthwhile);
+
+            return inp;
+        }
+
+        // Turns the scanned target cache into the planner's parallel target arrays: per-kind weight,
+        // primary/secondary role and the Sentinel pin, then the no-primary fallback promotion. Split out of
+        // BuildRouteInputs so the offline simulator (Tools/ExpeditionSim) can drive these REAL selection rules
+        // over a synthetic target set — everything else BuildRouteInputs does reads live game memory.
+        private void ExpFillRouteTargets(ExpRouteInputs inp, float markerBaseline, bool sentinelWorthwhile)
+        {
+            var s = this.Settings;
             foreach (var t in this.expTargetCache.Values)
             {
                 double w = 0;
@@ -1927,9 +1977,16 @@ namespace RunecraftHelper
                 for (int i = 0; i < inp.TPrimary.Count; i++) { inp.TPrimary[i] = true; promoted++; }
                 ExpLog(inp, $"[fallback] no primary anchors — promoted {promoted} reward flag(s) to route drivers");
             }
-
-            return inp;
         }
+
+        // Route weight of one monolith, and the single place the rune chain enters routing: value it by the
+        // best JOINT (reward + propagated rune) recipe instead of the reward alone, so a monolith that can
+        // seed a strong chain can outrank a slightly pricier one that cannot. Upper bound — the true chain
+        // value depends on the detonation order, which the router only fixes later. Off ⇒ reward price.
+        private double ExpMonolithRouteValue(MonoView mv) =>
+            (this.Settings.RuneChainEnabled && this.Settings.RuneChainAffectsRoute)
+                ? Math.Max(mv.Best, mv.BestCombined)
+                : mv.Best;
 
         // Kick the heavy A* planner onto a Task (the UI froze when it ran inline on "Run"). The result is
         // published into expPendingResult and applied on the next planner frame (ApplyPendingRouteResult).
@@ -3187,9 +3244,17 @@ namespace RunecraftHelper
             // (camera-nearer) ring rendered LARGER than the on-ground blast actually is. Sampling ground height per
             // point drops the ring onto the terrain and lets it follow slopes, so its size reads correctly.
             float effRadius = this.ExpBaseBlastRadius() * (1f + (this.Settings.ExpBlastRadiusPct / 100f));
-            // VISUAL-ONLY shrink: the ground-plane camera projection reads a touch larger than the game's in-game
-            // coverage circle, so draw the ring at 0.95× the true blast radius to match by eye. Routing/coverage keep
-            // the true effRadius (a charge still grabs exactly what the planner counted) — this only affects the ring.
+            // VISUAL-ONLY shrink: the ground-plane camera projection reads a touch larger than the game's own
+            // coverage circle, so draw the ring at 0.95× the true blast radius to match by eye. Routing and
+            // coverage keep the true effRadius (a charge still grabs exactly what the planner counted) — this
+            // affects the ring only.
+            //
+            // This factor was briefly removed on the theory that it was compensating for the Grand/Normal
+            // base being mis-picked (a Logbook zone reading as normal ⇒ 30 instead of 37). It was not:
+            // re-checked in-game AFTER the area-type fix, the unshrunk ring at the correct 37 draws LARGER
+            // than the game's circle, so the projection overshoot is real and independent of that bug.
+            // Corollary worth keeping: since the true radius already reads slightly big, the engine's
+            // +8×(nearby-uncovered) term was evidently NOT in play in that measurement.
             float drawRadius = effRadius * 0.95f;
             var heights = Core.States.InGameStateObject.CurrentAreaInstance?.GridHeightData;
             float GroundZ(float gx, float gy)

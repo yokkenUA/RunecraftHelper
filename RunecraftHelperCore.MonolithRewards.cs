@@ -1,4 +1,4 @@
-﻿namespace RunecraftHelper
+namespace RunecraftHelper
 {
     using System;
     using System.Collections.Generic;
@@ -123,22 +123,16 @@
             ["Bait"] = "filler (no monster buff)",
         };
 
-        // Watch-table rows the user can toggle off but not delete (seeded on first use).
-        private static readonly string[] DefaultGlowRuneNames = { "Time", "Death", "Bond", "Power", "Opulent" };
+        // Cap on how many propagating runes one map label lists (joined with " | "). An UNTOUCHED monolith
+        // can roll many different runes onto its gold socket, and the label sits over the map — so show only
+        // the best few. Once a recipe is picked (or the recommender chooses one) the list collapses to what
+        // actually propagates.
+        private const int MaxGlowRuneLabels = 3;
 
         // Rune display name for an Expedition2Runes index (json map first, static fallback).
         private string? RuneNameByIndex(int idx) =>
             this.runeNames.TryGetValue(idx, out var nm) ? nm
             : (idx >= 0 && idx < AllRuneNames.Length ? AllRuneNames[idx] : null);
-
-        // Ensure the default glow-rune rows exist (add any missing default; never resets existing show/weight,
-        // so a default that was toggled off stays off). Guarantees defaults can't be lost from the table.
-        private void EnsureGlowRuneDefaults()
-        {
-            foreach (var name in DefaultGlowRuneNames)
-                if (!this.Settings.GlowRunes.Exists(g => string.Equals(g.Rune, name, StringComparison.Ordinal)))
-                    this.Settings.GlowRunes.Add(new GlowRuneEntry { Rune = name, Weight = 100f, Show = true });
-        }
 
         private List<MonoRecipe> monolithRecipes = new();
         private readonly List<double> monoPriceScratch = new(); // per-reward totals → row-total colour median
@@ -198,8 +192,9 @@
             // (once per session). Must run before EnumerateMonoliths so AddCandidate can localize.
             this.BuildMetaToLocalNameIfNeeded();
 
-            // Seed the default watched glow-runes if the table is empty / missing a default.
-            this.EnsureGlowRuneDefaults();
+            // Seed the rune-chain weight table. Both the map labels and the panel labels rank runes by it,
+            // so it must exist even when the user never opened the rune-chain settings section.
+            this.EnsureRuneChainDefaults();
 
             var now = DateTime.UtcNow;
             if (now >= this.nextMonolithScanUtc)
@@ -264,7 +259,7 @@
             var dl = ImGui.GetForegroundDrawList();
             var font = ImGui.GetFont();
             float ambient = ImGui.GetFontSize();
-            float fontPx = ambient * 1.5f;
+            float fontPx = ambient * Math.Clamp(this.Settings.MapLabelFontScale, 0.5f, 3f);
             float k = fontPx / ambient;
 
             // maxBest across visible monoliths — needed by the ColorMode=Relative header tint so the map
@@ -316,20 +311,15 @@
 
                 if (hasGlow)
                 {
-                    // Watched rune name(s) stacked ABOVE the price row (amber). Multiple lines when a monolith
-                    // has several tied-weight watched runes on its glowing sockets.
-                    float lineH = fontPx + 3f;
-                    float y = priceTopY - lineH;
-                    for (int r = v.GlowRuneLabels.Count - 1; r >= 0; r--)
-                    {
-                        var name = v.GlowRuneLabels[r];
-                        var ts = ImGui.CalcTextSize(name) * k;
-                        var at = new Vector2(screen.X - (ts.X * 0.5f), y);
-                        dl.AddRectFilled(at - pad, at + ts + pad, monoBg, 2f);
-                        dl.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, name);
-                        dl.AddText(font, fontPx, at, glowCol, name);
-                        y -= lineH;
-                    }
+                    // The propagating rune(s) on ONE line above the price row (amber), best-valued first,
+                    // joined with " | ". One line rather than a stack: the label sits on the map, and a
+                    // tower of names over a monolith hides more than it tells.
+                    var names = string.Join(" | ", v.GlowRuneLabels);
+                    var ts = ImGui.CalcTextSize(names) * k;
+                    var at = new Vector2(screen.X - (ts.X * 0.5f), priceTopY - fontPx - 3f);
+                    dl.AddRectFilled(at - pad, at + ts + pad, monoBg, 2f);
+                    dl.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, names);
+                    dl.AddText(font, fontPx, at, glowCol, names);
                 }
             }
         }
@@ -1169,116 +1159,46 @@
                     if (rec.runeIdx != null && socket < rec.runeIdx.Count) Consider(rec.runeIdx[socket]);
             }
             if (!wantLabels || runeIdxAtGlow.Count == 0) return;
+            // A monolith that renders no gold frame propagates nothing (recipe-mode 0/3 — the panel builder
+            // hands its row widgets an empty socket vector even though +0x40 is populated), so there is
+            // nothing to label even though we just read its sockets for the debug window.
+            if (!RuneChainHighlightActive(v)) return;
 
-            // Match against the watch table (Show only); keep the highest weight, show all ties.
-            float best = float.NegativeInfinity;
-            var matched = new List<(string name, float w)>();
+            // Label the runes WORTH propagating, ranked by the rune-chain weight table — no separate watch
+            // list to keep in sync. A rune at 1.0 or below (pure danger, or Oath/Wisdom's net cost) is not
+            // a reason to route the chain here, so it is not labelled at all.
+            var matched = new List<(string Name, double Mult)>();
             foreach (var ri in runeIdxAtGlow)
             {
                 var name = this.RuneNameByIndex(ri);
                 if (name == null) continue;
-                var e = this.Settings.GlowRunes.Find(
-                    g => g.Show && string.Equals(g.Rune, name, StringComparison.Ordinal));
-                if (e == null) continue;
-                matched.Add((name, e.Weight));
-                if (e.Weight > best) best = e.Weight;
+                double m = this.RuneChainEffMult(name, v.RunesEmpowered);
+                if (m <= 1.0) continue;
+                if (!matched.Exists(x => string.Equals(x.Name, name, StringComparison.Ordinal)))
+                    matched.Add((name, m));
             }
 
-            foreach (var m in matched)
-                if (m.w >= best && !v.GlowRuneLabels.Contains(m.name)) v.GlowRuneLabels.Add(m.name);
+            matched.Sort((a, b) => b.Mult.CompareTo(a.Mult));   // best first
+            for (int i = 0; i < matched.Count && i < MaxGlowRuneLabels; i++)
+                v.GlowRuneLabels.Add(matched[i].Name);
         }
 
-        // For the open Combinations panel: the watched rune name a given recipe would place on the open
-        // monolith's glowing socket(s), or empty. Used by DrawOverlay to label such recipe rows after the
-        // price. Matches the visible recipe to the offline catalog by Id → runeIdx[glowSocket].
+        // For the open Combinations panel: the name of the rune a given recipe would drop on the open
+        // monolith's gold socket(s) — but only when it is a rune worth propagating (chain multiplier above
+        // 1). Used by DrawOverlay to label such rows after the price when scouting is on but the full
+        // rune-chain valuation is off; with the valuation on, TryGetPropagatedRuneForRecipeId supersedes
+        // this (it also reports the neutral/negative runes, tinted by class).
         private string GlowRuneLabelForRecipe(string recipeId)
         {
             if (!this.Settings.ShowGlowRunes || string.IsNullOrEmpty(recipeId)) return string.Empty;
             var open = this.monolithViews.Find(v => v.PanelOpen);
             if (open == null || open.GlowSockets.Count == 0) return string.Empty;
+            if (!RuneChainHighlightActive(open)) return string.Empty;
             var mr = this.monolithRecipes.Find(m => string.Equals(m.id, recipeId, StringComparison.Ordinal));
             if (mr?.runeIdx == null) return string.Empty;
-            foreach (var g in open.GlowSockets)
-            {
-                if (g < 0 || g >= mr.runeIdx.Count) continue;
-                var name = this.RuneNameByIndex(mr.runeIdx[g]);
-                if (name != null &&
-                    this.Settings.GlowRunes.Exists(e => e.Show && string.Equals(e.Rune, name, StringComparison.Ordinal)))
-                    return name;
-            }
 
-            return string.Empty;
-        }
-
-        // Settings UI: the watched glow-rune table (show / weight / rune / effect) + add / remove. Drawn from
-        // DrawSettings under the "Show glow runes" toggle. Defaults can be toggled off but not deleted.
-        private void DrawGlowRuneTable()
-        {
-            var runes = this.Settings.GlowRunes;
-            string? removeKey = null;
-            if (ImGui.BeginTable("glowrunes", 5,
-                    ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.ScrollY,
-                    new Vector2(0f, Math.Min(runes.Count + 1, 10) * ImGui.GetFrameHeightWithSpacing())))
-            {
-                ImGui.TableSetupColumn("Show", ImGuiTableColumnFlags.WidthFixed, 40f);
-                ImGui.TableSetupColumn("Weight", ImGuiTableColumnFlags.WidthFixed, 66f);
-                ImGui.TableSetupColumn("Rune", ImGuiTableColumnFlags.WidthFixed, 92f);
-                ImGui.TableSetupColumn("Effect", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("##rm", ImGuiTableColumnFlags.WidthFixed, 22f);
-                ImGui.TableSetupScrollFreeze(0, 1);
-                ImGui.TableHeadersRow();
-
-                foreach (var g in runes)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.PushID(g.Rune);
-
-                    ImGui.TableSetColumnIndex(0);
-                    bool show = g.Show;
-                    if (ImGui.Checkbox("##show", ref show)) g.Show = show;
-
-                    ImGui.TableSetColumnIndex(1);
-                    ImGui.SetNextItemWidth(60f);
-                    float w = g.Weight;
-                    if (ImGui.InputFloat("##w", ref w, 0f, 0f, "%.0f")) { if (w < 0f) w = 0f; g.Weight = w; }
-
-                    ImGui.TableSetColumnIndex(2);
-                    ImGui.AlignTextToFramePadding();
-                    ImGui.TextUnformatted(g.Rune);
-
-                    ImGui.TableSetColumnIndex(3);
-                    ImGui.AlignTextToFramePadding();
-                    ImGui.TextDisabled(RuneEffects.TryGetValue(g.Rune, out var eff) ? eff : string.Empty);
-
-                    ImGui.TableSetColumnIndex(4);
-                    if (Array.IndexOf(DefaultGlowRuneNames, g.Rune) < 0)   // defaults can't be removed
-                    {
-                        if (ImGui.SmallButton("×")) removeKey = g.Rune;
-                        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Remove from table");
-                    }
-
-                    ImGui.PopID();
-                }
-
-                ImGui.EndTable();
-            }
-
-            if (removeKey != null)
-                runes.RemoveAll(g => string.Equals(g.Rune, removeKey, StringComparison.Ordinal));
-
-            // Add a rune not already in the table (all 34, with their effect).
-            if (ImGui.BeginCombo("Add rune", "+ add…", ImGuiComboFlags.HeightLarge))
-            {
-                foreach (var name in AllRuneNames)
-                {
-                    if (runes.Exists(g => string.Equals(g.Rune, name, StringComparison.Ordinal))) continue;
-                    var eff = RuneEffects.TryGetValue(name, out var e) ? e : string.Empty;
-                    if (ImGui.Selectable($"{name}  —  {eff}"))
-                        runes.Add(new GlowRuneEntry { Rune = name, Weight = 100f, Show = true });
-                }
-
-                ImGui.EndCombo();
-            }
+            var rune = this.RuneChainPropagatedRune(open, mr);
+            return this.RuneChainEffMult(rune, open.RunesEmpowered) > 1.0 ? rune : string.Empty;
         }
 
         // Reward metaId of the locked recipe for the monolith whose Runeshape Combinations panel is

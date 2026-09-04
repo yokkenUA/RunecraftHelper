@@ -265,27 +265,19 @@ namespace RunecraftHelper
             {
                 ImGui.Spacing();
 
+                ImGui.TextDisabled(this.L("mono.map_value_hint", "Paints each monolith's best value (ex) on the large-map overlay"));
+                ImGui.Checkbox(this.L("mono.draw_on_map", "Draw value on map overlay"), ref this.Settings.DrawMonolithValueOnMap);
+
+                ImGui.Spacing();
+
+                // Just the toggle — which runes are worth showing comes from the rune-chain weight table
+                // (Expedition tab), so there is no second rune list to keep in sync with it.
                 ImGui.Checkbox(this.L("mono.show_glow_runes", "Show glow runes"), ref this.Settings.ShowGlowRunes);
                 if (this.Settings.ShowGlowRunes)
-                {
                     ImGui.TextDisabled(this.L("mono.glow_hint",
-                        "Labels a monolith on the large map with a watched rune found on a glowing\n" +
-                        "socket. Highest-weight match shows; ties show all. Defaults can be toggled off but not removed."));
-                    this.EnsureGlowRuneDefaults();
-                    this.DrawGlowRuneTable();
-                }
-
-                ImGui.Separator();
-                ImGui.Spacing();
-
-                this.DrawRuneChainSection();
-
-                ImGui.Separator();
-                ImGui.Spacing();
-
-                ImGui.Checkbox(this.L("mono.highlight_locked", "Highlight locked recipe (sealed monolith)"), ref this.Settings.HighlightLockedRecipeInPanel);
-                if (this.Settings.HighlightLockedRecipeInPanel)
-                    ImGui.TextDisabled(this.L("mono.highlight_locked_hint", "Gold border on the panel row of a sealed monolith's locked-in recipe."));
+                        "Labels a monolith on the large map with the rune(s) it would propagate from its gold\n" +
+                        "socket, best first, joined by \" | \". Only runes the rune-chain table values above\n" +
+                        "1.00 are shown — a monolith with nothing worth propagating stays unlabelled."));
 
                 ImGui.Separator();
                 ImGui.Spacing();
@@ -313,19 +305,6 @@ namespace RunecraftHelper
                     ImGui.TextDisabled(this.L("mono.highlight_threshold_hint",
                         "Tints a monolith's header by its best reward value: green at/above the\n" +
                         "threshold, yellow from 0.6× up to it, none below. 0 = off (use Price color)."));
-
-                    ImGui.Separator();
-                    ImGui.Spacing();
-
-                    ImGui.TextDisabled(this.L("mono.map_value_hint", "Paints each monolith's best value (ex) on the large-map overlay"));
-                    ImGui.Checkbox(this.L("mono.draw_on_map", "Draw value on map overlay"), ref this.Settings.DrawMonolithValueOnMap);
-                    if (this.Settings.DrawMonolithValueOnMap)
-                    {
-                        ImGui.Checkbox(this.L("mono.hide_map_when_panel", "Hide map values while Combinations panel open"), ref this.Settings.HideMapValueWhenPanelOpen);
-                        ImGui.SliderFloat(this.L("mono.map_scale", "Map value scale"), ref this.Settings.MapValueScaleMultiplier, 0.1f, 3f, "%.2f");
-                        ImGui.SliderFloat(this.L("mono.map_x", "Map value X offset"), ref this.Settings.MapValueXOffset, -200f, 200f, "%.0f");
-                        ImGui.SliderFloat(this.L("mono.map_y", "Map value Y offset"), ref this.Settings.MapValueYOffset, -200f, 200f, "%.0f");
-                    }
                 }
 
                 //ImGui.Checkbox("Show monolith debug window", ref this.Settings.ShowWindow);
@@ -334,6 +313,8 @@ namespace RunecraftHelper
 
             if (ImGui.BeginTabItem(this.Loc.Title("tab.expedition", "Expedition", "rh_tab_expedition")))
             {
+                ImGui.Spacing();
+
                 ImGui.TextDisabled(this.L("exp.planner_caption", "Explosive-chain route planner"));
                 ImGui.Checkbox(this.L("exp.show_planner", "Show route planner"), ref this.Settings.ShowExpeditionPlanner);
                 if (this.Settings.ShowExpeditionPlanner)
@@ -346,7 +327,16 @@ namespace RunecraftHelper
                     if(ImGui.CollapsingHeader(this.Loc.Title("exp.buff_profile", "Relic buff profile", "rh_exp_buff"))) {
                         this.DrawExpeditionBuffProfileSettings();
                     }
+
+                    // Rune-chain valuation is a route-planning input (it values the chain of monsters the
+                    // explosives unearth), so it lives with the planner and is gated on it.
+                    this.DrawRuneChainSection();
                 }
+
+                // Separator sits outside the planner gate so Debug is always set off from the section above
+                // it, planner on or off.
+                ImGui.Separator();
+                ImGui.Spacing();
 
                 if (ImGui.CollapsingHeader(this.Loc.Title("common.debug", "Debug", "rh_exp_debug")))
                 {

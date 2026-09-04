@@ -202,6 +202,19 @@ namespace RunecraftHelper
 
         private void DrawRuneChainSection()
         {
+            // One collapsible block for the whole proliferation feature: the master toggle AND everything it
+            // switches on. Collapsed, the 34-row rune weight table stops dominating the planner tab.
+            if (!ImGui.CollapsingHeader(this.Loc.Title("runechain.header", "Rune settings", "rh_runechain_header")))
+                return;
+
+            ImGui.Spacing();
+            ImGui.Indent();
+            this.DrawRuneChainBody();
+            ImGui.Unindent();
+        }
+
+        private void DrawRuneChainBody()
+        {
             var s = this.Settings;
 
             ImGui.Checkbox(this.L("runechain.enable", "Value the rune chain (proliferation)"), ref s.RuneChainEnabled);
