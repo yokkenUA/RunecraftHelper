@@ -44,10 +44,10 @@ namespace RunecraftHelper
 
         // Stable controller anchor (RE 2026-06-28, PoE2 0.5.4HF3 — Ghidra ExpeditionExplosiveController_ctor,
         // vtable 0x…3311e60). The controller is a ServerData field, NOT fundamentally a UI object:
-        // AreaInstance.PlayerInfo.ServerDataPtr (AreaInstance+0x598, +0x00) -> +0x2618 = controller. This source
-        // is UI-independent AND range-independent, so it survives walking away from the detonator and any UI
-        // child-index / state drift that broke the old GameUi->[97][9][17][1]->+0x378 path.
-        private const int AreaPlayerInfoOffset = 0x598;     // AreaInstance.PlayerInfo (ServerDataPtr @ +0x00)
+        // ServerData -> +0x2618 = controller, where ServerData comes from GameHelper's own
+        // AreaInstance.ServerDataObject (it parses PlayerInfo.ServerDataPtr with offsets that upstream keeps
+        // patched). This source is UI-independent AND range-independent, so it survives walking away from the
+        // detonator and any UI child-index / state drift that broke the old GameUi->[97][9][17][1]->+0x378 path.
         private const int ServerDataExpCtrlOffset = 0x2618; // ServerData -> ExpeditionExplosiveController
         private const int ServerDataScanStart = 0x2580;     // drift-recovery scan window around +0x2618
         private const int ServerDataScanEnd = 0x26b0;
@@ -441,6 +441,11 @@ namespace RunecraftHelper
         private readonly List<Vector2> expSpinePts = new();
         private readonly List<float> expSpineZs = new();
 
+        // Index into expSpinePts of each ORDERED anchor -- i.e. the detonation order of the monoliths the
+        // plan collects. Kept because the rune chain needs it: a rune only buffs what comes after it, so
+        // "how many waves are still ahead of this monolith" is a question about this list.
+        private readonly List<int> expSpineAnchorIdx = new();
+
         private double expRouteWeight;
         private int expRouteCovered;
         private int expRouteTargets;
@@ -590,6 +595,16 @@ namespace RunecraftHelper
             public List<StdTuple3D<float>> TWorld = new();
             public List<double> TW = new();
 
+            // Rune-chain shape per target (parallel to TPos), read by ExpChainReorder to price a candidate
+            // spine ORDER: waves the monolith spawns, the uplift it can propagate, and the rune's identity.
+            public List<int> TWaves = new();
+            public List<double> TUplift = new();
+            public List<int> TRuneId = new();
+
+            // Rune chain opted into routing, and the ex/wave the player values monster loot at.
+            public bool ChainOrder;
+            public float ChainBaseEx;
+
             // Per-target role (parallel to TPos): true = PRIMARY (monolith, ex-weighted, may drive a long pursuit
             // bridge), false = SECONDARY (reward marker — uniform coverage weight; never drives the route because we
             // can't tell good markers from trash from client memory, see project-expedition-marker-types).
@@ -663,7 +678,8 @@ namespace RunecraftHelper
         // the route is recomputed only when a knob / the target data / the charge budget changes.
         private readonly struct ExpCachedTarget
         {
-            public ExpCachedTarget(Vector2 pos, StdTuple3D<float> world, ExpKind kind, string info, double value, float groundZ = 0f)
+            public ExpCachedTarget(Vector2 pos, StdTuple3D<float> world, ExpKind kind, string info, double value,
+                                   float groundZ = 0f, int waves = 0, double uplift = 0.0, int runeId = -1)
             {
                 this.Pos = pos;
                 this.World = world;
@@ -671,6 +687,9 @@ namespace RunecraftHelper
                 this.Info = info;
                 this.Value = value;
                 this.GroundZ = groundZ;
+                this.Waves = waves;
+                this.Uplift = uplift;
+                this.RuneId = runeId;
             }
 
             public Vector2 Pos { get; }
@@ -681,6 +700,16 @@ namespace RunecraftHelper
 
             // See ExpMarkerTierWeight.
             public float GroundZ { get; }
+
+            // Rune-chain shape of a MONOLITH target (0 / 0 / -1 on everything else): the monster waves it will
+            // spawn, the best loot uplift it can propagate, and that rune's identity for duplicate suppression.
+            // Cached alongside Value for the same reason -- so the spine ORDER search keeps working for monoliths
+            // that have dropped out of the awake bubble.
+            public int Waves { get; }
+
+            public double Uplift { get; }
+
+            public int RuneId { get; }
         }
 
         private readonly Dictionary<long, ExpCachedTarget> expTargetCache = new();
@@ -733,6 +762,7 @@ namespace RunecraftHelper
                 this.expRoute.Clear();
                 this.expSpinePts.Clear();
                 this.expSpineZs.Clear();
+                this.expSpineAnchorIdx.Clear();
                 this.expRouteFingerprint = string.Empty;
                 this.expPlacedMax = 0;
                 this.expHudTotal = 0;
@@ -752,6 +782,7 @@ namespace RunecraftHelper
             // Monolith ex-values reused from RunecraftHelper's own (patch-current) scan.
             this.EnsureExpeditionMonoliths();
             var monoByAddr = new Dictionary<long, double>();
+            var monoChainByAddr = new Dictionary<long, (int Waves, double Uplift, int RuneId)>();
             var foreignMonos = new HashSet<long>();
             foreach (var mv in this.monolithViews)
             {
@@ -763,6 +794,11 @@ namespace RunecraftHelper
                 // outrank a slightly pricier one that cannot. Upper bound — the true chain value depends on
                 // the detonation order, which the router only fixes later. Off ⇒ reward price, as before.
                 monoByAddr[mv.EntityId] = this.ExpMonolithRouteValue(mv);
+
+                // Chain SHAPE (waves + best propagatable uplift), kept separate from the ex value because the
+                // spine order is decided from it before any order exists. See RuneChainRouteUplift.
+                this.RuneChainRouteUplift(mv, out var mvRuneId, out var mvUplift);
+                monoChainByAddr[mv.EntityId] = (RuneChainWavesOf(mv), mvUplift, mvRuneId);
             }
 
             // Pass 1: collect non-charge items + the detonator; charges go to a separate list (chained by Id).
@@ -841,8 +877,15 @@ namespace RunecraftHelper
                     others.Add((ExpKind.Monolith, pos, world, "monolith", best));
                     // Cache it; keep the last KNOWN ex value when this scan reads 0 (out of bubble).
                     double keep = best;
-                    if (best <= 0 && this.expTargetCache.TryGetValue((long)e.Id, out var oldMono)) keep = oldMono.Value;
-                    this.expTargetCache[(long)e.Id] = new ExpCachedTarget(pos, world, ExpKind.Monolith, "monolith", keep);
+                    monoChainByAddr.TryGetValue(e.Address.ToInt64(), out var chain);
+                    if (best <= 0 && this.expTargetCache.TryGetValue((long)e.Id, out var oldMono))
+                    {
+                        keep = oldMono.Value;
+                        if (chain.Waves <= 0) chain = (oldMono.Waves, oldMono.Uplift, oldMono.RuneId);
+                    }
+
+                    this.expTargetCache[(long)e.Id] = new ExpCachedTarget(
+                        pos, world, ExpKind.Monolith, "monolith", keep, 0f, chain.Waves, chain.Uplift, chain.RuneId);
                     continue;
                 }
 
@@ -1257,10 +1300,13 @@ namespace RunecraftHelper
         {
             controller = IntPtr.Zero;
 
+            // Ask GameHelper for ServerData rather than walking AreaInstance ourselves. We used to read
+            // AreaInstance+0x598, which silently became null on the 2026-09 build (the pointer had moved to
+            // +0x5A0) -- with the HUD widget absent unless you stand at the detonator and no vtable captured
+            // yet for the recovery scan, the controller never resolved and the planner fell back to the manual
+            // 15-charge default on an 18-charge logbook. GH parses this field itself, so it stays patched.
             var area = Core.States.InGameStateObject.CurrentAreaInstance;
-            IntPtr serverData = IntPtr.Zero;
-            if (area != null && area.Address != IntPtr.Zero)
-                serverData = this.ReadPtr(area.Address + AreaPlayerInfoOffset);
+            IntPtr serverData = area?.ServerDataObject?.Address ?? IntPtr.Zero;
 
             // (1) Stable ServerData field.
             if (serverData != IntPtr.Zero)
@@ -1269,7 +1315,7 @@ namespace RunecraftHelper
                 if (this.ExpControllerLooksValid(c))
                 {
                     this.CaptureControllerVtable(c);
-                    this.expCtrlSource = "serverData+0x2618";
+                    this.expCtrlSource = "GH serverData+0x2618";
                     controller = c;
                     return true;
                 }
@@ -1857,6 +1903,8 @@ namespace RunecraftHelper
                 MinMarkers = ExpIsGrand(this.expHasDetonator ? this.ExpEffectiveTotal() : 0)
                     ? Math.Max(1, s.ExpMinMarkersPerSpareCharge)
                     : 1,
+                ChainOrder = s.RuneChainEnabled && s.RuneChainAffectsRoute,
+                ChainBaseEx = s.RuneChainBaseMonsterEx,
                 Log = s.ExpLogPlanner ? new List<string>() : null,
             };
 
@@ -1962,6 +2010,9 @@ namespace RunecraftHelper
                 inp.TW.Add(w);
                 inp.TPrimary.Add(primary);
                 inp.TSentinel.Add(t.Kind == ExpKind.Sentinel);
+                inp.TWaves.Add(t.Waves);
+                inp.TUplift.Add(t.Uplift);
+                inp.TRuneId.Add(t.RuneId);
             }
 
             // FALLBACK route drivers: a Normal expedition often has NO monolith passing the price filter and no
@@ -2027,6 +2078,8 @@ namespace RunecraftHelper
             this.expSpinePts.AddRange(res.SpinePts);
             this.expSpineZs.Clear();
             this.expSpineZs.AddRange(res.SpineZs);
+            this.expSpineAnchorIdx.Clear();
+            this.expSpineAnchorIdx.AddRange(res.SpineAnchorIdx);
             this.expRouteWeight = res.Weight;
             this.expRouteCovered = res.Covered;
             this.expRouteTargets = res.Targets;
@@ -2622,7 +2675,16 @@ namespace RunecraftHelper
             foreach (var i in anchors) anchorPos.Add(inp.TPos[i]);
 
             // Phase A2: order the anchors into the spine (NN + 2-opt over walkable distances, from the detonator).
-            var ordered = ExpTourOrder(inp, anchorPos);
+            var ordered = ExpTourOrder(inp, anchorPos, out var geoOrderIdx, out var ddetA, out var dmatA);
+
+            // Phase A2b: re-score that order by what the rune chain actually propagates along it (free -- reuses
+            // the tour's distance matrix). Runs BEFORE the sentinel pin so the pin still owns position 1.
+            var chainOrderIdx = ExpChainReorder(inp, anchors, geoOrderIdx, ddetA, dmatA);
+            if (chainOrderIdx != null)
+            {
+                ordered.Clear();
+                foreach (var gi in chainOrderIdx) ordered.Add(anchorPos[gi]);
+            }
 
             // Pin the Kalguur Sentinel buff FIRST (a monolith-level anchor, forced to the head of the tour): detonating
             // it as early as possible maximises the mob-buffing drone's uptime ⇒ more empowered Logbook drops. The rest
@@ -2667,8 +2729,17 @@ namespace RunecraftHelper
                 prev = a;
             }
 
-            ExpLog(inp, $"  spine total path≈{spineLen:F0}, est charges≈{spineChargesEst} / budget {inp.Budget}" +
-                        (spineChargesEst > inp.Budget ? "  ⚠ over budget — far/cheap anchors should be dropped (pruning = next brick)" : string.Empty));
+            // Two estimates, and only one of them is honest. The per-hop sum above ceils EVERY hop separately,
+            // which double-counts the leftover of each one -- it read 19 charges for a spine the placer laid in
+            // 14. The placer chains charges continuously along the whole polyline, so ceil(total / effDist) is
+            // its actual cost, and that is what the budget verdict (and ExpChainReorder's own pricing) uses.
+            // The per-hop numbers stay in the lines above because they show WHERE the walking goes.
+            int spineChargesReal = (int)Math.Ceiling(spineLen / effDist);
+            ExpLog(inp, $"  spine total path≈{spineLen:F0}, charges≈{spineChargesReal} (per-hop ceil sum " +
+                        $"{spineChargesEst}, over-counts) / budget {inp.Budget}" +
+                        (spineChargesReal > inp.Budget
+                            ? "  ⚠ over budget — far/cheap anchors should be dropped (pruning = next brick)"
+                            : string.Empty));
 
             // Phase A3: lay charges along the spine with the PLACER (Algorithm 2) — a forward sweep over the Router
             // polyline that edge-places coverage charges (anchor at the forward blast EDGE, not dead-centre) and
@@ -2733,11 +2804,33 @@ namespace RunecraftHelper
         // Order the coverage stops into a short open tour from the detonator: nearest-neighbour seed + 2-opt on
         // a precomputed walkable-distance matrix (unreachable pairs penalised). This is what turns the greedy's
         // value-ordered zig-zag into a spatial loop, so far fewer bridge charges are needed to connect clusters.
-        private static List<Vector2> ExpTourOrder(ExpRouteInputs inp, List<Vector2> stops)
+        // `orderIdx` / `ddet` / `dmat` are handed back so a second pass can re-score orders for FREE: the
+        // all-pairs matrix below is the expensive part (m^2 cross-map A*), and re-ordering only needs arithmetic
+        // over it. See ExpChainReorder.
+        private static List<Vector2> ExpTourOrder(ExpRouteInputs inp, List<Vector2> stops,
+                                                  out List<int> orderIdx, out float[] ddet, out float[,] dmat)
         {
             var data = inp.WalkData; int bpr = inp.Bpr; var doors = inp.Doors;
             int m = stops.Count;
-            if (m <= 2) return new List<Vector2>(stops);
+            orderIdx = new List<int>(m);
+            for (int i = 0; i < m; i++) orderIdx.Add(i);
+            ddet = new float[m];
+            dmat = new float[m, m];
+            if (m <= 2)
+            {
+                for (int i = 0; i < m; i++)
+                {
+                    ddet[i] = ExpTourDist(inp, inp.DetonatorPos, stops[i]);
+                    for (int j = i + 1; j < m; j++)
+                    {
+                        float d0 = ExpTourDist(inp, stops[i], stops[j]);
+                        dmat[i, j] = d0;
+                        dmat[j, i] = d0;
+                    }
+                }
+
+                return new List<Vector2>(stops);
+            }
 
             float Dist(Vector2 a, Vector2 b)
             {
@@ -2750,12 +2843,12 @@ namespace RunecraftHelper
             // since no gate ever opens), and the calls are heavy enough that thread-pool overhead is negligible, so
             // fill the matrix in PARALLEL. Race-free: outer row i writes only ddet[i] and dmat[i,j]/dmat[j,i] for
             // j>i, and each off-diagonal cell is owned by exactly one row.
-            var dmat = new float[m, m];
-            var ddet = new float[m];
+            var dmatL = dmat;
+            var ddetL = ddet;
             Parallel.For(0, m, i =>
             {
-                ddet[i] = Dist(inp.DetonatorPos, stops[i]);
-                for (int j = i + 1; j < m; j++) { float d = Dist(stops[i], stops[j]); dmat[i, j] = d; dmat[j, i] = d; }
+                ddetL[i] = Dist(inp.DetonatorPos, stops[i]);
+                for (int j = i + 1; j < m; j++) { float d = Dist(stops[i], stops[j]); dmatL[i, j] = d; dmatL[j, i] = d; }
             });
 
             var used = new bool[m];
@@ -2797,9 +2890,157 @@ namespace RunecraftHelper
                 }
             }
 
+            orderIdx = order;
             var result = new List<Vector2>(m);
             foreach (int idx in order) result.Add(stops[idx]);
             return result;
+        }
+
+        // Walkable distance between two stops, with the same "no path => discourage but stay finite" rule the
+        // tour matrix uses. Lifted out of ExpTourOrder's local so the m<=2 shortcut can fill the matrix too.
+        private static float ExpTourDist(ExpRouteInputs inp, Vector2 a, Vector2 b)
+        {
+            float d = ExpFullPath(inp.WalkData, inp.Bpr, inp.Doors, a, b);
+            return d < 0f ? Vector2.Distance(a, b) * 4f : d;
+        }
+
+        // Opportunity cost of one extra spine charge, in ex. Measured, not guessed: the SPARE optimiser's own
+        // log prices the clusters it buys, and the tail of that ladder -- the cheapest cluster still worth a
+        // charge -- runs 2-4 ex on a Grand map (a rich one hits 25-46). Pricing a charge at 8 ex therefore means
+        // "spend a walking charge only when the rune gain clearly beats a mediocre cluster", while a genuinely
+        // good cluster still outbids a marginal reorder. Reordering also NEVER exceeds the charge budget.
+        private const double ExpChargeOpportunityEx = 8.0;
+
+        // Chain-aware spine ORDER. The geometric tour (ExpTourOrder) minimises walking and never looks at what
+        // a monolith propagates, while the rune chain's value is computed FOR whatever order is in force -- so a
+        // strong rune that lands at the tail of the tour reaches zero monoliths, prices itself at zero, and
+        // nothing ever pulls it forward. Measured on a live map (obsidian poe2/mehanics/expedition-rune-chain
+        // §19): Opulent last was worth 52 ex where the same rune taken first was worth 346 ex, i.e. the shipped
+        // order gave up 27% of the map.
+        //
+        // So re-score orders by what the run is actually worth:
+        //     J(order) = baseEx * SUM_j waves_j * (SUM_{i<=j} uplift_i)  -  chargeCost * ceil(walk / effDist)
+        // Recipe rewards are deliberately absent: every candidate order visits every anchor, so they contribute
+        // the same constant to all of them and only the propagation term and the walking differ.
+        //
+        // Search: hill-climb (2-opt segment reversal + single-anchor relocation) from two starts -- the geometric
+        // tour and its reverse, the reverse being the move that usually matters (the strong rune is typically the
+        // far end of the tour). Costs no A*: everything reads the matrix ExpTourOrder already built. Returns null
+        // when the geometric order stands, so an equal-value order never churns the route.
+        private static List<int>? ExpChainReorder(ExpRouteInputs inp, List<int> anchors, List<int> geo,
+                                                  float[] ddet, float[,] dmat)
+        {
+            if (!inp.ChainOrder || inp.ChainBaseEx <= 0f || geo.Count < 2) return null;
+
+            // Nothing to gain unless at least one anchor can actually propagate something.
+            bool anyUplift = false;
+            foreach (var g in geo) if (inp.TUplift[anchors[g]] > 0.0) { anyUplift = true; break; }
+            if (!anyUplift) return null;
+
+            float effDist = Math.Max(1f, inp.EffDist);
+
+            float Walk(List<int> ord)
+            {
+                float w = ddet[ord[0]];
+                for (int i = 1; i < ord.Count; i++) w += dmat[ord[i - 1], ord[i]];
+                return w;
+            }
+
+            double Propagated(List<int> ord)
+            {
+                double cum = 0.0, sum = 0.0;
+                ulong seen = 0UL;
+                foreach (var g in ord)
+                {
+                    int t = anchors[g];
+                    double up = inp.TUplift[t];
+                    int rid = inp.TRuneId[t];
+                    if (up > 0.0 && rid >= 0 && rid < 64)
+                    {
+                        ulong bit = 1UL << rid;
+                        if ((seen & bit) != 0) up = 0.0;   // duplicates do not stack
+                        else seen |= bit;
+                    }
+
+                    cum += up;
+                    sum += inp.TWaves[t] * cum;
+                }
+
+                return inp.ChainBaseEx * sum;
+            }
+
+            double J(List<int> ord)
+            {
+                int charges = (int)Math.Ceiling(Walk(ord) / effDist);
+                if (charges > inp.Budget) return double.NegativeInfinity;   // a plan that cannot be laid
+                return Propagated(ord) - (ExpChargeOpportunityEx * charges);
+            }
+
+            List<int> Climb(List<int> start)
+            {
+                var cur = new List<int>(start);
+                double curJ = J(cur);
+                bool better = true;
+                int guard = 0;
+                while (better && guard++ < 40)
+                {
+                    better = false;
+
+                    // 2-opt: reverse a segment (this is what turns a tour around).
+                    for (int i = 0; i < cur.Count - 1 && !better; i++)
+                    {
+                        for (int k = i + 1; k < cur.Count && !better; k++)
+                        {
+                            cur.Reverse(i, k - i + 1);
+                            double j2 = J(cur);
+                            if (j2 > curJ + 1e-6) { curJ = j2; better = true; }
+                            else cur.Reverse(i, k - i + 1);
+                        }
+                    }
+
+                    // Or-opt: pull one anchor out and reinsert it elsewhere (moves a strong rune to the front).
+                    for (int i = 0; i < cur.Count && !better; i++)
+                    {
+                        int v = cur[i];
+                        cur.RemoveAt(i);
+                        for (int k = 0; k <= cur.Count && !better; k++)
+                        {
+                            cur.Insert(k, v);
+                            double j2 = J(cur);
+                            if (j2 > curJ + 1e-6) { curJ = j2; better = true; }
+                            else cur.RemoveAt(k);
+                        }
+
+                        if (!better) cur.Insert(i, v);
+                    }
+                }
+
+                return cur;
+            }
+
+            var rev = new List<int>(geo);
+            rev.Reverse();
+            var bestOrd = Climb(geo);
+            double bestJ = J(bestOrd);
+            var altOrd = Climb(rev);
+            double altJ = J(altOrd);
+            if (altJ > bestJ) { bestOrd = altOrd; bestJ = altJ; }
+
+            double geoJ = J(geo);
+            int geoCharges = (int)Math.Ceiling(Walk(geo) / effDist);
+            int newCharges = (int)Math.Ceiling(Walk(bestOrd) / effDist);
+            ExpLog(inp, $"--- ORDER (chain-aware) --- geometric: rune {Propagated(geo):F0} ex over {geoCharges} chg " +
+                        $"⇒ J={geoJ:F0}  |  best: rune {Propagated(bestOrd):F0} ex over {newCharges} chg ⇒ J={bestJ:F0}");
+
+            if (!(bestJ > geoJ + 1e-6))
+            {
+                ExpLog(inp, "  keeping the geometric order (no order propagates more than it costs)");
+                return null;
+            }
+
+            ExpLog(inp, $"  REORDERED: +{Propagated(bestOrd) - Propagated(geo):F0} ex of propagation for " +
+                        $"{newCharges - geoCharges:+0;-0;0} charge(s) @ {ExpChargeOpportunityEx:F0} ex");
+            return bestOrd;
         }
 
         // FULL route on the in-game LARGE map (Tab): white dot = anchor, gold line = order, blue numbered

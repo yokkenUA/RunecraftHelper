@@ -55,6 +55,11 @@ namespace RunecraftHelper.Sim
             PowerPlacement("I · does WHEN Power is detonated matter?", ScenarioI(97), charges: 15);
             PowerSweep(charges: 15);
             ChainAudit("J · shipped chain value vs. the order-aware one", ScenarioI(97), charges: 15);
+            DuplicateRunes("K · eight monoliths all offering Opulent — do duplicates get recommended?",
+                           charges: 15);
+            AlreadyTaken("L · Opulent already LOCKED on another monolith — does the amber ring still advise it?",
+                         charges: 15);
+            TailRune("M · strong rune parked at the FAR end of the tour (live Scorched Cay shape)", charges: 18);
         }
 
         // ── scenarios ────────────────────────────────────────────────────────────────────────────────────
@@ -226,6 +231,169 @@ namespace RunecraftHelper.Sim
             return m;
         }
 
+        // The live failure from Scorched Cay (2026-09-04): the detonator sits at one end and the monoliths run
+        // away from it in a chain, so the geometric tour reaches the FARTHEST one last -- and that is the one
+        // carrying Opulent. Its rune then propagates to nobody. Checks that the router now pays to visit it
+        // early, and that it leaves the order alone when the far monolith has nothing to propagate.
+        private static void TailRune(string title, int charges)
+        {
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 108));
+            Console.WriteLine(title + $"   [{charges} charges]");
+            Console.WriteLine(new string('=', 108));
+
+            foreach (bool strongTail in new[] { false, true })
+            {
+                // A line of 8 monoliths marching away from the detonator, ~120 grid apart (so each hop is about
+                // one charge), with a slight lateral wobble so the tour is not degenerate.
+                var m = new List<SimMono>();
+                for (int i = 0; i < 8; i++)
+                {
+                    m.Add(new SimMono
+                    {
+                        Name = "M" + i.ToString("00", CultureInfo.InvariantCulture),
+                        Pos = new Vector2(Detonator.X + ((i % 2 == 0) ? -20 : 20),
+                                          Detonator.Y + 60 + (i * 26)),
+                        Holes = 4 + (i % 2),
+                        RecipeMode = 1,
+                    });
+
+                    // Everyone offers a mid reward on a neutral rune, so rewards cannot drive the order.
+                    m[i].Offers.Add(Offer(RewardMid, 2, "Soul", "Arcane", "Moon", "Toxic", "Tidal"));
+                    m[i].GlowSocket = 0;
+                }
+
+                // The farthest monolith: Opulent (x1.35) in the tail case, a neutral rune otherwise.
+                m[7].Offers.Add(Offer(RewardMid, 2, strongTail ? "Opulent" : "Soul", "Arcane", "Moon", "Toxic", "Tidal"));
+
+                Console.WriteLine();
+                Console.WriteLine(strongTail
+                    ? "far monolith M07 carries Opulent (x1.35):"
+                    : "far monolith M07 carries a neutral rune (control):");
+                var res = Plan(m, chain: true, minEx: 0f, verbose: true, charges: charges, passes: 10);
+                Console.WriteLine("      tour: " + string.Join(" -> ", res.AnchorOrder));
+                foreach (var mm in m)
+                    if (mm.ChainEx > 0)
+                        Console.WriteLine("      {0} stop #{1}  rune {2}  chain {3:F0} ex",
+                            mm.Name, Ord(mm.VisitOrder), mm.BestRune, mm.ChainEx);
+            }
+        }
+
+        // One monolith is sealed with Opulent already; the panel is open on a different one that offers
+        // Opulent, Bond and a neutral recipe. The amber "best rune" ring must not point at the Opulent row.
+        private static void AlreadyTaken(string title, int charges)
+        {
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 108));
+            Console.WriteLine(title + $"   [{charges} charges]");
+            Console.WriteLine(new string('=', 108));
+
+            foreach (bool sealOther in new[] { false, true })
+            {
+                var m = Ring(12, seed: 149);
+                for (int i = 0; i < m.Count; i++)
+                {
+                    m[i].Offers.Add(Offer(RewardJunk, 1, "Soul", "Toxic", "Arcane", "Moon"));
+                    m[i].GlowSocket = 0;
+                }
+
+                // The other monolith, far along the ring, can lock Opulent in.
+                m[8].Offers.Add(Offer(RewardJunk, 1, "Opulent", "Soul", "Arcane", "Moon"));
+                m[8].Name += "-other";
+                if (sealOther) m[8].SealedOffer = 1;      // index 1 = the Opulent recipe above
+
+                // The monolith whose panel we are looking at.
+                m[2].Offers.Add(Offer(RewardJunk, 1, "Opulent", "Soul", "Arcane", "Moon"));
+                m[2].Offers.Add(Offer(RewardJunk, 1, "Bond", "Soul", "Arcane", "Moon"));
+                m[2].Name += "-open";
+                m[2].PanelOpen = true;
+
+                var core = PlanCore(m, charges, out _);
+                var rows = core.SimPanelRows();
+
+                Console.WriteLine();
+                Console.WriteLine(sealOther
+                    ? "Opulent LOCKED IN on M08-other:"
+                    : "nothing locked in anywhere (baseline):");
+                Console.WriteLine("{0,-18} {1,-18} {2,7} {3,7} {4,7}", "row", "rune", "mult", "taken", "amber");
+                Console.WriteLine(new string('-', 62));
+                foreach (var (id, rune, mult, taken, amber) in rows)
+                    Console.WriteLine("{0,-18} {1,-18} {2,7:F2} {3,7} {4,7}",
+                        id, rune, mult, taken ? "yes" : "-", amber ? "AMBER" : "-");
+            }
+        }
+
+        // Eight monoliths that can each propagate Opulent, and each also offers exactly one distinct
+        // alternative. "Runeshape modifiers of the same type no longer stack", so only the FIRST Opulent is
+        // worth anything -- every later one should be steered onto its alternative instead.
+        private static List<SimMono> ScenarioK()
+        {
+            var m = Ring(20, seed: 131);
+            for (int i = 0; i < m.Count; i++)
+            {
+                m[i].Offers.Add(Offer(RewardJunk, 1, "Soul", "Toxic", "Arcane", "Moon"));
+                m[i].GlowSocket = 0;
+            }
+
+            string[] alts = { "Bond", "Time", "Death", "Rebirth", "Bond", "Time", "Death", "Rebirth" };
+            for (int k = 0; k < alts.Length; k++)
+            {
+                int i = 1 + (k * 2);
+                m[i].Offers.Add(Offer(RewardJunk, 1, "Opulent", "Soul", "Arcane", "Moon"));
+                m[i].Offers.Add(Offer(RewardJunk, 1, alts[k], "Soul", "Arcane", "Moon"));
+                m[i].Name += "-dual";
+            }
+
+            return m;
+        }
+
+        private static void DuplicateRunes(string title, int charges)
+        {
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 108));
+            Console.WriteLine(title + $"   [{charges} charges]");
+            Console.WriteLine(new string('=', 108));
+
+            // Convergence: the mask for position k is built from the previous scan's choices for the
+            // positions before it, so a fresh area needs a few scans to settle. Show both.
+            foreach (int passes in new[] { 2, 10 })
+            {
+                var monos = ScenarioK();
+                var res = Plan(monos, chain: true, minEx: 0f, verbose: false, charges: charges, passes: passes);
+                var pos = new Dictionary<string, int>(StringComparer.Ordinal);
+                for (int i = 0; i < res.AnchorOrder.Count; i++) pos[res.AnchorOrder[i]] = i + 1;
+
+                int opulents = 0;
+                var lines = new List<string>();
+                foreach (var m in monos)
+                {
+                    if (!m.Name.EndsWith("-dual", StringComparison.Ordinal)) continue;
+
+                    // What a chain-agnostic ranking would pick here: simply the strongest rune on offer.
+                    string raw = string.Empty;
+                    double rawMult = 1.0;
+                    foreach (var o in m.OfferViews)
+                        if (o.EffMult > rawMult) { rawMult = o.EffMult; raw = o.Rune; }
+
+                    if (string.Equals(m.BestRune, "Opulent", StringComparison.Ordinal)) opulents++;
+                    lines.Add(string.Format("{0,-14} {1,5} {2,10} {3,12} {4,10:F0}",
+                        m.Name, pos.TryGetValue(m.Name, out var p2) ? p2.ToString() : "-",
+                        string.IsNullOrEmpty(raw) ? "-" : raw,
+                        string.IsNullOrEmpty(m.BestRune) ? "-" : m.BestRune, m.ChainEx));
+                }
+
+                Console.WriteLine();
+                Console.WriteLine($"after {passes} scan passes:");
+                Console.WriteLine("{0,-14} {1,5} {2,10} {3,12} {4,10}",
+                    "monolith", "pos", "strongest", "recommended", "chainEx");
+                Console.WriteLine(new string('-', 60));
+                lines.Sort();
+                foreach (var l in lines) Console.WriteLine(l);
+                Console.WriteLine($"  Opulent recommended on {opulents} of 8 monoliths " +
+                                  (opulents == 1 ? "(correct — only the first can pay)" : "(should be 1)"));
+            }
+        }
+
         // Prices the difference between the two ways of counting "how many packs will this rune still buff".
         //
         //   SHIPPED   downstreamPacks = size(recipe) + chargesLeft          (RuneChainDownstreamPacks)
@@ -264,9 +432,9 @@ namespace RunecraftHelper.Sim
                 return baseTotal - without;
             }
 
-            Console.WriteLine("{0,-16} {1,4} {2,8} {3,7} {4,7} {5,9} {6,9} {7,9} {8,8} {9,9}",
-                "monolith", "pos", "rune", "runeEx", "own", "Y chosen", "Y sockets", "true ex", "shipped",
-                "marginal");
+            Console.WriteLine("{0,-16} {1,4} {2,8} {3,7} {4,7} {5,9} {6,9} {7,9} {8,8} {9,8} {10,9}",
+                "monolith", "pos", "rune", "runeEx", "own", "Y chosen", "Y sockets", "true ex", "was",
+                "now", "marginal");
             Console.WriteLine(new string('-', 108));
 
             for (int j = 0; j < order.Count; j++)
@@ -283,15 +451,20 @@ namespace RunecraftHelper.Sim
                 double runeEx = BaseMonsterEx * e.Uplifts[j];
                 double trueEx = runeEx * (e.Sizes[j] + yChosen);
                 double marg = Marginal(mi);
-                Console.WriteLine("{0,-16} {1,4} {2,8} {3,7:F1} {4,7} {5,9} {6,9} {7,9:F0} {8,8:F0} {9,9}",
+
+                // The formula the plugin used before this change, reproduced here purely for comparison:
+                // baseEx x (size + chargesLeft) x uplift, with chargesLeft = the whole budget at plan time.
+                double wasEx = runeEx * (e.Sizes[j] + charges);
+                Console.WriteLine("{0,-16} {1,4} {2,8} {3,7:F1} {4,7} {5,9} {6,9} {7,9:F0} {8,8:F0} {9,8:F0} {10,9}",
                     monos[mi].Name, j + 1, monos[mi].BestRune, runeEx, e.Sizes[j], yChosen, ySockets,
-                    trueEx, monos[mi].ChainEx, double.IsNaN(marg) ? "-" : marg.ToString("F0"));
+                    trueEx, wasEx, monos[mi].ChainEx, double.IsNaN(marg) ? "-" : marg.ToString("F0"));
             }
 
             Console.WriteLine(new string('-', 108));
             Console.WriteLine("runeEx = baseMonsterEx x uplift (ex added per buffed wave) · own = this recipe's waves");
             Console.WriteLine("Y chosen/sockets = waves still ahead, by expected recipe vs. by hole count (upper bound)");
-            Console.WriteLine("shipped = MonoView.ChainBestEx, i.e. baseEx x (size + chargesLeft) x uplift");
+            Console.WriteLine("was = the old formula baseEx x (size + chargesLeft) x uplift · " +
+                              "now = MonoView.ChainBestEx as the plugin computes it today");
             Console.WriteLine("marginal = what the whole plan loses if this monolith is played neutral instead " +
                               "(Power's cross-term lives here)");
         }
@@ -653,8 +826,34 @@ namespace RunecraftHelper.Sim
                 : $"VERDICT  anchor set CHANGED — added [{string.Join(", ", added)}] dropped [{string.Join(", ", dropped)}]");
         }
 
+        private static RunecraftHelperCore PlanCore(List<SimMono> monos, int charges, out SimResult res)
+        {
+            var core = NewCore(chain: true, minEx: 0f, charges: charges);
+            res = core.SimRun(monos, Detonator, Grid, log: false, onlyAnchors: null, passes: 10);
+            return core;
+        }
+
+        private static RunecraftHelperCore NewCore(bool chain, float minEx, int charges)
+        {
+            var settings = new RunecraftHelperSettings
+            {
+                ExpTotalChargesManual = charges,
+                ExpMonolithMinEx = minEx,
+                RuneChainEnabled = chain,
+                RuneChainAffectsRoute = chain,
+            };
+            var core = RunecraftHelperCore.SimCreate(settings);
+            core.SimSeedPrice(RewardJunk, 5);
+            core.SimSeedPrice(RewardMid, 25);
+            core.SimSeedPrice(RewardRich, 260);
+            core.SimSeedPrice(RewardRich200, 200);
+            core.SimSeedPrice(RewardRich300, 300);
+            core.SimSetCharges(charges, 0);
+            return core;
+        }
+
         private static SimResult Plan(List<SimMono> monos, bool chain, float minEx, bool verbose, int charges,
-                                      HashSet<int>? onlyAnchors = null)
+                                      HashSet<int>? onlyAnchors = null, int passes = 2)
         {
             var settings = new RunecraftHelperSettings
             {
@@ -672,7 +871,7 @@ namespace RunecraftHelper.Sim
             core.SimSeedPrice(RewardRich300, 300);
             core.SimSetCharges(charges, 0);
 
-            var res = core.SimRun(monos, Detonator, Grid, log: verbose, onlyAnchors: onlyAnchors);
+            var res = core.SimRun(monos, Detonator, Grid, log: verbose, onlyAnchors: onlyAnchors, passes: passes);
             if (verbose && res.Log != null)
                 foreach (var line in res.Log) Console.WriteLine("      | " + line);
             return res;

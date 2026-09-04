@@ -644,6 +644,17 @@ namespace RunecraftHelper
         // ── enumeration / resolution ──────────────────────────────────────────
         private List<MonoView> EnumerateMonoliths()
         {
+            // Detonation-order state the chain valuation below needs (waves ahead, what is already
+            // propagating, where Power lands). It MUST be rebuilt here rather than at a caller: there are two
+            // scan entry points sharing one throttle -- this window and EnsureExpeditionMonoliths on the
+            // planner path -- so whichever wins the 750 ms race performs the scan and the other is skipped.
+            // With the rebuild sitting at only one of them, the planner path valued every monolith against
+            // empty maps and silently took the "no plan" fallback (every rune priced against ALL waves on the
+            // map, and no duplicate suppression at all), while the maps themselves looked perfectly correct
+            // when inspected. Reading `this.monolithViews` here is deliberate: it is still the PREVIOUS
+            // scan's list, which is exactly the ordering the rebuild wants.
+            this.RuneChainRebuildWavesAhead();
+
             var list = new List<MonoView>();
             var area = Core.States.InGameStateObject.CurrentAreaInstance;
             if (area == null) return list;
@@ -766,13 +777,24 @@ namespace RunecraftHelper
                         v.StationDiag = $"station resolved, anchor read failed: {adiag}";
                     }
 
-                    // Sealed (rerolled) monolith: the reward is locked in — the player can no longer
-                    // pick. Show ONLY the selected reward's value, not the max over the anchor
-                    // candidates (which would over-report). The selection is the recipe row pointer at
-                    // station+0x60; resolve it by language-independent Id against the offline catalog.
-                    // Runs independent of the anchor read (it can fail on odd stations) — +0x60 alone
-                    // identifies the locked recipe.
-                    if (v.IsRerolled && this.TryReadSelectedRecipeId(station, out var selId))
+                    // A recipe is COMMITTED on this monolith. The signal is station+0x60 alone: it is
+                    // null on an untouched monolith and holds the chosen recipe row once a choice exists,
+                    // however that choice was made -- the player picking normally, or the game force-rolling
+                    // one after a currency reroll. Verified live 2026-09-04: two untouched monoliths read
+                    // +0x60 == 0 while every chosen one resolved a real Id ("4SlotArchaicRuneofDecay1",
+                    // "8SlotKatlasGloom1"), all of them with is_rerolled == 0.
+                    //
+                    // This used to be gated on IsRerolled, which was a misreading: is_rerolled means the
+                    // monolith has ALREADY been rerolled with currency and is now sealed against being
+                    // rerolled again (that reroll also force-picks a random recipe). It says nothing about
+                    // whether a recipe is committed, so the gate hid every ordinary player choice -- and
+                    // with it the rune-chain's "this rune is already taken" rule.
+                    //
+                    // Once committed, the other offers are moot: show ONLY the selected reward's value
+                    // rather than the max over the anchor candidates, which would over-report a reward the
+                    // player can no longer take. Runs independent of the anchor read (it can fail on odd
+                    // stations) -- +0x60 alone identifies the recipe.
+                    if (this.TryReadSelectedRecipeId(station, out var selId))
                     {
                         v.SelectedRecipeId = selId;
                         var sel = this.monolithRecipes.Find(
@@ -1172,8 +1194,8 @@ namespace RunecraftHelper
             {
                 var name = this.RuneNameByIndex(ri);
                 if (name == null) continue;
-                double m = this.RuneChainEffMult(name, v.RunesEmpowered);
-                if (m <= 1.0) continue;
+                double m = this.RuneChainEffMultAt(v.EntityId, name, v.RunesEmpowered);
+                if (m <= 1.0) continue;   // neutral, a net cost, or already propagating upstream
                 if (!matched.Exists(x => string.Equals(x.Name, name, StringComparison.Ordinal)))
                     matched.Add((name, m));
             }
@@ -1304,9 +1326,13 @@ namespace RunecraftHelper
             public int AnchorPos = -1;
             public string AnchorName = "?";
             public bool IsUnique;          // anchor-less "unique" monolith: offers all size<=N (docs §6.12)
-            public bool IsRerolled;        // sealed: SM "is_rerolled"=1 → recipe locked, show only selection
+            // SM "is_rerolled"=1 → this monolith has been rerolled with currency and is SEALED against
+            // another reroll (the reroll re-rolls its recipes/runes and force-picks one at random). NOT a
+            // "recipe committed" flag — that is SelectedRecipeId / station+0x60, which an ordinary player
+            // choice fills while this stays 0.
+            public bool IsRerolled;
             public bool PanelOpen;         // this monolith's Combinations panel is open (station+0xB8 set)
-            public string SelectedRecipeId = string.Empty; // locked recipe Id (station+0x60), when sealed
+            public string SelectedRecipeId = string.Empty; // committed recipe Id (station+0x60); empty = untouched
             public string StationDiag = string.Empty; // why station/anchor failed to resolve (debug)
             public string SmStates = string.Empty;     // all StateMachine states "name=value" (debug)
             public bool RunesEmpowered;    // station+0x5d — a Power rune is already in effect on this station
@@ -1315,6 +1341,11 @@ namespace RunecraftHelper
             public double ChainBestEx;                     // the chain part of that joint best
             public string ChainBestRune = string.Empty;    // rune the joint-best recipe would propagate
             public string ChainBestRecipeId = string.Empty; // that recipe's Expedition2Recipes Id
+
+            // Waves this monolith is EXPECTED to spawn: the length of the recipe already locked in, else of
+            // the one we recommend, else its socket count. Feeds the "waves still ahead" count that prices
+            // every rune propagated earlier in the chain (RuneChainRebuildWavesAhead).
+            public int ExpectedWaves;
             public List<MonoCand> Candidates = new();
             public List<string> GlowRuneLabels = new(); // watched runes on glowing sockets to label on the map (weight-filtered)
             public List<int> GlowSockets = new();        // raw glowing socket indices (station+0x40); used by the panel rune overlay

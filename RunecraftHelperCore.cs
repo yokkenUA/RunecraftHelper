@@ -1047,10 +1047,16 @@ namespace RunecraftHelper
                     // propagate even before the player picks anything. Its label wins over the scouting one
                     // (it names the rune that actually propagates, not merely a watched one).
                     double runeMult = 1.0;
-                    bool chainRune = this.TryGetPropagatedRuneForRecipeId(r.Id, out var pRune, out var pMult);
+                    bool chainRune = this.TryGetPropagatedRuneForRecipeId(
+                        r.Id, out var pRune, out var pMult, out var pTaken);
                     if (chainRune)
                     {
-                        rune = pRune;
+                        // Spell out WHY a strong-looking rune is drawn plain: it is already propagating in
+                        // this chain (locked in on another monolith, or on one detonated earlier), and the
+                        // same runeshape modifier does not stack with itself.
+                        rune = pTaken
+                            ? pRune + " " + this.L("panel.rune_taken", "(taken)")
+                            : pRune;
                         runeMult = pMult;
                     }
 

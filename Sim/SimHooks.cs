@@ -53,10 +53,13 @@ namespace RunecraftHelper
             public int GlowSocket;             // station+0x40: the gold-framed SOCKET INDEX (0-based)
             public bool Empowered;             // station+0x5d: a Power rune already in effect here
             public int RecipeMode = 1;         // station+0x58: 1/2 render a gold frame, 0/3 do not
+            public int SealedOffer = -1;       // index into Offers that is LOCKED IN (station+0x60), -1 = none
+            public bool PanelOpen;             // its Runeshape Combinations panel is the open one
             public List<SimOffer> Offers = new();
 
             // Filled by the run (all read back out of the plugin's own MonoView).
             public double RewardEx;            // MonoView.Best        — priciest reward on offer
+            public int TourPos = -1;           // 1-based detonation position the plugin planned for it
             public double ChainEx;             // MonoView.ChainBestEx — chain part of the joint best
             public string BestRune = string.Empty;
             public double RouteValue;          // ExpMonolithRouteValue — what the router actually sees
@@ -110,9 +113,28 @@ namespace RunecraftHelper
 
         // One full pass: value every monolith, gate + weight it, then plan. Returns the plan; the per-monolith
         // numbers are written back into the SimMono objects so the caller can table them.
+        // `passes` mirrors what the live plugin does over successive frames: it values the monoliths, plans,
+        // and the NEXT scan values them again against that plan. The chain value depends on the detonation
+        // order and the order depends on the values, so one pass alone would report the chain value of a
+        // monolith whose position on the route was not yet known. Two passes is what the game reaches.
         public SimResult SimRun(List<SimMono> monos, Vector2 detonator, int gridSize, bool log = false,
-                                HashSet<int>? onlyAnchors = null)
+                                HashSet<int>? onlyAnchors = null, int passes = 2)
         {
+            SimResult outp = new();
+            for (int pass = 0; pass < Math.Max(1, passes); pass++)
+                outp = this.SimRunOnce(monos, detonator, gridSize, log && pass == Math.Max(1, passes) - 1, onlyAnchors);
+            return outp;
+        }
+
+        private SimResult SimRunOnce(List<SimMono> monos, Vector2 detonator, int gridSize, bool log,
+                                     HashSet<int>? onlyAnchors)
+        {
+            // 0) The waves-ahead map the chain valuation reads, rebuilt from the previous pass's plan and
+            //    the previous pass's VIEWS -- before SimBuildViews replaces them, exactly as the live scan
+            //    rebuilds it before EnumerateMonoliths. Doing it after would hand the rebuild fresh views
+            //    whose ExpectedWaves is still 0, silently dropping it back to the socket-count fallback.
+            this.RuneChainRebuildWavesAhead();
+
             var views = this.SimBuildViews(monos);
 
             // 1) VALUATION — the real one.
@@ -135,8 +157,13 @@ namespace RunecraftHelper
             {
                 if (onlyAnchors != null && !onlyAnchors.Contains(i)) continue;
                 var v = views[i];
+
+                // Same two facts the live scan caches next to the value: waves + the best uplift this monolith
+                // could propagate. Without them ExpChainReorder sees a chainless map and never reorders.
+                this.RuneChainRouteUplift(v, out var runeId, out var uplift);
                 this.expTargetCache[v.EntityId] = new ExpCachedTarget(
-                    monos[i].Pos, ExpGridToWorld(monos[i].Pos, 0f), ExpKind.Monolith, "monolith", monos[i].RouteValue);
+                    monos[i].Pos, ExpGridToWorld(monos[i].Pos, 0f), ExpKind.Monolith, "monolith", monos[i].RouteValue,
+                    0f, RuneChainWavesOf(v), uplift, runeId);
             }
 
             // 3) PLANNER INPUTS — mirrors BuildRouteInputs for a GRAND expedition (the mechanic only exists
@@ -163,12 +190,21 @@ namespace RunecraftHelper
                 StepDist = Math.Max(1f, effDist - ExpStepMarginGrid),
                 MarkerCoverageMode = false,                                  // Grand
                 MinMarkers = Math.Max(1, s.ExpMinMarkersPerSpareCharge),
+                ChainOrder = s.RuneChainEnabled && s.RuneChainAffectsRoute,
+                ChainBaseEx = s.RuneChainBaseMonsterEx,
                 Log = log ? new List<string>() : null,
             };
 
             // 4) GATING + WEIGHTING + 5) ROUTING — both the plugin's own.
             this.ExpFillRouteTargets(inp, float.NaN, false);
             var res = ExpComputeRoute(inp);
+
+            // Publish the plan into the same fields ApplyPendingRouteResult writes, so the next pass's
+            // RuneChainRebuildWavesAhead sees a real detonation order.
+            this.expSpinePts.Clear();
+            this.expSpinePts.AddRange(res.SpinePts);
+            this.expSpineAnchorIdx.Clear();
+            this.expSpineAnchorIdx.AddRange(res.SpineAnchorIdx);
 
             var outp = new SimResult
             {
@@ -233,6 +269,33 @@ namespace RunecraftHelper
             return list;
         }
 
+        // What the Combinations panel would draw for each row of the open monolith: the rune the row would
+        // propagate, its deduped multiplier, whether it is already taken, and which row wins the amber ring.
+        public List<(string Id, string Rune, double Mult, bool Taken, bool Amber)> SimPanelRows()
+        {
+            var rows = new List<(string, string, double, bool, bool)>();
+            var open = this.monolithViews.Find(v => v.PanelOpen);
+            if (open == null) return rows;
+
+            double bestMult = 1.0;
+            foreach (var rec in open.Offered)
+                if (this.TryGetPropagatedRuneForRecipeId(rec.id, out _, out var m, out _) && m > bestMult)
+                    bestMult = m;
+
+            foreach (var rec in open.Offered)
+            {
+                if (!this.TryGetPropagatedRuneForRecipeId(rec.id, out var rune, out var mult, out var taken))
+                {
+                    rows.Add((rec.id, "-", 1.0, false, false));
+                    continue;
+                }
+
+                rows.Add((rec.id, rune, mult, taken, bestMult > 1.0 && mult >= bestMult));
+            }
+
+            return rows;
+        }
+
         // Synthetic MonoViews: exactly the fields the valuation reads, filled the way the live scan fills them.
         private List<MonoView> SimBuildViews(List<SimMono> monos)
         {
@@ -253,6 +316,7 @@ namespace RunecraftHelper
                     GridPos = m.Pos,
                     HasPos = true,
                     AreaLevel = 80,
+                    PanelOpen = m.PanelOpen,
                 };
                 v.GlowSockets.Add(m.GlowSocket);
 
@@ -291,6 +355,14 @@ namespace RunecraftHelper
                 }
 
                 v.Best = best;
+
+                // A locked-in recipe: what the game exposes as sealed (is_rerolled) + station+0x60.
+                if (m.SealedOffer >= 0 && m.SealedOffer < v.Offered.Count)
+                {
+                    v.IsRerolled = true;
+                    v.SelectedRecipeId = v.Offered[m.SealedOffer].id;
+                }
+
                 this.monolithViews.Add(v);
             }
 

@@ -100,6 +100,7 @@
   "prof.del": "del",
   "prof.popup_new": "New profile name",
   "prof.popup_rename": "Rename profile",
+  "panel.rune_taken": "(taken)",
   "runechain.header": "Rune settings",
   "runechain.enable": "Value the rune chain (proliferation)",
   "runechain.enable_hint": "The gold-framed socket marks the rune that propagates to every pack unearthed LATER in\nthe chain, and buffing those monsters raises their drops. In the panel the GREEN frame\nkeeps meaning \"most valuable reward\"; an AMBER frame around a rune name marks the\nstrongest rune this monolith can propagate. Two separate calls, not one merged number.",
