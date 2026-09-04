@@ -65,11 +65,18 @@ namespace RunecraftHelper
         // child's RelativePosition/PositionModifier. Read directly here (not via GameOffsets) so the
         // plugin stays self-contained across GH versions. Verified live on PoE2 0.5.x (docs/re-findings.md §3).
         private const int ScrollOffsetFieldOffset = 0x108;   // 0.5.5: -0x18 (was 0x120)
+        // Note (0.5.5 RE): this field IS UiElementBase.PositionModifier -- same offset in both builds
+        // (0.5.4 0x120, 0.5.5 0x108). That explains the mechanism: the viewport translates its content by
+        // the modifier, and the game adds a parent's modifier to a child whose flag bit 0x400 is set.
         // The resolved viewport's scroll offset, re-read once per frame in DrawOverlay and added to the
         // content rows' positions (see TryGetUnscaledPosition).
         private Vector2 viewportScrollOffset;
 
-        private const int NameWStringOffset = 0x378;         // 0.5.5: -0x18 (was 0x390)
+        // 0.5.5: -0x30 (was 0x390), NOT the -0x18 that UiElementBase moved by. These wstrings live on the
+        // derived TEXT element, which lost another 0x18 of its own, so the base's delta alone lands short.
+        // Measured, not shifted: the wstring header at kid[0]+0x360 reads "1x Aldur's Legacy" live, and the
+        // MSVC layout confirms it (buffer/ptr at +0x00, size at +0x10 = 17, capacity at +0x18 = 23).
+        private const int NameWStringOffset = 0x360;
         private const int UiElementChildrenOffset = 0x10;
         private const int UiElementFlagsOffset = 0x168;      // 0.5.5: -0x18 (was 0x180), measured
         private const int IsVisibleBit = 0x0B;

@@ -39,8 +39,32 @@ namespace RunecraftHelper
     {
         private static readonly int[] ExpWidgetPath = { 97, 9, 17, 1 };
         private const int ExpControllerOffset = 0x360;      // 0.5.5: -0x18 (was 0x378), UI-element field
-        private const int ExpCtrlTotalOffset = 0x2b0;       // byte: total explosives
-        private const int ExpCtrlPlacedVecOffset = 0x220;   // std::vector<placed charge> {begin,end}
+        // 0.5.5: the counts left the controller. It shrank 0x2b8 -> 0x278 (dtor frees 0x278), so the old
+        // total at +0x2b0 and placed-vector at +0x220 both fall outside the object now -- +0x220 reads a
+        // stale pointer that faults on access. They live in a PLACEMENT-STATE sub-object instead, held by
+        // a one-element container at controller+0x1E0 (the ctor's FUN_1417441c0(this+0x3c, 1) reserves it):
+        //
+        //   sub = [controller + 0x1E0]           (0x70 bytes, its own vtable)
+        //   sub + 0x40  std::vector<GridPoint>   placed charges, element = {int32 x, int32 y}
+        //   sub + 0x58  (1023, 724)              constant, looks like grid bounds
+        //   sub + 0x60  {int32 x, int32 y}       last placed position (mirrors the vector's tail)
+        //   sub + 0x68  u8                       TOTAL charges for the map (the MAX, not the remainder)
+        //
+        // Verified live: with two charges placed and the HUD showing 13, +0x68 still read 15 -- so it is
+        // the max, which is what the planner budgets against; and the vector held exactly 2 entries,
+        // (1113,666) and (1098,711), in the same grid space as the monoliths' GridPos.
+        private const int ExpCtrlPlacementStateOffset = 0x1E0;  // -> one-element container {begin,end,cap}
+        private const int ExpPlacementTotalOffset = 0x68;       // u8: max charges for the map
+        private const int ExpPlacementPlacedVecOffset = 0x40;   // std::vector<{i32 x, i32 y}>
+
+        // Structural fingerprint of the controller, from ExpeditionExplosiveController_ctor:
+        // ServerController_ctorBase(this, manager, 0x33) puts the controller TYPE ID at +0x30, and the base
+        // stores its manager -- the very ServerData we walked from -- at +0x48. Both were identical in
+        // 0.5.4HF3 and 0.5.5 while the class body around them shifted, and the +0x48 BACK-POINTER is
+        // self-verifying: only the real controller of THIS ServerData points back at it.
+        private const int ExpCtrlTypeIdOffset = 0x30;
+        private const int ExpCtrlTypeId = 0x33;
+        private const int ExpCtrlManagerOffset = 0x48;      // -> the owning ServerData
 
         // Stable controller anchor (RE 2026-06-28, PoE2 0.5.4HF3 — Ghidra ExpeditionExplosiveController_ctor,
         // vtable 0x…3311e60). The controller is a ServerData field, NOT fundamentally a UI object:
@@ -48,9 +72,13 @@ namespace RunecraftHelper
         // AreaInstance.ServerDataObject (it parses PlayerInfo.ServerDataPtr with offsets that upstream keeps
         // patched). This source is UI-independent AND range-independent, so it survives walking away from the
         // detonator and any UI child-index / state drift that broke the old GameUi->[97][9][17][1]->+0x378 path.
-        private const int ServerDataExpCtrlOffset = 0x2618; // ServerData -> ExpeditionExplosiveController
-        private const int ServerDataScanStart = 0x2580;     // drift-recovery scan window around +0x2618
-        private const int ServerDataScanEnd = 0x26b0;
+        // 0.5.5 moved the slot: +0x2618 -> +0x2598. Both are tried, and if neither holds it the window is
+        // scanned with the fingerprint above -- which needs no prior successful resolve, unlike the old
+        // vtable-matched scan (that could only run AFTER a resolve had already captured a vtable, so on a
+        // patch day it never ran at all). The window is deliberately wide: this slot has now moved twice.
+        private static readonly int[] ServerDataExpCtrlOffsets = { 0x2598, 0x2618 };
+        private const int ServerDataScanStart = 0x2400;     // drift-recovery scan window
+        private const int ServerDataScanEnd = 0x2700;
 
         // Map/zone modifiers: the AreaInstance exposes its active mods as a std::vector<{ i32 StatsKey; i32 Value }>
         // at +0x158 (begin) / +0x160 (end) — locale-free, Value = signed integer percent (RE 2026-07-03, obsidian
@@ -340,8 +368,8 @@ namespace RunecraftHelper
         private bool expHasDetonator;
         private bool expDetonatorActivated;  // detonator StateMachine "activated" != 0 ⇒ dig started, plan is locked in
         private Vector2 expDetonatorPos;
-        private int expTotalCharges;        // controller +0x2b0
-        private int expPlacedFromCtrl;      // controller placed-vector count
+        private int expTotalCharges;        // placement state +0x68 (max charges for the map)
+        private int expPlacedFromCtrl;      // placement state +0x40 placed-vector count
         private int expPlacedFromEntities;  // distinct ExpeditionExplosive entity ids seen this area (accumulated)
         private readonly HashSet<uint> expPlacedIds = new();  // every placed-charge id seen — accumulates, so the
                                                               // count is right even for charges placed far apart
@@ -1328,41 +1356,44 @@ namespace RunecraftHelper
             var area = Core.States.InGameStateObject.CurrentAreaInstance;
             IntPtr serverData = area?.ServerDataObject?.Address ?? IntPtr.Zero;
 
-            // (1) Stable ServerData field.
+            // (1) Known ServerData slots, newest build first.
             if (serverData != IntPtr.Zero)
             {
-                var c = this.ReadPtr(serverData + ServerDataExpCtrlOffset);
-                if (this.ExpControllerLooksValid(c))
+                foreach (var off in ServerDataExpCtrlOffsets)
                 {
+                    var c = this.ReadPtr(serverData + off);
+                    if (!this.ExpControllerLooksValid(c, serverData)) continue;
                     this.CaptureControllerVtable(c);
-                    this.expCtrlSource = "GH serverData+0x2618";
+                    this.expCtrlSource = $"GH serverData+0x{off:x}";
                     controller = c;
                     return true;
                 }
             }
 
-            // (2) HUD widget fallback.
-            if (this.TryGetExpeditionWidget(out var widget))
-            {
-                var c = this.ReadPtr(widget + ExpControllerOffset);
-                if (this.ExpControllerLooksValid(c))
-                {
-                    this.CaptureControllerVtable(c);
-                    this.expCtrlSource = "widget+0x378";
-                    controller = c;
-                    return true;
-                }
-            }
-
-            // (3) Drift-recovery scan (only trusts an exact vtable match).
-            if (serverData != IntPtr.Zero && this.expCtrlVtable != IntPtr.Zero)
+            // (2) Drift-recovery scan of the whole window. The fingerprint (type id + a back-pointer to
+            // THIS ServerData) is specific enough to run unconditionally, so the next time the slot moves
+            // it self-heals instead of leaving the planner on a guessed charge budget.
+            if (serverData != IntPtr.Zero)
             {
                 for (int off = ServerDataScanStart; off <= ServerDataScanEnd; off += 8)
                 {
                     var c = this.ReadPtr(serverData + off);
-                    if (c == IntPtr.Zero || this.ReadPtr(c) != this.expCtrlVtable) continue;
-                    if (!this.ExpControllerLooksValid(c)) continue;
+                    if (!this.ExpControllerLooksValid(c, serverData)) continue;
+                    this.CaptureControllerVtable(c);
                     this.expCtrlSource = $"serverData+0x{off:x} (scan)";
+                    controller = c;
+                    return true;
+                }
+            }
+
+            // (3) HUD widget fallback (exists only while standing at the detonator).
+            if (this.TryGetExpeditionWidget(out var widget))
+            {
+                var c = this.ReadPtr(widget + ExpControllerOffset);
+                if (this.ExpControllerLooksValid(c, serverData))
+                {
+                    this.CaptureControllerVtable(c);
+                    this.expCtrlSource = $"widget+0x{ExpControllerOffset:x}";
                     controller = c;
                     return true;
                 }
@@ -1372,29 +1403,44 @@ namespace RunecraftHelper
             return false;
         }
 
-        // Structural validation (no build-specific vtable hardcode): a small total explosive count at +0x2b0
-        // and a well-formed placed-charge std::vector at +0x220 whose element count never exceeds the total.
-        // These invariants reject the unrelated objects that occupy the same ServerData slot outside expedition.
-        private bool ExpControllerLooksValid(IntPtr c)
+        // Structural validation, build-stable and self-verifying: the type id at +0x30 is the 0x33 the ctor
+        // passes to ServerController_ctorBase, and the manager pointer at +0x48 points back at the very
+        // ServerData we walked from. No vtable hardcode, no dependence on a field that patch days keep moving.
+        //
+        // This used to validate on "a small total at +0x2b0 and a placed vector no longer than it". On 0.5.5
+        // the class shrank (0x2b8 -> 0x278), +0x2b0 fell outside the object and read a neighbouring
+        // allocation, so the controller failed validation AT ITS CORRECT ADDRESS and the planner fell back to
+        // a guessed charge budget. A count is DATA -- the wrong thing to prove identity with.
+        private bool ExpControllerLooksValid(IntPtr c, IntPtr serverData)
         {
             if (c == IntPtr.Zero) return false;
-            if (!this.TryReadI32(c + ExpCtrlTotalOffset, out var raw)) return false;
-            int total = raw & 0xFF;
-            if (total < 1 || total > 64) return false;
-            if (!this.TryReadPlacedCount(c, out var placed)) return false;
-            return placed >= 0 && placed <= total;
+            if (!this.TryReadI32(c + ExpCtrlTypeIdOffset, out var typeId) || typeId != ExpCtrlTypeId) return false;
+            if (serverData == IntPtr.Zero) return this.ReadPtr(c) != IntPtr.Zero; // widget path: no back-ref to test
+            return this.ReadPtr(c + ExpCtrlManagerOffset) == serverData;
         }
 
-        // Read the placed-charge count from the controller's std::vector at +0x220, TOLERATING an empty
-        // (null) vector. Pre-placement the vector is genuinely {begin=0,end=0} — TryReadStdVector rejects
-        // that null begin, which used to make ExpControllerLooksValid fail and the controller "disappear"
-        // until the first charge was placed (symptom: "Controller + HUD unreadable", manual fallback shown).
-        // Empty ⇒ 0 placed; a non-empty vector must be 8-aligned with last ≥ first.
-        private bool TryReadPlacedCount(IntPtr c, out int placed)
+        // Resolve the placement-state sub-object that carries both counts (see the offsets above). The
+        // container at controller+0x1E0 is {begin,end,cap}; begin is the single element we want.
+        private bool TryGetExpPlacementState(IntPtr c, out IntPtr state)
+        {
+            state = IntPtr.Zero;
+            if (c == IntPtr.Zero) return false;
+            var s = this.ReadPtr(c + ExpCtrlPlacementStateOffset);
+            if (s == IntPtr.Zero) return false;
+            if (this.ReadPtr(s) == IntPtr.Zero) return false;   // must have a vtable
+            state = s;
+            return true;
+        }
+
+        // Read the placed-charge count from the placement state's std::vector, TOLERATING an empty (null)
+        // vector: before the first placement it is genuinely {begin=0,end=0}, and treating that as a
+        // failure used to make the controller "disappear" until a charge was placed.
+        // Empty ⇒ 0 placed; a non-empty vector must be 8-aligned (element = two int32) with last ≥ first.
+        private bool TryReadPlacedCount(IntPtr state, out int placed)
         {
             placed = 0;
             var buf = new byte[16];
-            if (!ReadProcessMemory(this.processHandle, c + ExpCtrlPlacedVecOffset, buf, (uint)buf.Length, out _))
+            if (!ReadProcessMemory(this.processHandle, state + ExpPlacementPlacedVecOffset, buf, (uint)buf.Length, out _))
                 return false;
             long first = BitConverter.ToInt64(buf, 0);
             long last = BitConverter.ToInt64(buf, 8);
@@ -1421,8 +1467,18 @@ namespace RunecraftHelper
             total = 0;
             placed = 0;
             if (!this.TryGetExpeditionController(out var c)) return false;
-            if (this.TryReadI32(c + ExpCtrlTotalOffset, out var raw)) total = raw & 0xFF;
-            this.TryReadPlacedCount(c, out placed);
+            if (!this.TryGetExpPlacementState(c, out var state)) return false;
+
+            // Range-check the total and report 0 = "unknown" rather than a fabricated budget: the HUD
+            // remaining-count path and the manual setting already cover an unknown total, and a wrong
+            // budget silently mis-plans a whole map.
+            if (this.TryReadI32(state + ExpPlacementTotalOffset, out var raw))
+            {
+                int t = raw & 0xFF;
+                if (t >= 1 && t <= 64) total = t;
+            }
+
+            this.TryReadPlacedCount(state, out placed);
             return true;
         }
 
@@ -1441,7 +1497,10 @@ namespace RunecraftHelper
             }
 
             // Counter glyphs live at +0x4C0; fall back to the +0x390 duplicate if that's empty.
-            string txt = this.ReadStdWString(leaf + 0x4A8);   // 0.5.5: -0x18 (was 0x4C0)
+            // 0.5.5: -0x30 (was 0x4C0), same as NameWStringOffset -- these are two wstrings on the SAME
+            // text element and they move together. Verified on a recipe row's text child: the duplicate at
+            // +0x490 reads the identical label, size 17 / capacity 23 at +0x4A0 / +0x4A8.
+            string txt = this.ReadStdWString(leaf + 0x490);
             if (string.IsNullOrEmpty(txt)) txt = this.ReadStdWString(leaf + NameWStringOffset);
             if (string.IsNullOrEmpty(txt)) return false;
 
