@@ -758,11 +758,17 @@ namespace RunecraftHelper
                 this.expNextScanUtc = now.AddMilliseconds(500);
             }
 
+            // The scan above still runs while a panel is open (state stays fresh, so nothing has to be
+            // recomputed on close); only the drawing is suppressed. The debug/planner ImGui WINDOWS are
+            // left alone -- they are GameHelper windows the user can move or close, not overlay clutter
+            // painted over the game.
+            bool covered = IsAnyLargePanelOpen;
+
             if (this.Settings.ShowExpeditionDebug) this.DrawExpeditionDebugWindow();
-            if (this.Settings.ShowExpeditionGridValue) this.DrawExpeditionGridValues();
+            if (this.Settings.ShowExpeditionGridValue && !covered) this.DrawExpeditionGridValues();
             if (this.Settings.ShowExpeditionPlanner) this.DrawExpeditionPlannerWindow();
-            if (this.Settings.ShowExpeditionGates) this.DrawExpeditionGatesLargeMap();
-            if (this.Settings.ShowExpeditionHeatmap || this.Settings.ShowExpeditionHeatmapMarkers) this.DrawExpeditionHeatmapLargeMap();
+            if (this.Settings.ShowExpeditionGates && !covered) this.DrawExpeditionGatesLargeMap();
+            if ((this.Settings.ShowExpeditionHeatmap || this.Settings.ShowExpeditionHeatmapMarkers) && !covered) this.DrawExpeditionHeatmapLargeMap();
         }
 
         private void ScanExpedition()

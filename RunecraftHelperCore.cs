@@ -48,6 +48,21 @@ namespace RunecraftHelper
             0x00542EF1,
             0x00502EF1, // recipes-container
         };
+        /// <summary>
+        ///     GameHelper's own "a large game panel is covering the screen" check: the side panels
+        ///     (inventory / character), the passive tree, the atlas skill tree, the currency exchange,
+        ///     the temple console and the Sekhema trial map. Upstream asks plugins to route their
+        ///     hide-the-overlay logic through this rather than probing panels themselves -- a plugin's
+        ///     own probe is usually a fixed child index, which is exactly what silently moves on a patch.
+        ///
+        ///     Applied to the WORLD and large-map overlays only. The Runeshape Combinations overlay is
+        ///     deliberately NOT gated on it: that overlay is positioned on the game's own panel and only
+        ///     drawn once the panel resolves, and if that panel ever counts as one of the panels above,
+        ///     gating it here would hide the plugin's main feature exactly when it is needed.
+        /// </summary>
+        private static bool IsAnyLargePanelOpen =>
+            Core.States.InGameStateObject.GameUi.IsAnyLargePanelOpen;
+
         private const int GateStep = 0;
 
         // The scroll viewport (the fixed-size clip window) is the element matched at this fp step —

@@ -204,9 +204,11 @@ namespace RunecraftHelper
             }
 
             // Map value labels: optionally suppressed while the Runeshape Combinations panel is open so
-            // they don't clutter the map on top of the panel's own per-recipe overlay.
+            // they don't clutter the map on top of the panel's own per-recipe overlay, and always
+            // suppressed while a large game panel covers the screen (see IsAnyLargePanelOpen).
             bool drawMap = (this.Settings.DrawMonolithValueOnMap || this.Settings.ShowGlowRunes) &&
-                !(this.Settings.HideMapValueWhenPanelOpen && combinationsPanelOpen);
+                !(this.Settings.HideMapValueWhenPanelOpen && combinationsPanelOpen) &&
+                !IsAnyLargePanelOpen;
             if (drawMap) this.DrawMonolithMapLabels();
             if (this.Settings.ShowMonolithRewards) this.DrawMonolithRewardsWindow();
             if (this.Settings.ShowWindow)
