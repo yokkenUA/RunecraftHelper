@@ -3139,10 +3139,7 @@ namespace RunecraftHelper
             var largeMap = gameUi.LargeMap;
             if (largeMap == null || !largeMap.IsVisible || gameUi.WorldMapPanel.IsVisible) return;
 
-            var area = Core.States.InGameStateObject.CurrentAreaInstance;
-            if (area?.Player == null || !area.Player.TryGetComponent<Render>(out var playerRender)) return;
-            var trackingPos = new Vector2(playerRender.GridPosition.X, playerRender.GridPosition.Y);
-            float trackingHeight = playerRender.TerrainHeight;
+            if (!this.GetTrackingPosAndHeight(out var trackingPos, out var trackingHeight)) return;
 
             var baseRes = UiElementBaseFuncs.BaseResolution;
             double baseDiag = Math.Sqrt(((double)baseRes.X * baseRes.X) + ((double)baseRes.Y * baseRes.Y));
@@ -3232,9 +3229,7 @@ namespace RunecraftHelper
             if (largeMap == null || !largeMap.IsVisible || gameUi.WorldMapPanel.IsVisible) return;
 
             var area = Core.States.InGameStateObject.CurrentAreaInstance;
-            if (area?.Player == null || !area.Player.TryGetComponent<Render>(out var playerRender)) return;
-            var trackingPos = new Vector2(playerRender.GridPosition.X, playerRender.GridPosition.Y);
-            float trackingHeight = playerRender.TerrainHeight;
+            if (!this.GetTrackingPosAndHeight(out var trackingPos, out var trackingHeight)) return;
 
             var baseRes = UiElementBaseFuncs.BaseResolution;
             double baseDiag = Math.Sqrt(((double)baseRes.X * baseRes.X) + ((double)baseRes.Y * baseRes.Y));
@@ -3461,9 +3456,7 @@ namespace RunecraftHelper
             if (largeMap == null || !largeMap.IsVisible || gameUi.WorldMapPanel.IsVisible) return;
 
             var area = Core.States.InGameStateObject.CurrentAreaInstance;
-            if (area?.Player == null || !area.Player.TryGetComponent<Render>(out var playerRender)) return;
-            var trackingPos = new Vector2(playerRender.GridPosition.X, playerRender.GridPosition.Y);
-            float trackingHeight = playerRender.TerrainHeight;
+            if (!this.GetTrackingPosAndHeight(out var trackingPos, out var trackingHeight)) return;
 
             var baseRes = UiElementBaseFuncs.BaseResolution;
             double baseDiag = Math.Sqrt(((double)baseRes.X * baseRes.X) + ((double)baseRes.Y * baseRes.Y));
