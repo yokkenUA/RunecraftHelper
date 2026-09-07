@@ -7162,6 +7162,9 @@
    "rewardCount": 1,
    "description": "",
    "category": 0,
+   "areaTags": [
+    54
+   ],
    "minLevel": 1,
    "maxLevel": 100
   },
