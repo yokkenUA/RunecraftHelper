@@ -142,8 +142,21 @@ namespace RunecraftHelper
         private const int BaseItemTypeArtOffset = 0x78;    // → sub-object; +0x08 → ".dds" art path
         private const int ArtSubPathOffset = 0x08;         //   art path = poe.ninja image-id
 
-        // Combinations-panel row UiElement → its Expedition2Recipes_Row (live-verified back-ptr).
-        private const int RecipeRowBackPtrOffset = 0x540;
+        // Combinations-panel row UiElement -> its Expedition2Recipes_Row (live-verified back-ptr).
+        // 0.5.5 HF9: 0x540 -> 0x528. The row is a UiElement, so it rode the -0x18 UiElementBase
+        // shift; this one was simply missed when the base was fixed, because the old slot does not
+        // read as null -- it holds an all-0xFF sentinel, so the pointer looked live and every field
+        // behind it came back empty instead.
+        //
+        // Consequence while it was stale: Id / MetaId / DdsArt were blank for every panel row and
+        // pricing silently fell back to matching the LOCALIZED name -- invisible on an English
+        // client, broken on any other (same failure mode as the RU empty-dict bug).
+        //
+        // Verified by direct read, not inference: two visible rows held 0x319300DDB1F and
+        // 0x319300DD5A0 here, differing by 0x57F = exactly 7 x 0xC9 (the HF9 recipe stride), and
+        // the second decodes as a real row -- count 7, size 7, band 1..100, Id "7SlotCelestialAlloy1",
+        // matching the panel label "Celestial Alloy".
+        private const int RecipeRowBackPtrOffset = 0x528;
         // Expedition2Recipes_Row → reward BaseItemType* (null = "random currency" / no fixed item).
         private const int RecipeRewardItemOffset = 0x2c;
         // Expedition2Recipes_Row → level band (i32 MinLevelReq / i32 MaxLevelReq).
