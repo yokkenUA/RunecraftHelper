@@ -322,6 +322,13 @@ namespace RunecraftHelper
 
                 ImGui.TextDisabled(this.L("mono.map_value_hint", "Paints each monolith's best value (ex) on the large-map overlay"));
                 ImGui.Checkbox(this.L("mono.draw_on_map", "Draw value on map overlay"), ref this.Settings.DrawMonolithValueOnMap);
+                if (this.Settings.DrawMonolithValueOnMap)
+                {
+                    ImGui.Indent();
+                    ImGui.Checkbox(this.L("mono.show_holes_on_map", "Show socket count"), ref this.Settings.ShowHoleCountOnMap);
+                    ImGui.TextDisabled(this.L("mono.show_holes_hint", "Prefixes the label with the socket count: \"[5] 49 ex\""));
+                    ImGui.Unindent();
+                }
 
                 ImGui.Spacing();
 

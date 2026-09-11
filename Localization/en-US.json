@@ -115,5 +115,7 @@
   "exp.run_hotkey": "Run hotkey",
   "exp.run_hotkey_key": "Key",
   "exp.run_hotkey_hint": "Rebuilds the route without the mouse, and works while the planner window is\ncollapsed. It listens only during an expedition, before the detonator is\npressed, so a key the game uses elsewhere (Shift) is usually fine here.",
-  "exp.run_tip_hotkey": "Hotkey: {0}"
+  "exp.run_tip_hotkey": "Hotkey: {0}",
+  "mono.show_holes_on_map": "Show socket count",
+  "mono.show_holes_hint": "Prefixes the label with the socket count: \"[5] 49 ex\""
 }

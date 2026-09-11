@@ -173,6 +173,12 @@ namespace RunecraftHelper
         // map position (the same place Radar shows the socket count). Tinted by MonolithHighlightThreshold.
         public bool DrawMonolithValueOnMap = false;
 
+        // Prefix the on-map label with the monolith's socket count in brackets: "[5] 49 ex" = 5 sockets,
+        // best reward 49 ex (community request). Socket count is the first thing that decides whether a
+        // monolith is worth walking to, so it belongs on the same line as the price rather than in the
+        // window. Suppressed when the count is unknown (station unresolved) -- "[0]" would read as a fact.
+        public bool ShowHoleCountOnMap = false;
+
         // Hide the on-map value labels while the in-game Runeshape Combinations panel is open (the same
         // panel the recipe overlay reads). Avoids cluttering the map with summary prices while the player
         // is reading the panel + its per-recipe overlay. Always on (no longer a settings-UI choice).
