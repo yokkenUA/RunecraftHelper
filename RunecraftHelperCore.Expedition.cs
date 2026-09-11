@@ -8,6 +8,7 @@ namespace RunecraftHelper
     using System.Numerics;
     using System.Threading;
     using System.Threading.Tasks;
+    using ClickableTransparentOverlay.Win32;
     using GameHelper;
     using GameHelper.RemoteEnums.Entity;
     using GameHelper.RemoteObjects.Components;
@@ -3965,19 +3966,32 @@ namespace RunecraftHelper
             this.DrawExpeditionRouteLargeMap();
             this.DrawExpeditionNextPointWorld();
 
+            var s = this.Settings;
+
+            // The plan is "stale" when anything it depends on changed since the last Run (or after an area
+            // change, which clears the stored fingerprint). Only Run -- the button or its hotkey -- recomputes.
+            string routeFp = this.BuildRouteFingerprint();
+            bool routeStale = routeFp != this.expRouteFingerprint;
+
+            // Hotkey equivalent of the Run button. It sits ABOVE ImGui.Begin on purpose: a collapsed window (or
+            // one dragged off-screen) returns false from Begin, and those are exactly the cases where reaching
+            // for the button is most annoying -- so the shortcut has to work without the window drawing.
+            //
+            // The button's preconditions all still hold here: this method has already returned unless we are in
+            // an expedition whose detonator is unpressed, LaunchRouteCompute is a no-op while a plan is cooking,
+            // and DrawUI returns early when neither the game nor GameHelper owns the foreground -- so a keypress
+            // meant for another application can never reach this line. That is why there is no focus check here.
+            if (s.ExpPlannerRunHotkeyEnabled && Utils.IsKeyPressedAndNotTimeout(s.ExpPlannerRunHotkey))
+            {
+                this.LaunchRouteCompute(routeFp);
+            }
+
             ImGui.SetNextWindowSize(new Vector2(340f, 0f), ImGuiCond.FirstUseEver);
             if (!ImGui.Begin(this.Loc.Title("exp.planner_title", "Expedition Planner", "RunecraftExpeditionPlanner")))
             {
                 ImGui.End();
                 return;
             }
-
-            var s = this.Settings;
-
-            // The plan is "stale" when anything it depends on changed since the last Run (or after an area
-            // change, which clears the stored fingerprint). The Run button is the ONLY thing that recomputes.
-            string routeFp = this.BuildRouteFingerprint();
-            bool routeStale = routeFp != this.expRouteFingerprint;
 
             if (this.expCtrlResolved)
             {
@@ -4024,9 +4038,17 @@ namespace RunecraftHelper
 
                 if (routeStale) ImGui.PopStyleColor(3);
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(routeStale
+                {
+                    // Name the bound key in the tooltip -- otherwise the shortcut is invisible to anyone who
+                    // did not set it up themselves (e.g. a shared settings file).
+                    var tip = routeStale
                         ? this.L("exp.run_tip_stale", "Settings changed — click to (re)build the route.")
-                        : this.L("exp.run_tip_ok", "Route is up to date."));
+                        : this.L("exp.run_tip_ok", "Route is up to date.");
+                    if (s.ExpPlannerRunHotkeyEnabled)
+                        tip += "\n" + this.LF("exp.run_tip_hotkey", "Hotkey: {0}", s.ExpPlannerRunHotkey);
+
+                    ImGui.SetTooltip(tip);
+                }
             }
 
             // Neither the controller nor the HUD counter could be read this scan — let the player set the total so

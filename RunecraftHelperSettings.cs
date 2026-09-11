@@ -2,6 +2,7 @@ namespace RunecraftHelper
 {
     using System;
     using System.Collections.Generic;
+    using ClickableTransparentOverlay.Win32;
     using GameHelper.Plugin;
     using Newtonsoft.Json;
 
@@ -265,6 +266,26 @@ namespace RunecraftHelper
         // (GameUi→[97][9][17][1]) is visible — i.e. while you're placing explosives. All the knobs below
         // are edited from that window, not from this settings page.
         public bool ShowExpeditionPlanner = false;
+
+        // Optional keyboard shortcut for the planner window's "Run" button, so re-planning does not cost a
+        // mouse trip to a window that is easy to bury under the game's own HUD.
+        //
+        // Off by default, and deliberately so: a hotkey nobody asked for competes with whatever the player has
+        // bound in game, and no default is safe on every keyboard.
+        //
+        // LSHIFT is the requested default. It is a key the game itself uses, which is survivable only because of
+        // the narrow scope below: the planner listens during the placement phase, before the detonator is pressed,
+        // where there is nothing to fight and holding shift does not compete with anything. Anyone who does bind
+        // it can pick another key in the combo; the repeat is rate-limited by GameHelper's KeyPressTimeout, and a
+        // re-plan while one is already running is dropped in LaunchRouteCompute, so a held key cannot pile up.
+        //
+        // Scope is the same as the button's: it is polled only inside DrawExpeditionPlannerWindow, which runs
+        // solely while the planner is enabled, an expedition detonator is on the map, and that detonator has
+        // not been pressed yet. It also inherits DrawUI's foreground gate, so the key cannot fire while you are
+        // alt-tabbed into another application.
+        public bool ExpPlannerRunHotkeyEnabled = false;
+
+        public VK ExpPlannerRunHotkey = VK.LSHIFT;
 
         // Map "+% to explosive placement distance" modifier (0–100). Effective placement = 108 × (1 + %/100).
         // Read off the map yourself (no clean memory source) — see EXPEDITION_WIP.md.
