@@ -1150,7 +1150,7 @@ namespace RunecraftHelper
         //   BestRune  — this row's recipe would drop the best-valued rune on the monolith's gold
         //               (propagating) socket → amber frame around the rune name, no figures.
         // A row can carry either, both, or neither; the player weighs price against chain themselves.
-        private readonly List<(Vector2 Pos, Vector2 Size, double Total, bool Locked, string Rune, bool BestPrice, bool BestRune, uint RuneColor)> overlayRows = new();
+        private readonly List<(Vector2 Pos, Vector2 Size, double Total, bool Priced, bool Locked, string Rune, bool BestPrice, bool BestRune, uint RuneColor)> overlayRows = new();
 
         // Priced rows for the current frame (RowAddress + total), built BEFORE geometry is resolved so
         // the Relative-mode median is computed over the full priced set, independent of whether any
@@ -1158,7 +1158,11 @@ namespace RunecraftHelper
         // RuneMult = the propagated rune's effective loot multiplier (1.0 = none / no rune), the ranking
         // key for the BestRune frame. ChainRune distinguishes a chain-resolved propagating rune (tinted by
         // its class) from the older glow-rune SCOUTING label, which keeps its plain amber.
-        private readonly List<(IntPtr Addr, double Total, bool Locked, string Rune, double RuneMult, bool ChainRune)> pricedScratch = new();
+        // One panel row's overlay content. Priced says whether Total means anything: a row whose reward has
+        // no poe.ninja price still belongs here, because the RUNE it would propagate is knowledge of its own
+        // and does not come from the price. Tying the two together hid the rune on every unpriced row -- and
+        // on a panel of nothing but unpriced rewards (a rune-reward panel) it hid the whole overlay.
+        private readonly List<(IntPtr Addr, double Total, bool Priced, bool Locked, string Rune, double RuneMult, bool ChainRune)> rowScratch = new();
 
         // Last-good screen geometry per row UiElement. A single ReadProcessMemory miss on a live client
         // would otherwise blank or teleport that row's price for a frame; instead we reuse the previous
@@ -1207,68 +1211,75 @@ namespace RunecraftHelper
             //    this full priced set — NOT over the rows whose geometry happens to resolve this frame —
             //    so a transient geometry read miss can't shift the colour thresholds and flip every
             //    row green/yellow/red.
-            this.pricedScratch.Clear();
+            this.rowScratch.Clear();
             foreach (var r in this.recipes)
-                if (this.TryGetRecipePrice(in r, out var unit))
-                {
-                    // Match the locked row on metaId when it's available, else fall back to the reward
-                    // name (rune/SoulCore rewards have a blank live MetaId — see lockedPanelName).
-                    bool locked =
-                        (this.lockedPanelMetaId.Length > 0 &&
-                         string.Equals(r.MetaId, this.lockedPanelMetaId, StringComparison.Ordinal)) ||
-                        (this.lockedPanelName.Length > 0 &&
-                         string.Equals(r.Name, this.lockedPanelName, StringComparison.Ordinal));
-                    // Watched rune this recipe would place on the open monolith's glowing socket (empty if none).
-                    string rune = this.GlowRuneLabelForRecipe(r.Id);
-                    // Rune-chain: the gold socket is a POSITION, so we know which rune this recipe would
-                    // propagate even before the player picks anything. Its label wins over the scouting one
-                    // (it names the rune that actually propagates, not merely a watched one).
-                    double runeMult = 1.0;
-                    bool chainRune = this.TryGetPropagatedRuneForRecipeId(
-                        r.Id, out var pRune, out var pMult, out var pTaken);
-                    if (chainRune)
-                    {
-                        // Spell out WHY a strong-looking rune is drawn plain: it is already propagating in
-                        // this chain (locked in on another monolith, or on one detonated earlier), and the
-                        // same runeshape modifier does not stack with itself.
-                        rune = pTaken
-                            ? pRune + " " + this.L("panel.rune_taken", "(taken)")
-                            : pRune;
-                        runeMult = pMult;
-                    }
+            {
+                bool priced = this.TryGetRecipePrice(in r, out var unit);
 
-                    this.pricedScratch.Add((r.RowAddress, unit * Math.Max(1, r.Count), locked, rune, runeMult, chainRune));
+                // Match the locked row on metaId when it's available, else fall back to the reward
+                // name (rune/SoulCore rewards have a blank live MetaId -- see lockedPanelName).
+                bool locked =
+                    (this.lockedPanelMetaId.Length > 0 &&
+                     string.Equals(r.MetaId, this.lockedPanelMetaId, StringComparison.Ordinal)) ||
+                    (this.lockedPanelName.Length > 0 &&
+                     string.Equals(r.Name, this.lockedPanelName, StringComparison.Ordinal));
+                // Watched rune this recipe would place on the open monolith's glowing socket (empty if none).
+                string rune = this.GlowRuneLabelForRecipe(r.Id);
+                // Rune-chain: the gold socket is a POSITION, so we know which rune this recipe would
+                // propagate even before the player picks anything. Its label wins over the scouting one
+                // (it names the rune that actually propagates, not merely a watched one).
+                double runeMult = 1.0;
+                bool chainRune = this.TryGetPropagatedRuneForRecipeId(
+                    r.Id, out var pRune, out var pMult, out var pTaken);
+                if (chainRune)
+                {
+                    // Spell out WHY a strong-looking rune is drawn plain: it is already propagating in
+                    // this chain (locked in on another monolith, or on one detonated earlier), and the
+                    // same runeshape modifier does not stack with itself.
+                    rune = pTaken
+                        ? pRune + " " + this.L("panel.rune_taken", "(taken)")
+                        : pRune;
+                    runeMult = pMult;
                 }
-            if (this.pricedScratch.Count == 0) return;
+
+                // A row earns its place with EITHER piece of information. The rune matters most exactly
+                // where the price is missing: league runeshape rewards carry no poe.ninja price at all, so
+                // the panel the player is standing in front of was the one telling them nothing.
+                if (!priced && string.IsNullOrEmpty(rune)) continue;
+                this.rowScratch.Add((r.RowAddress, priced ? unit * Math.Max(1, r.Count) : 0.0,
+                                     priced, locked, rune, runeMult, chainRune));
+            }
+
+            if (this.rowScratch.Count == 0) return;
 
             // Best PRICE (green frame below) — the highest-priced offered row, computed over the full priced
             // set so it is independent of which rows' geometry resolves this frame.
             double bestTotal = double.NegativeInfinity;
-            foreach (var p in this.pricedScratch) if (p.Total > bestTotal) bestTotal = p.Total;
+            foreach (var p in this.rowScratch) if (p.Priced && p.Total > bestTotal) bestTotal = p.Total;
 
             // Best RUNE (amber frame around the rune name) — the strongest rune any offered row can drop on
             // the gold socket. Only a rune that actually gains loot qualifies (> 1.0), so a panel where the
-            // only propagatable runes are Oath/Wisdom (multiplier below 1) frames nothing. Ties frame all.
+            // only propagatable rune is Wisdom (multiplier below 1) frames nothing. Ties frame all.
             double bestRuneMult = 1.0;
-            foreach (var p in this.pricedScratch) if (p.RuneMult > bestRuneMult) bestRuneMult = p.RuneMult;
+            foreach (var p in this.rowScratch) if (p.RuneMult > bestRuneMult) bestRuneMult = p.RuneMult;
 
             double median = 0;
             if (this.Settings.ColorMode == RewardColorMode.Relative)
-                median = MedianOf(this.pricedScratch);
+                median = MedianOf(this.rowScratch);
 
             // 2) Resolve each row's screen geometry, falling back to its last-good (pos, size) for a few
             //    frames on a read miss so the price doesn't blink out or teleport on a single bad read.
-            foreach (var (addr, total, locked, rune, runeMult, chainRune) in this.pricedScratch)
+            foreach (var (addr, total, priced, locked, rune, runeMult, chainRune) in this.rowScratch)
             {
                 if (!this.TryResolveRowGeometry(addr, out var pos, out var size)) continue;
-                bool bestPrice = total >= bestTotal && bestTotal > double.NegativeInfinity;
+                bool bestPrice = priced && total >= bestTotal && bestTotal > double.NegativeInfinity;
                 bool bestRune = bestRuneMult > 1.0 && runeMult >= bestRuneMult;
                 // A scouting-only label keeps its plain amber; a chain-resolved rune is tinted by class.
                 uint runeColor = !chainRune ? ColorGlowRune
                     : runeMult > 1.0 ? ColorGlowRune
                     : runeMult < 1.0 ? ColorRed
                     : ColorRuneNeutral;
-                this.overlayRows.Add((pos, size, total, locked, rune, bestPrice, bestRune, runeColor));
+                this.overlayRows.Add((pos, size, total, priced, locked, rune, bestPrice, bestRune, runeColor));
             }
             if (this.overlayRows.Count == 0) return;
 
@@ -1301,38 +1312,45 @@ namespace RunecraftHelper
                     if (centreY < clipTop || centreY > clipBottom) continue;
                 }
 
-                var text = FormatExalted(row.Total);
-                uint color = this.PickColor(row.Total, median);
-
-                // Scale the price text to the row height so it reads at any UI scale.
+                // Scale the text to the row height so it reads at any UI scale.
                 float fontPx = Math.Clamp(row.Size.Y * 0.5f, 12f, 40f);
                 float k = fontPx / ambient;
-                var ts = ImGui.CalcTextSize(text) * k;
+                string text = row.Priced ? FormatExalted(row.Total) : string.Empty;
+
+                // An unpriced row occupies no width at the price anchor, so the rune plate below slides into
+                // the place the price box would have held -- the row's right end, where the eye already is.
+                var ts = row.Priced ? ImGui.CalcTextSize(text) * k : Vector2.Zero;
+                float lineH = ts.Y > 0f ? ts.Y : ImGui.CalcTextSize("0").Y * k;
                 float padding = 6f * k;
                 float x = row.Pos.X + row.Size.X - ts.X - padding + this.Settings.OverlayXOffset;
-                float y = row.Pos.Y + (row.Size.Y - ts.Y) * 0.5f;
+                float y = row.Pos.Y + (row.Size.Y - lineH) * 0.5f;
                 var at = new Vector2(x, y);
                 var bgPad = new Vector2(4f * k, 2f * k);
-                drawList.AddRectFilled(at - bgPad, at + ts + bgPad, ColorPriceBg, 3f * k);
 
-                // Best PRICE: green frame. Drawn as an OUTER ring (offset beyond the gold box) so it never
-                // overlaps the locked-recipe gold frame — when the best row IS the locked row you see green
-                // outside + gold inside; otherwise each ring sits on its own row.
-                if (row.BestPrice)
+                if (row.Priced)
                 {
-                    var gp = bgPad + new Vector2(2f * k, 2f * k);
-                    drawList.AddRect(at - gp, at + ts + gp, ColorGreen, 4f * k, ImDrawFlags.None, 2f * k);
-                }
+                    uint color = this.PickColor(row.Total, median);
+                    drawList.AddRectFilled(at - bgPad, at + ts + bgPad, ColorPriceBg, 3f * k);
 
-                if (row.Locked)
-                {
-                    // Sealed monolith: ring the locked-in recipe's price box in gold so it's obvious
-                    // which of the listed combinations the monolith will actually produce.
-                    drawList.AddRect(at - bgPad, at + ts + bgPad, ColorGold, 3f * k, ImDrawFlags.None, 2f * k);
-                }
+                    // Best PRICE: green frame. Drawn as an OUTER ring (offset beyond the gold box) so it never
+                    // overlaps the locked-recipe gold frame -- when the best row IS the locked row you see green
+                    // outside + gold inside; otherwise each ring sits on its own row.
+                    if (row.BestPrice)
+                    {
+                        var gp = bgPad + new Vector2(2f * k, 2f * k);
+                        drawList.AddRect(at - gp, at + ts + gp, ColorGreen, 4f * k, ImDrawFlags.None, 2f * k);
+                    }
 
-                drawList.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
-                drawList.AddText(font, fontPx, at, color, text);
+                    if (row.Locked)
+                    {
+                        // Sealed monolith: ring the locked-in recipe's price box in gold so it's obvious
+                        // which of the listed combinations the monolith will actually produce.
+                        drawList.AddRect(at - bgPad, at + ts + bgPad, ColorGold, 3f * k, ImDrawFlags.None, 2f * k);
+                    }
+
+                    drawList.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
+                    drawList.AddText(font, fontPx, at, color, text);
+                }
 
                 // Glow-rune label: this recipe places a watched / propagating rune on the monolith's gold
                 // socket — write its NAME AFTER the price, on its own transparent plate (same style as the
@@ -1349,6 +1367,8 @@ namespace RunecraftHelper
                     // the two can land on different rows, which is exactly the trade-off to see.
                     if (row.BestRune)
                         drawList.AddRect(rat - bgPad, rat + rts + bgPad, ColorGlowRune, 3f * k, ImDrawFlags.None, 2f * k);
+                    else if (row.Locked && !row.Priced)
+                        drawList.AddRect(rat - bgPad, rat + rts + bgPad, ColorGold, 3f * k, ImDrawFlags.None, 2f * k);
 
                     drawList.AddText(font, fontPx, rat + new Vector2(1f, 1f), ColorShadow, row.Rune);
                     drawList.AddText(font, fontPx, rat, row.RuneColor, row.Rune);
@@ -1414,10 +1434,15 @@ namespace RunecraftHelper
             }
         }
 
-        private static double MedianOf(List<(IntPtr Addr, double Total, bool Locked, string Rune, double RuneMult, bool ChainRune)> rows)
+        // Median of the PRICED rows only -- the relative-colour thresholds compare prices, and an unpriced
+        // row's Total is 0, which would drag the median down and tint the real prices green.
+        private static double MedianOf(
+            List<(IntPtr Addr, double Total, bool Priced, bool Locked, string Rune, double RuneMult, bool ChainRune)> rows)
         {
-            var arr = new double[rows.Count];
-            for (int i = 0; i < arr.Length; i++) arr[i] = rows[i].Total;
+            var list = new List<double>(rows.Count);
+            foreach (var r in rows) if (r.Priced) list.Add(r.Total);
+            if (list.Count == 0) return 0;
+            var arr = list.ToArray();
             Array.Sort(arr);
             int n = arr.Length;
             return n % 2 == 1 ? arr[n / 2] : (arr[n / 2 - 1] + arr[n / 2]) * 0.5;
