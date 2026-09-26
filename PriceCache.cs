@@ -30,12 +30,17 @@ namespace RunecraftHelper
 
         // poe.ninja quotes every `primaryValue` in the league's OWN base currency -- named by
         // `core.primary` -- and `core.rates` says how many of each OTHER currency one base unit buys,
-        // so the base currency itself is absent from `rates`. The base is per league, not fixed:
+        // so the base currency itself is absent from `rates`:
         //   Runes of Aldur   primary="divine"   rates={exalted:520.2, chaos:10.4}
         //   Forbidden Rites  primary="exalted"  rates={divine:0.02028, chaos:0.5905}   <- no "exalted"
         // Reading rates.exalted unconditionally therefore returned 0 in Forbidden Rites, every price
         // became primaryValue * 0, and the panel showed no prices at all while the requests all
         // answered 200 with full rows -- nothing in the fetch path looked wrong.
+        //
+        // The base is not merely per-league, it MOVES WITHIN a league: the Forbidden Rites line above was
+        // measured when this was written, and on 2026-09-13 the same league answered primary="divine",
+        // rates={exalted:312.5, chaos:9.28} on all six types. So neither branch is the "normal" one and a
+        // base read once must never be cached as a constant -- which is why Per() resolves it per response.
         private static void ReadRates(JObject parsed, out double baseToEx, out double divToEx)
         {
             var core = parsed["core"];
