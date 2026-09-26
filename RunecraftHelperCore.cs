@@ -1177,7 +1177,7 @@ namespace RunecraftHelper
         // Rune-chain tinting of that name, so "no good rune here" is distinguishable from "not working"
         // without printing a single figure. Amber (above) = gains loot down the chain; grey = pure danger,
         // no loot effect (most runes, and any rune absent from the weight table); red = a net cost to
-        // propagate (Oath's immortal loot-less waves, Wisdom's experience-only).
+        // propagate (Wisdom's experience-only).
         private const uint ColorRuneNeutral = 0xFF9A9A9Au;
 
         // Reward metaId of the locked recipe for the sealed monolith the open panel belongs to (the

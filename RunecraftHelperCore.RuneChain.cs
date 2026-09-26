@@ -31,27 +31,84 @@ namespace RunecraftHelper
     // write-up incl. sources: obsidian poe2/mehanics/expedition-rune-chain.md.
     public sealed partial class RunecraftHelperCore
     {
-        // Tier-list defaults (community list: Opulent > Bond > Power > Time > Death > Rebirth). LootMult
-        // below 1.0 encodes a NET COST: Oath seeds immortal, loot-less waves and — because the chain waits
-        // for the previous pack to die — drags the whole run; Wisdom only grants experience and burns the
-        // slot a good rune could have used. Runes absent from the table are worth 1.0 (pure danger, no
-        // loot effect) — see RuneEffects / obsidian poe2/expedition-runes for what each one does.
+        // Tier-list defaults, community list as of 2026-09-12:
+        //   SS Opulent | S Power, Death, Bond | A Time, Oath, Rebirth | B rest of the purple runes |
+        //   C rest of the blue ones.
+        //
+        // Rune RARITY is not readable from the dumped data, so the B/C split below is the player's own
+        // visual reading of the tome, not a derived field. Three separate attempts at deriving it failed:
+        // ArchnemesisMods.TextStyles is empty for all 34 runes, every visual column there is identical,
+        // and the art path (TomeRune* vs TomeRareRune*) contradicts the client three times -- it files
+        // Opulent as common though the tome draws it GOLD, a third tier that appears nowhere in the data;
+        // it reuses TomeRareRunePower for Bait outright; and it calls Sky, Earth and Ward rare, which the
+        // observed purple set does not include. Confirmed purple: Oath, Power, Life, Death, Bond, Soul,
+        // Time. So only Life and Soul are new here -- the rest were already weighted by name.
+        //
+        // LootMult below 1.0 encodes a NET COST -- now only Wisdom, which grants experience alone and
+        // burns the slot a good rune could have used.
+        //
+        // Oath USED to sit there at 0.75 with Avoid set, on the local observation that it seeds immortal,
+        // loot-less waves and, because the chain waits for the previous pack to die, drags the whole run.
+        // The community list rates it A tier instead, and that is what we now follow: the observation
+        // described the run FEELING slower, which is a cost in time, while LootMult means loot per pack --
+        // two different things that the single number cannot hold at once. Anyone who prefers the old
+        // behaviour can set it back in the settings table; the migration below will not touch it again.
+        //
+        // Runes absent from the table are worth 1.0 (pure danger, no loot effect) -- see RuneEffects /
+        // obsidian poe2/expedition-runes for what each one does.
         private static readonly RuneChainEntry[] DefaultRuneChainWeights =
         {
             new RuneChainEntry { Rune = "Opulent", LootMult = 1.35f },
             new RuneChainEntry { Rune = "Bond", LootMult = 1.25f },
             new RuneChainEntry { Rune = "Power", LootMult = 1.30f },
             new RuneChainEntry { Rune = "Time", LootMult = 1.18f },
-            new RuneChainEntry { Rune = "Death", LootMult = 1.15f },
+            new RuneChainEntry { Rune = "Death", LootMult = 1.27f },
             new RuneChainEntry { Rune = "Rebirth", LootMult = 1.10f },
             new RuneChainEntry { Rune = "Wisdom", LootMult = 0.95f, Avoid = true },
-            new RuneChainEntry { Rune = "Oath", LootMult = 0.75f, Avoid = true },
+            new RuneChainEntry { Rune = "Oath", LootMult = 1.15f },
             new RuneChainEntry { Rune = "Bait", LootMult = 1.00f, Avoid = true },
+
+            // Tier B: purple, but unnamed by the tier list -- a small edge over the blue ones rather
+            // than a measured effect. Both are "special (server-side)" in RuneEffects, so there is no
+            // client-side magnitude to calibrate against.
+            new RuneChainEntry { Rune = "Life", LootMult = 1.05f },
+            new RuneChainEntry { Rune = "Soul", LootMult = 1.05f },
+        };
+
+        // Revision of the shipped defaults above. Bump it whenever one of their LootMults is corrected.
+        private const int RuneChainDefaultsRevision = 1;
+
+        // rev 1 (2026-09-12), both from the community tier list: Death was S tier all along but shipped
+        // at 1.15, below Time; Oath was A tier while we shipped it as a penalty at 0.75 with Avoid set,
+        // which actively steered players off a rune worth propagating. Only a row still holding the
+        // superseded multiplier is moved -- anything else is a deliberate re-tune and stays, Avoid
+        // included, so a player who agrees with the old Oath reading keeps it by having touched it.
+        private static readonly (string Rune, float Superseded, float Corrected, bool Avoid)[]
+            RuneChainDefaultFixes =
+        {
+            ("Death", 1.15f, 1.27f, false),
+            ("Oath", 0.75f, 1.15f, false),
         };
 
         // Add any missing default row; never touches an existing one, so a re-tuned LootMult survives.
         private void EnsureRuneChainDefaults()
         {
+            if (this.Settings.RuneChainDefaultsVersion < RuneChainDefaultsRevision)
+            {
+                foreach (var (rune, superseded, corrected, avoid) in RuneChainDefaultFixes)
+                {
+                    var row = this.Settings.RuneChainWeights.Find(
+                        e => string.Equals(e.Rune, rune, StringComparison.Ordinal));
+                    if (row != null && Math.Abs(row.LootMult - superseded) < 1e-4f)
+                    {
+                        row.LootMult = corrected;
+                        row.Avoid = avoid;
+                    }
+                }
+
+                this.Settings.RuneChainDefaultsVersion = RuneChainDefaultsRevision;
+            }
+
             foreach (var d in DefaultRuneChainWeights)
                 if (!this.Settings.RuneChainWeights.Exists(
                         e => string.Equals(e.Rune, d.Rune, StringComparison.Ordinal)))
@@ -568,7 +625,7 @@ namespace RunecraftHelper
             ImGui.TextDisabled(this.L("runechain.table_hint",
                 "Loot multiplier per propagated rune, and the same weight as the ex it adds to ONE buffed\n" +
                 "wave (edit either — they are one number). 1.00× / 0 ex = no loot effect (pure danger); below\n" +
-                "1.00 is a net cost (Oath seeds immortal loot-less waves; Wisdom only grants experience).\n" +
+                "1.00 is a net cost (Wisdom buys experience with a slot a loot rune could use).\n" +
                 "Magnitudes are server-side, so calibrate the ex column — it is the half you can measure."));
             this.DrawRuneChainTable();
         }

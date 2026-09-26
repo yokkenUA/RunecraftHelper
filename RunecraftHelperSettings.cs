@@ -34,17 +34,18 @@ namespace RunecraftHelper
     // ex-equivalent value on top of the recipe's own reward — the two ADD UP.
     //
     // LootMult = multiplier on the loot of every downstream pack. 1.0 = no effect (most runes are pure
-    // danger). BELOW 1.0 encodes a net cost: Oath seeds immortal, loot-less waves and, because the chain
-    // waits for kills, it slows the whole run. Rune = the language-independent Expedition2Runes Id.
+    // danger). BELOW 1.0 encodes a net cost -- as of 2026-09-12 only Wisdom, which buys experience with a
+    // slot a loot rune could have used. Rune = the language-independent Expedition2Runes Id.
     //
-    // Magnitudes are SERVER-SIDE — they are not in the .dat and cannot be read from the client. These are
-    // calibratable defaults ordered by the community tier list (Opulent > Bond > Power > Time > Death >
-    // Rebirth); measure and re-tune. See obsidian poe2/mehanics/expedition-rune-chain.md.
+    // Magnitudes are SERVER-SIDE -- they are not in the .dat and cannot be read from the client. These are
+    // calibratable defaults following the community tier list (SS Opulent | S Power, Death, Bond |
+    // A Time, Oath, Rebirth | B rest of the purple runes | C rest of the blue ones); measure and re-tune.
+    // See obsidian poe2/mehanics/expedition-rune-chain.md.
     public sealed class RuneChainEntry
     {
         public string Rune = string.Empty;
         public float LootMult = 1f;
-        public bool Avoid = false;    // never worth propagating (Oath / Wisdom / Bait) — flagged in the UI
+        public bool Avoid = false;    // never worth propagating (Wisdom / Bait) -- flagged in the UI
     }
 
     public sealed class RunecraftHelperSettings : IPSettings
@@ -137,6 +138,12 @@ namespace RunecraftHelper
         // defaults; runes absent from the table are worth 1.0 (no loot effect). Edit / add / remove from
         // the settings table.
         public List<RuneChainEntry> RuneChainWeights = new();
+
+        // Which revision of the shipped tier-list defaults this config has been through. The seeding
+        // pass only ADDS missing rows -- deliberately, so a value the player re-tuned is never clobbered
+        // -- which also means a CORRECTED default would otherwise reach new installs only. Bumping this
+        // lets one migration rewrite the rows still sitting on a superseded default, and nothing else.
+        public int RuneChainDefaultsVersion = 0;
 
         // Route planner: add each monolith's best achievable chain value to its route weight, so the
         // planner prefers monoliths that can seed a strong chain and not only expensive rewards. This is

@@ -1308,7 +1308,7 @@ namespace RunecraftHelper
             if (!RuneChainHighlightActive(v)) return;
 
             // Label the runes WORTH propagating, ranked by the rune-chain weight table — no separate watch
-            // list to keep in sync. A rune at 1.0 or below (pure danger, or Oath/Wisdom's net cost) is not
+            // list to keep in sync. A rune at 1.0 or below (pure danger, or Wisdom's net cost) is not
             // a reason to route the chain here, so it is not labelled at all.
             var matched = new List<(string Name, double Mult)>();
             foreach (var ri in runeIdxAtGlow)
