@@ -661,6 +661,7 @@ namespace RunecraftHelper
             // before the panel-open early-return below.
             if (this.Settings.ShowExpeditionDebug || this.Settings.ShowExpeditionGridValue ||
                 this.Settings.ShowExpeditionPlanner || this.Settings.ShowExpeditionGates ||
+                this.Settings.ShowExpeditionProps ||
                 this.Settings.ShowExpeditionHeatmap || this.Settings.ShowExpeditionHeatmapMarkers)
                 this.ExpeditionTick();
 

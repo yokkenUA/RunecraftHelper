@@ -128,6 +128,36 @@ namespace RunecraftHelper
         // Expedition Logbook drop chance from tall "double-flag" (logbook-tier) markers. See obsidian poe2/Expedition.
         private const string ExpSentinelPath = "Sentinel/SentinelRandomEncounterObject";
 
+        // Destructible terrain props that go off when OUR blast reaches them and then explode with a radius
+        // of their own, far larger than a charge's. Live-identified 2026-09-12 in ExpeditionLogBook_Atoll --
+        // the family is ExplodingFill_*, seen as BoomBarrel (the green barrel), StrongBox (sitting exactly on
+        // an ArmourerStrongboxExpedition) and BoxxesofGold. GameHelper does not classify them: type and
+        // subtype read Unidentified, so the metadata path is the only handle.
+        //
+        // What makes them worth modelling: they are FREE area. They cost no charge, and -- reported from
+        // play and the reason they are pure coverage here -- the chain does NOT continue from one. The next
+        // charge is still measured from our own previous charge, never from the barrel, so a fill is never a
+        // placement anchor and never a reach node. It only widens what a charge already placed takes.
+        // Every tileset keeps its own copy under its own name, and the radius differs between them, so the
+        // rule is NOT a constant: Settings.ExpPropRules holds "path substring -> radius" entries, shipped with
+        // the pairs we have measured and extensible without a new build. Measured so far:
+        //   Metadata/Terrain/Gallows/Leagues/Expedition/Objects/ExplodingFill_BoomBarrel        r = 55
+        //   Metadata/Terrain/Gallows/Leagues/Expedition/Logbook_Basin/Objects/OilWell           r = 112
+        //   Metadata/Terrain/Gallows/Leagues/Expedition/Logbook_Basin/Objects/FaridunExplosive  r = 74
+        // Basin alone carries two of them at different radii, so the LOGBOOK is not the unit of identity
+        // either -- each object is its own rule, and a zone can hold several.
+        // Neither the tileset ("Gallows") nor the logbook zone ("Logbook_Basin") is part of the identity, so
+        // the DISCOVERY net is the two segments both paths share -- the expedition league folder and an
+        // Objects folder under it, with anything in between. A single "Leagues/Expedition/Objects/" prefix
+        // missed the OilWell entirely, which is how that one came to be reported by hand.
+        //
+        // The net is ONLY for discovery: everything under it that no rule matched is listed in the expedition
+        // debug window, so a new variant can be spotted by walking past it instead of reverse-engineering. It
+        // is deliberately not used for coverage -- most objects under there are scenery, and crediting their
+        // area would make the planner count coverage the run never gets.
+        private const string ExpPropScanLeague = "Leagues/Expedition/";
+        private const string ExpPropScanObjects = "/Objects/";
+
         // ExpeditionMarker reward icons share metadata; the reward TYPE is the MinimapIcon.IconName (RE
         // 2026-06-26), one of the MinimapIcons.dat "RewardChest*" family. Friendly labels for the planner UI;
         // anything not listed falls back to the icon name minus the "RewardChest" prefix.
@@ -486,6 +516,14 @@ namespace RunecraftHelper
             public bool Sentinel { get; }          // this charge captures the Kalguur Sentinel buff → keep it early in the chain
         }
 
+        // ExplodingFill props found this scan: position + the radius its own blast covers. Rebuilt every scan
+        // (terrain objects are always awake, so nothing has to be remembered across the bubble).
+        private readonly List<(Vector2 Pos, float Radius)> expProps = new();
+
+        // Props under Leagues/Expedition/Objects/ that no rule matched -- the discovery list for the debug
+        // window. Paths only, deduplicated: every tileset names its exploding prop differently.
+        private readonly SortedSet<string> expPropUnmatched = new(StringComparer.OrdinalIgnoreCase);
+
         // Greedy route result, recomputed only when the planner fingerprint changes (A* is too heavy/frame).
         private readonly List<ExpRoutePoint> expRoute = new();
 
@@ -653,6 +691,21 @@ namespace RunecraftHelper
             // spine ORDER: waves the monolith spawns, the uplift it can propagate, and the rune's identity.
             public List<int> TWaves = new();
             public List<double> TUplift = new();
+
+            // Each target's value WITHOUT the rune chain: the recipe price for a monolith, the plain weight
+            // for anything else. The order search needs it separately from TW (which folds the chain value
+            // in) because once an order can be truncated by the budget, different orders reach different
+            // anchors and the rewards stop cancelling out as a constant.
+            public List<double> TReward = new();
+
+            // ExplodingFill positions and the radius they cover. Kept apart from the target arrays on
+            // purpose: a fill is not a target (nothing to collect on it) and not an anchor (no reach), it
+            // only enlarges the coverage of a charge that reaches it.
+            public List<Vector2> PropPos = new();
+
+            // Parallel to PropPos: each fill carries its OWN radius, because the variants differ between
+            // tilesets and a single figure would be wrong on most maps.
+            public List<float> PropRadius = new();
             public List<int> TRuneId = new();
 
             // Rune chain opted into routing, and the ex/wave the player values monster loot at.
@@ -733,7 +786,8 @@ namespace RunecraftHelper
         private readonly struct ExpCachedTarget
         {
             public ExpCachedTarget(Vector2 pos, StdTuple3D<float> world, ExpKind kind, string info, double value,
-                                   float groundZ = 0f, int waves = 0, double uplift = 0.0, int runeId = -1)
+                                   float groundZ = 0f, int waves = 0, double uplift = 0.0, int runeId = -1,
+                                   double reward = 0.0, int sockets = 0)
             {
                 this.Pos = pos;
                 this.World = world;
@@ -744,6 +798,8 @@ namespace RunecraftHelper
                 this.Waves = waves;
                 this.Uplift = uplift;
                 this.RuneId = runeId;
+                this.Reward = reward;
+                this.Sockets = sockets;
             }
 
             public Vector2 Pos { get; }
@@ -762,6 +818,16 @@ namespace RunecraftHelper
             public int Waves { get; }
 
             public double Uplift { get; }
+
+            // A monolith's REWARD price alone, before the rune chain is folded in (0 on every other kind).
+            // Value above can be the joint reward+chain figure, which is right for RANKING but wrong for the
+            // "min ex" filter: that filter is the player saying which RECIPES are worth a detour, so it has
+            // to read the recipe price and not a number the chain inflated.
+            public double Reward { get; }
+
+            // Holes in the monolith. NOT the same as Waves above: once a recipe is locked in, Waves is that
+            // recipe's rune count, which can be smaller. The anchor rule wants the physical socket count.
+            public int Sockets { get; }
 
             public int RuneId { get; }
         }
@@ -794,11 +860,13 @@ namespace RunecraftHelper
             if (this.Settings.ShowExpeditionGridValue && !covered) this.DrawExpeditionGridValues();
             if (this.Settings.ShowExpeditionPlanner) this.DrawExpeditionPlannerWindow();
             if (this.Settings.ShowExpeditionGates && !covered) this.DrawExpeditionGatesLargeMap();
+            if (this.Settings.ShowExpeditionProps && !covered) this.DrawExpeditionPropsLargeMap();
             if ((this.Settings.ShowExpeditionHeatmap || this.Settings.ShowExpeditionHeatmapMarkers) && !covered) this.DrawExpeditionHeatmapLargeMap();
         }
 
         private void ScanExpedition()
         {
+            this.EnsurePropRuleDefaults();
             this.expItems.Clear();
             this.expPlacedFromEntities = 0;
             this.expScanStatus = "scanning";
@@ -842,6 +910,8 @@ namespace RunecraftHelper
             // Monolith ex-values reused from RunecraftHelper's own (patch-current) scan.
             this.EnsureExpeditionMonoliths();
             var monoByAddr = new Dictionary<long, double>();
+            var monoRewardByAddr = new Dictionary<long, double>();
+            var monoSocketsByAddr = new Dictionary<long, int>();
             var monoChainByAddr = new Dictionary<long, (int Waves, double Uplift, int RuneId)>();
             var foreignMonos = new HashSet<long>();
             foreach (var mv in this.monolithViews)
@@ -854,6 +924,8 @@ namespace RunecraftHelper
                 // outrank a slightly pricier one that cannot. Upper bound — the true chain value depends on
                 // the detonation order, which the router only fixes later. Off ⇒ reward price, as before.
                 monoByAddr[mv.EntityId] = this.ExpMonolithRouteValue(mv);
+                monoRewardByAddr[mv.EntityId] = mv.Best;
+                monoSocketsByAddr[mv.EntityId] = mv.HoleCount;
 
                 // Chain SHAPE (waves + best propagatable uplift), kept separate from the ex value because the
                 // spine order is decided from it before any order exists. See RuneChainRouteUplift.
@@ -874,6 +946,8 @@ namespace RunecraftHelper
             // Relics (a.k.a. "remnants"): the field devices whose Upside/Downside mods get applied to the encounter
             // when the blast chain reaches them. Captured here (debug only) so we can dump each relic's +/- mods.
             var relics = new List<(Vector2 Pos, ObjectMagicProperties Omp)>();
+            this.expProps.Clear();
+            this.expPropUnmatched.Clear();
             foreach (var kv in area.AwakeEntities)
             {
                 var e = kv.Value;
@@ -890,6 +964,28 @@ namespace RunecraftHelper
                     blockers.Add(((int)Math.Round(pos.X), (int)Math.Round(pos.Y), world.Z, tb.IsBlocked, e.Id));
                     // Fall through on purpose: the Gully DevourerSegment is BOTH the path gate and a remnant
                     // ("Dormant Burrower"), so it must also reach the remnant classification below.
+                }
+
+                // Destructible props. A rule match makes this one free coverage for the planner and ends the
+                // classification here: the exploding prop is its own entity, separate from whatever it sits on
+                // -- the StrongBox variant shares a grid cell with an ArmourerStrongboxExpedition chest but is
+                // a different entity id.
+                //
+                // No match FALLS THROUGH on purpose. The net is wide (two path segments with anything between),
+                // so it can overlap a real target's path on some tileset we have not seen; swallowing the entity
+                // would silently delete a monolith from the plan, while falling through costs only a line in the
+                // discovery list. Wrong in the harmless direction.
+                if (path.IndexOf(ExpPropScanLeague, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    path.IndexOf(ExpPropScanObjects, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    float propRadius = this.ExpPropRadiusFor(path);
+                    if (propRadius > 0f)
+                    {
+                        this.expProps.Add((pos, propRadius));
+                        continue;
+                    }
+
+                    this.expPropUnmatched.Add(path);
                 }
 
                 if (path.Equals(ExpDetonatorPath, StringComparison.OrdinalIgnoreCase))
@@ -935,18 +1031,25 @@ namespace RunecraftHelper
                     }
 
                     monoByAddr.TryGetValue(e.Address.ToInt64(), out var best);
+                    monoRewardByAddr.TryGetValue(e.Address.ToInt64(), out var bestReward);
+                    monoSocketsByAddr.TryGetValue(e.Address.ToInt64(), out var bestSockets);
                     others.Add((ExpKind.Monolith, pos, world, "monolith", best));
                     // Cache it; keep the last KNOWN ex value when this scan reads 0 (out of bubble).
                     double keep = best;
+                    double keepReward = bestReward;
+                    int keepSockets = bestSockets;
                     monoChainByAddr.TryGetValue(e.Address.ToInt64(), out var chain);
                     if (best <= 0 && this.expTargetCache.TryGetValue((long)e.Id, out var oldMono))
                     {
                         keep = oldMono.Value;
+                        keepReward = oldMono.Reward;
+                        if (keepSockets <= 0) keepSockets = oldMono.Sockets;
                         if (chain.Waves <= 0) chain = (oldMono.Waves, oldMono.Uplift, oldMono.RuneId);
                     }
 
                     this.expTargetCache[(long)e.Id] = new ExpCachedTarget(
-                        pos, world, ExpKind.Monolith, "monolith", keep, 0f, chain.Waves, chain.Uplift, chain.RuneId);
+                        pos, world, ExpKind.Monolith, "monolith", keep, 0f, chain.Waves, chain.Uplift, chain.RuneId,
+                        keepReward, keepSockets);
                     continue;
                 }
 
@@ -1615,6 +1718,39 @@ namespace RunecraftHelper
 
             ImGui.Separator();
             ImGui.Text($"Targets — chests {chests} · markers {markers} · remnants {remnants} · monoliths {monos}");
+
+            // Exploding props. The unmatched list is the point of this block: a tileset we have never planned on
+            // names its barrel something else, and the only way to learn the name without reverse-engineering is
+            // to stand in the zone and read it here. Radii shown so a rule typo is visible too.
+            if (this.expProps.Count > 0 || this.expPropUnmatched.Count > 0)
+            {
+                ImGui.Text($"Exploding props — {this.expProps.Count} matched");
+                if (this.expProps.Count > 0 && ImGui.IsItemHovered())
+                {
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var f in this.expProps)
+                        sb.AppendLine($"({f.Pos.X:F0}, {f.Pos.Y:F0})  r={f.Radius:F0}");
+                    ImGui.SetTooltip(sb.ToString().TrimEnd());
+                }
+
+                if (this.expPropUnmatched.Count > 0)
+                {
+                    ImGui.TextColored(new Vector4(1f, 0.72f, 0.2f, 1f),
+                        $"{this.expPropUnmatched.Count} expedition object path(s) matched NO rule:");
+                    foreach (var path in this.expPropUnmatched)
+                    {
+                        // Only the leaf is useful for writing a rule; the tileset prefix differs per map.
+                        int cut = path.LastIndexOf('/');
+                        string leaf = cut >= 0 && cut + 1 < path.Length ? path.Substring(cut + 1) : path;
+                        ImGui.Bullet();
+                        ImGui.TextDisabled(leaf);
+                        if (ImGui.IsItemHovered()) ImGui.SetTooltip(path + "\n\n(click to copy the full path)");
+                        if (ImGui.IsItemClicked()) ImGui.SetClipboardText(path);
+                    }
+
+                    ImGui.TextDisabled("scenery is expected here — only add a rule for one that really explodes");
+                }
+            }
             ImGui.TextDisabled("charges: S/P/C = straight / A* path / A* raw-cost, from the PREVIOUS chain node");
             ImGui.Spacing();
 
@@ -1656,12 +1792,18 @@ namespace RunecraftHelper
             return (dx * dx) + (dy * dy);
         }
 
-        // Total uncaptured ex weight whose target centre lies within the blast (r2 = effRadius²) of p.
-        private static double ExpCoverGain(List<Vector2> tPos, List<double> tW, bool[] captured, Vector2 p, float r2, out int count)
+        // Total uncaptured ex weight a charge at p collects: its own blast (r2 = effRadius²) PLUS whatever the
+        // exploding props that blast sets off cover (their radius is far larger than ours, so one charge on a
+        // barrel can harvest a cluster no charge of ours could reach). Fills are free coverage ONLY — they never
+        // move the chain head, which is why they appear here and never in the reach/ordering code.
+        private static double ExpCoverGain(ExpRouteInputs inp, bool[] captured, Vector2 p, float r2, out int count)
         {
+            var tPos = inp.TPos; var tW = inp.TW;
+            var fired = ExpTriggeredProps(inp, p, r2);
             double g = 0; count = 0;
             for (int u = 0; u < tPos.Count; u++)
-                if (!captured[u] && ExpDistSq(p, tPos[u]) <= r2) { g += tW[u]; count++; }
+                if (!captured[u] && (ExpDistSq(p, tPos[u]) <= r2 || ExpPropCovers(inp, fired, tPos[u])))
+                { g += tW[u]; count++; }
             return g;
         }
 
@@ -1673,10 +1815,12 @@ namespace RunecraftHelper
         {
             if (!inp.MarkerCoverageMode) return true;
             var tPos = inp.TPos; var prim = inp.TPrimary;
+            var fired = ExpTriggeredProps(inp, p, r2);
             int markers = 0;
             for (int u = 0; u < tPos.Count; u++)
             {
-                if (captured[u] || ExpDistSq(p, tPos[u]) > r2) continue;
+                if (captured[u]) continue;
+                if (ExpDistSq(p, tPos[u]) > r2 && !ExpPropCovers(inp, fired, tPos[u])) continue;
                 if (u < prim.Count && prim[u]) return true;   // captures a primary ⇒ always worth it
                 markers++;
             }
@@ -1711,7 +1855,7 @@ namespace RunecraftHelper
             float wide = 4f * r2;   // (2·effRadius)² — gather neighbours one extra radius out
 
             Vector2 best = c0;
-            double bestGain = ExpCoverGain(tPos, tW, captured, c0, r2, out _);
+            double bestGain = ExpCoverGain(inp, captured, c0, r2, out _);
             reach = ExpReach(data, bpr, doors, node, c0, effDist);
 
             // Gather uncaptured targets near the cluster, then build candidates: the weighted centroid,
@@ -1741,7 +1885,7 @@ namespace RunecraftHelper
 
             foreach (var p in cands)
             {
-                double g = ExpCoverGain(tPos, tW, captured, p, r2, out _);
+                double g = ExpCoverGain(inp, captured, p, r2, out _);
                 if (g <= bestGain) continue;                       // never reduce coverage
                 float rr = ExpReach(data, bpr, doors, node, p, effDist);
                 if (rr < 0f) continue;                             // must still be one hop from the chain
@@ -1969,7 +2113,14 @@ namespace RunecraftHelper
                 ? $"1,{s.RuneChainBaseMonsterEx:F2},{s.RuneChainPowerInChain},{s.RuneChainPowerFactor:F2}"
                 : "0";
 
+            // Exploding props: the COUNT and the radii actually matched this scan. Both halves matter -- editing
+            // a rule changes the radii (and can drop a prop out entirely), and walking into a new zone changes
+            // which props are in range, so the plan has to be recomputed in either case.
+            double propR = 0.0;
+            foreach (var f in this.expProps) propR += f.Radius;
+
             return $"{s.ExpPlacementDistancePct}|{s.ExpBlastRadiusPct}|{s.ExpMonolithMinEx}|" +
+                   $"{s.ExpMonolithMinSockets}|{this.expProps.Count},{propR:F0}|" +
                    $"{wb}|{mb}|{monoN}|{monoSum:F0}|{anchor.X:F0},{anchor.Y:F0}|" +
                    $"{this.ExpEffectiveTotal()}|{this.expCtrlResolved}|{this.expHasDetonator}|" +
                    $"{s.ExpMinMarkersPerSpareCharge}|{bb}|{rb}|{rc}";
@@ -2018,6 +2169,14 @@ namespace RunecraftHelper
                 ChainBaseEx = s.RuneChainBaseMonsterEx,
                 Log = s.ExpLogPlanner ? new List<string>() : null,
             };
+
+            // Copied, not referenced: the planner runs on a background Task and the scan keeps rewriting
+            // this.expProps every frame.
+            foreach (var f in this.expProps)
+            {
+                inp.PropPos.Add(f.Pos);
+                inp.PropRadius.Add(f.Radius);
+            }
 
             // Gate-aware doors: a BLOCKED blocker is a true wall for the planner. LineWalker.BuildDoorOverrideMap
             // force-marks 5×5 around EVERY TriggerableBlockage as walkable (a generic-door convenience) — wrong for
@@ -2072,6 +2231,22 @@ namespace RunecraftHelper
 
             this.ExpFillRouteTargets(inp, markerBaseline, sentinelWorthwhile);
 
+            // AFTER the targets are in: the per-prop line counts how many routed targets sit inside that prop's
+            // radius, which is the whole point of the line and reads 0 if logged any earlier. Positions, not
+            // just a count, because only the coordinates say WHICH prop -- the difference between "the planner
+            // ignored the derrick" and "no charge ever reached it".
+            if (this.expProps.Count > 0)
+            {
+                ExpLog(inp, $"exploding props: {this.expProps.Count}");
+                foreach (var f in this.expProps)
+                    ExpLog(inp, $"  prop ({f.Pos.X:F0},{f.Pos.Y:F0}) r={f.Radius:F0} " +
+                                $"· {ExpCountUncoveredRaw(inp, f.Pos, f.Radius)} routed target(s) inside it");
+            }
+
+            if (this.expPropUnmatched.Count > 0)
+                ExpLog(inp, $"expedition objects matching no rule: {this.expPropUnmatched.Count} " +
+                            $"({string.Join(", ", this.expPropUnmatched)})");
+
             return inp;
         }
 
@@ -2082,13 +2257,56 @@ namespace RunecraftHelper
         private void ExpFillRouteTargets(ExpRouteInputs inp, float markerBaseline, bool sentinelWorthwhile)
         {
             var s = this.Settings;
+            var monoIdx = new List<int>();   // positions of the monolith targets, for the rune fallback below
+            bool anyWorthTheWalk = false;    // did ANY monolith clear the VALUE gate (not the size one)?
             foreach (var t in this.expTargetCache.Values)
             {
                 double w = 0;
                 bool primary = false;
                 if (t.Kind == ExpKind.Monolith)
                 {
-                    if (t.Value > 0 && t.Value >= s.ExpMonolithMinEx) { w = t.Value; primary = true; }
+                    // "Monolith min (ex)" used to be an ADMISSION filter: a monolith under it was struck from
+                    // the target set entirely, taking its runes with it. That threw away the thing the player
+                    // actually wants from a cheap monolith -- the rune it propagates into every pack unearthed
+                    // after it -- and it compared against a value the chain may have inflated, so a monolith
+                    // could clear "500 ex" on chain value while carrying a 40 ex recipe.
+                    //
+                    // It now decides DETOUR-worthiness instead: clearing it makes the monolith a spine ANCHOR
+                    // (the tour goes there), failing it leaves the monolith in the target set as an en-route
+                    // pickup -- captured for free when a spine blast covers it, or by a spare charge. At the
+                    // default 0 every priced monolith is an anchor, exactly as before.
+                    //
+                    // It reads the JOINT value (recipe + the rune this monolith would propagate), not the
+                    // recipe price alone. Gating on the price alone was tried and is wrong: on a live map a
+                    // monolith holding Opulent -- the one rune the community rates above all others -- had a
+                    // 147 ex recipe against a 200 ex bar, so it stopped being an anchor and the plan walked
+                    // straight past it. A cheap recipe with a great rune IS worth the detour, which is exactly
+                    // what the joint figure says. An expensive recipe still clears the bar on its own, since
+                    // the joint value is the max of the two.
+                    //
+                    // SIZE is the second way in, and it ignores the price entirely: a monolith spawns one wave
+                    // per socket, and those waves carry every rune propagated before them, so the big one is
+                    // where the whole chain cashes out. Dropping it for a cheap recipe leaves the accumulated
+                    // runes with little to multiply -- which is why it is an anchor on its size alone.
+                    if (t.Value > 0)
+                    {
+                        w = t.Value;
+                        bool worthTheWalk = t.Value >= s.ExpMonolithMinEx;
+                        bool bigEnough = s.ExpMonolithMinSockets > 0 && t.Sockets >= s.ExpMonolithMinSockets;
+                        if (worthTheWalk) anyWorthTheWalk = true;
+                        primary = worthTheWalk || bigEnough;
+
+                        // Spell out WHY, per monolith. "The plan walked past the Opulent monolith" is the
+                        // kind of report that costs a screenshot and a guess to answer otherwise; the two
+                        // figures that decide it (recipe alone vs. recipe+rune) belong in the log.
+                        ExpLog(inp, $"[gate] monolith ({t.Pos.X:F0},{t.Pos.Y:F0}) recipe {t.Reward:F0} ex, " +
+                                    $"with rune {t.Value:F0} ex, {t.Sockets} sockets ⇒ " +
+                                    (primary
+                                        ? "ANCHOR (" + (worthTheWalk ? $"≥ {s.ExpMonolithMinEx:F0} ex" : string.Empty) +
+                                          (worthTheWalk && bigEnough ? ", " : string.Empty) +
+                                          (bigEnough ? $"≥ {s.ExpMonolithMinSockets} sockets" : string.Empty) + ")"
+                                        : "pickup only (under both gates)"));
+                    }
                 }
                 else if (t.Kind == ExpKind.Marker)
                 {
@@ -2116,6 +2334,7 @@ namespace RunecraftHelper
                 }
 
                 if (w <= 0) continue;
+                if (t.Kind == ExpKind.Monolith) monoIdx.Add(inp.TPos.Count);
                 inp.TPos.Add(t.Pos);
                 inp.TWorld.Add(t.World);
                 inp.TW.Add(w);
@@ -2124,9 +2343,44 @@ namespace RunecraftHelper
                 inp.TWaves.Add(t.Waves);
                 inp.TUplift.Add(t.Uplift);
                 inp.TRuneId.Add(t.RuneId);
+                inp.TReward.Add(t.Kind == ExpKind.Monolith ? t.Reward : w);
             }
 
-            // FALLBACK route drivers: a Normal expedition often has NO monolith passing the price filter and no
+            // FALLBACK 1 -- no recipe clears the price bar. The player set "min ex" to say which recipes are
+            // worth a detour; a map where none qualify is not a map worth skipping, because the monoliths still
+            // carry RUNES, and a rune multiplies the loot of every pack unearthed after it. So when no monolith
+            // became an anchor, promote them all: the charges get spent collecting runes instead of on nothing.
+            // This also makes a high threshold converge to the default-0 behaviour on such a map rather than
+            // silently producing a monolith-less plan.
+            //
+            // Ordered before the marker fallback on purpose: with monoliths present they, not the flags, are
+            // what the chain is built from. If the monoliths are all unpriced (none reached the target set at
+            // all) this promotes nothing and the marker fallback below still fires, as it did before.
+            // Keyed on the VALUE gate alone, not on "is anything an anchor": the size gate can anchor the big
+            // monolith, and that must not be read as "this map has something worth walking to, no need to
+            // collect runes" -- it would leave the chain ending on a big monolith with nothing propagated
+            // into it.
+            if (!anyWorthTheWalk && monoIdx.Count > 0)
+            {
+                // Promote the ones that actually CARRY a rune, not every monolith on the map. Walking the whole
+                // field costs charges, and charges are what the chain reorder needs to work with: in the sim's
+                // junk-reward scenario, routing all 14 monoliths spent 14 of 15 charges, which left the reorder
+                // no slack and parked the two rune-bearing monoliths 11th and 12th instead of early, where a
+                // propagated rune actually multiplies something. Anchoring just the rune carriers keeps the
+                // detour short; the rune-less ones stay pickups and are still collected when a blast covers one.
+                var withRunes = monoIdx.FindAll(i => inp.TUplift[i] > 0.0);
+
+                // Nothing propagates anywhere (a map of pure-danger runes): fall back to all of them, so the
+                // plan is still built rather than being empty for want of a better reason to walk.
+                var promote = withRunes.Count > 0 ? withRunes : monoIdx;
+                foreach (var i in promote) inp.TPrimary[i] = true;
+                ExpLog(inp, $"[fallback] nothing on this map is worth ≥ {s.ExpMonolithMinEx:F0} ex — promoted " +
+                            $"{promote.Count} of {monoIdx.Count} " +
+                            $"monolith(s) to route drivers ({(withRunes.Count > 0 ? "the rune carriers" : "all of " +
+                            "them; none carries a rune")}), so the run still collects runes");
+            }
+
+            // FALLBACK 2: a Normal expedition often has NO monolith passing the price filter and no
             // beneficial relic → zero primary anchors → the spine planner builds nothing and the valuable flags are
             // never collected (the reported "no monoliths ⇒ no route" bug). When nothing primary exists, promote
             // every surviving marker (all non-tiny — tiny flags were dropped above at w≤0) to a primary anchor so a
@@ -2139,6 +2393,47 @@ namespace RunecraftHelper
                 for (int i = 0; i < inp.TPrimary.Count; i++) { inp.TPrimary[i] = true; promoted++; }
                 ExpLog(inp, $"[fallback] no primary anchors — promoted {promoted} reward flag(s) to route drivers");
             }
+        }
+
+        private const int ExpPropRulesRevision = 2;
+
+        // Prop rules added after the first shipped set. A saved settings file is loaded whole, so a rule
+        // added in a later build would otherwise never reach anyone who already ran the plugin. Each is
+        // offered ONCE (ExpPropRulesVersion), which is what lets a rule the user deleted on purpose stay
+        // deleted instead of returning on the next launch.
+        private static readonly (string PathContains, float Radius)[] ExpPropRuleAdditions =
+        {
+            ("Objects/OilWell", 112f),
+            ("Objects/FaridunExplosive", 74f),
+        };
+
+        private void EnsurePropRuleDefaults()
+        {
+            var s = this.Settings;
+            if (s.ExpPropRulesVersion >= ExpPropRulesRevision) return;
+            s.ExpPropRules ??= new List<ExpPropRule>();
+            foreach (var (pathContains, radius) in ExpPropRuleAdditions)
+                if (!s.ExpPropRules.Exists(
+                        r => string.Equals(r.PathContains, pathContains, StringComparison.OrdinalIgnoreCase)))
+                    s.ExpPropRules.Add(new ExpPropRule { PathContains = pathContains, Radius = radius });
+
+            s.ExpPropRulesVersion = ExpPropRulesRevision;
+        }
+
+        // Radius of the prop at `path` per Settings.ExpPropRules, or 0 when no rule claims it. First match
+        // wins, so a narrower entry placed above a broader one overrides it.
+        private float ExpPropRadiusFor(string path)
+        {
+            var rules = this.Settings.ExpPropRules;
+            if (rules == null) return 0f;
+            for (int i = 0; i < rules.Count; i++)
+            {
+                var r = rules[i];
+                if (!r.Enabled || string.IsNullOrWhiteSpace(r.PathContains) || r.Radius <= 0f) continue;
+                if (path.IndexOf(r.PathContains, StringComparison.OrdinalIgnoreCase) >= 0) return r.Radius;
+            }
+
+            return 0f;
         }
 
         // Route weight of one monolith, and the single place the rune chain enters routing: value it by the
@@ -2314,24 +2609,84 @@ namespace RunecraftHelper
             }
         }
 
-        // Capture every uncaptured target within `pos`'s blast, append the route point at an EXPLICIT world Z (the
-        // spine cell's interpolated height — more accurate than deriving Z from a captured target, and correct even
-        // for a bridge that captures nothing). Returns the ex newly collected. Placer's analogue of ExpCommit.
+        // Which exploding props a charge at `pos` sets off: ONLY those inside our own blast. Returns null when
+        // none is in range, which is the overwhelmingly common case and keeps the placer's hot loops as they
+        // were.
+        //
+        // THERE IS NO CASCADE. A prop is set off by our explosion and by nothing else -- its own blast takes
+        // everything in its radius EXCEPT another prop, so two props standing inside each other's radius still
+        // need two separate charges (confirmed in play 2026-09-12, Stagnant Basin, two Oil Derricks). This was
+        // first written as a cascading flood on the assumption that a blast carries; that over-credited
+        // coverage and is exactly the kind of error that makes a plan promise more than the dig delivers. Do
+        // not reintroduce it without a measurement.
+        private static List<int>? ExpTriggeredProps(ExpRouteInputs inp, Vector2 pos, float r2)
+        {
+            var fp = inp.PropPos;
+            if (fp.Count == 0) return null;
+
+            List<int>? fired = null;
+            for (int i = 0; i < fp.Count; i++)
+                if (ExpDistSq(pos, fp[i]) <= r2)
+                    (fired ??= new List<int>()).Add(i);
+
+            return fired;
+        }
+
+        // How many routed targets lie inside this prop's own radius, ignoring whether a charge ever sets it
+        // off. Log-only: it answers "was there anything here to gain" before asking why a charge did or did
+        // not fire it.
+        private static int ExpCountUncoveredRaw(ExpRouteInputs inp, Vector2 propPos, float radius)
+        {
+            float rr = radius * radius;
+            int n = 0;
+            for (int u = 0; u < inp.TPos.Count; u++)
+                if (ExpDistSq(propPos, inp.TPos[u]) <= rr) n++;
+            return n;
+        }
+
+        // Does any prop in `fired` cover the point `t`? Each carries its own radius. `t` is always a TARGET
+        // (monolith, marker, relic): a prop's blast is explicitly not able to set off another prop, and props
+        // are not targets, so this is never asked about one.
+        private static bool ExpPropCovers(ExpRouteInputs inp, List<int>? fired, Vector2 t)
+        {
+            if (fired == null) return false;
+            for (int k = 0; k < fired.Count; k++)
+            {
+                float fr = inp.PropRadius[fired[k]];
+                if (ExpDistSq(inp.PropPos[fired[k]], t) <= fr * fr) return true;
+            }
+
+            return false;
+        }
+
+        // Capture every uncaptured target within `pos`'s blast — or within the blast of an exploding prop that
+        // blast sets off — and append the route point at an EXPLICIT world Z (the spine cell's interpolated height:
+        // more accurate than deriving Z from a captured target, and correct even for a bridge that captures
+        // nothing). Returns the ex newly collected. Placer's analogue of ExpCommit.
         private static double ExpCommitAt(ExpRouteInputs inp, bool[] captured, List<ExpRoutePoint> route,
             Vector2 pos, float placeZ, float r2, bool isBridge, float reach, string note, bool sentinel = false)
         {
             var tPos = inp.TPos; var tW = inp.TW;
-            double cgain = 0; int cap = 0;
+            var fired = ExpTriggeredProps(inp, pos, r2);
+            double cgain = 0; int cap = 0, viaFill = 0;
             for (int u = 0; u < tPos.Count; u++)
             {
-                if (captured[u] || ExpDistSq(pos, tPos[u]) > r2) continue;
+                if (captured[u]) continue;
+                bool direct = ExpDistSq(pos, tPos[u]) <= r2;
+                if (!direct && !ExpPropCovers(inp, fired, tPos[u])) continue;
+                if (!direct) viaFill++;
                 captured[u] = true; cap++; cgain += tW[u];
             }
 
             var placeWorld = ExpGridToWorld(pos, placeZ);
             string kind = isBridge ? "bridge" : "cover";
+            // Name the prop assist in the route line: a capture outside our own radius is the one the player cannot
+            // check by eye, so a placement that looks wrong should say why it isn't.
+            string propNote = fired != null
+                ? $" · sets off {fired.Count} prop(s)" + (viaFill > 0 ? $", +{viaFill} tgt via their blast" : string.Empty)
+                : string.Empty;
             route.Add(new ExpRoutePoint(pos, placeWorld, cgain, cap, pos, placeZ,
-                $"{kind} {cap} tgt · {cgain:F0} ex · reach {reach:F0}/{inp.EffDist:F0}{note}", sentinel));
+                $"{kind} {cap} tgt · {cgain:F0} ex · reach {reach:F0}/{inp.EffDist:F0}{note}{propNote}", sentinel));
             return cgain;
         }
 
@@ -2405,8 +2760,12 @@ namespace RunecraftHelper
                 int hi = Math.Min(M - 1, anchorPosIdx + band);
                 for (int j = hi; j > nodeIdx; j--)
                 {
-                    if (ExpDistSq(pts[j], anchorPos) > r2) continue;       // must keep the anchor in the blast
-                    double cov = ExpCoverGain(inp.TPos, inp.TW, captured, pts[j], r2, out _);
+                    // The anchor must end up inside SOME blast: ours, or that of an exploding prop ours sets off.
+                    // Letting a prop do it is the whole saving — the charge can sit well short of the anchor and
+                    // still kill it, so the chain head advances less per charge but reaches the same anchor.
+                    var jFired = ExpTriggeredProps(inp, pts[j], r2);
+                    if (ExpDistSq(pts[j], anchorPos) > r2 && !ExpPropCovers(inp, jFired, anchorPos)) continue;
+                    double cov = ExpCoverGain(inp, captured, pts[j], r2, out _);
                     double score = cov + (j * 1e-6);                       // +j: forward progress breaks coverage ties
                     if (score <= bestScore) continue;                      // can't beat best → skip the costly reach
                     float rr = ExpReach(data, bpr, doors, node, pts[j], effDist);
@@ -2433,7 +2792,7 @@ namespace RunecraftHelper
                         Vector2 p = anchorPos + (dir * Math.Min(d, effRadius * 0.999f));      // ≤ effRadius from anchor
                         if (ExpDistSq(p, anchorPos) > r2 || ExpDistSq(p, inp.TPos[u]) > r2) continue;  // cover both
                         if (!ExpIsWalkable(data, bpr, doors, p)) continue;
-                        double cov = ExpCoverGain(inp.TPos, inp.TW, captured, p, r2, out _);
+                        double cov = ExpCoverGain(inp, captured, p, r2, out _);
                         if (cov <= bestScore) continue;                        // only a real coverage gain wins
                         float rr = ExpReach(data, bpr, doors, node, p, effDist);
                         if (rr < 0f) continue;
@@ -2477,10 +2836,10 @@ namespace RunecraftHelper
                     // ties, so empty bridges stay maximally forward.
                     int pickBand = (int)Math.Ceiling(effRadius / ExpSpineStep);
                     int chosenJ = bridgeJ;
-                    int chosenCnt = ExpCountUncovered(inp.TPos, captured, pts[bridgeJ], r2);
+                    int chosenCnt = ExpCountUncovered(inp, captured, pts[bridgeJ], r2);
                     for (int j = bridgeJ - 1; j >= Math.Max(nodeIdx + 1, bridgeJ - pickBand); j--)
                     {
-                        int cnt = ExpCountUncovered(inp.TPos, captured, pts[j], r2);
+                        int cnt = ExpCountUncovered(inp, captured, pts[j], r2);
                         if (cnt > chosenCnt) { chosenCnt = cnt; chosenJ = j; }
                     }
 
@@ -2494,11 +2853,13 @@ namespace RunecraftHelper
             return route;
         }
 
-        private static int ExpCountUncovered(List<Vector2> tPos, bool[] captured, Vector2 pos, float r2)
+        private static int ExpCountUncovered(ExpRouteInputs inp, bool[] captured, Vector2 pos, float r2)
         {
+            var tPos = inp.TPos;
+            var fired = ExpTriggeredProps(inp, pos, r2);
             int cnt = 0;
             for (int u = 0; u < tPos.Count; u++)
-                if (!captured[u] && ExpDistSq(pos, tPos[u]) <= r2) cnt++;
+                if (!captured[u] && (ExpDistSq(pos, tPos[u]) <= r2 || ExpPropCovers(inp, fired, tPos[u]))) cnt++;
             return cnt;
         }
 
@@ -2555,8 +2916,10 @@ namespace RunecraftHelper
                     Vector2 cand = tPos[c];
 
                     int cnt = 0; double gain = 0;
+                    var candFired = ExpTriggeredProps(inp, cand, r2);
                     for (int u = 0; u < n; u++)
-                        if (!captured[u] && ExpDistSq(cand, tPos[u]) <= r2) { cnt++; gain += tW[u]; }
+                        if (!captured[u] && (ExpDistSq(cand, tPos[u]) <= r2 || ExpPropCovers(inp, candFired, tPos[u])))
+                        { cnt++; gain += tW[u]; }
                     if (cnt < minCluster || gain <= 0) continue;
 
                     int si = ExpBestDetourEdge(inp, route, cand, effDist, minEdge, out float outPath, out _, out int hops);
@@ -2613,7 +2976,7 @@ namespace RunecraftHelper
                     float nodeToCluster = ExpFullPath(data, bpr, doors, node, bestC);
                     int straightHops = Math.Max(1, (int)Math.Ceiling(nodeToCluster / effDist));
                     Vector2 place = step;
-                    double placeCov = ExpCoverGain(tPos, tW, captured, step, r2, out _);
+                    double placeCov = ExpCoverGain(inp, captured, step, r2, out _);
                     float r = ExpReach(data, bpr, doors, node, step, effDist);
                     for (int u = 0; u < n; u++)
                     {
@@ -2630,7 +2993,7 @@ namespace RunecraftHelper
                             if (!ExpIsWalkable(data, bpr, doors, cand)) continue;
                             float rr = ExpReach(data, bpr, doors, node, cand, effDist);
                             if (rr < 0f) continue;                       // not yet reachable — slide a bit nearer node
-                            double cov = ExpCoverGain(tPos, tW, captured, cand, r2, out _);
+                            double cov = ExpCoverGain(inp, captured, cand, r2, out _);
                             if (cov > placeCov)
                             {
                                 float pathUC = ExpFullPath(data, bpr, doors, cand, bestC);
@@ -2875,8 +3238,12 @@ namespace RunecraftHelper
             {
                 var capF = new bool[n];
                 foreach (var rp in route)
+                {
+                    var fired = ExpTriggeredProps(inp, rp.Grid, r2);
                     for (int u = 0; u < n; u++)
-                        if (!capF[u] && ExpDistSq(rp.Grid, inp.TPos[u]) <= r2) { capF[u] = true; covered++; }
+                        if (!capF[u] && (ExpDistSq(rp.Grid, inp.TPos[u]) <= r2 || ExpPropCovers(inp, fired, inp.TPos[u])))
+                        { capF[u] = true; covered++; }
+                }
             }
 
             res.Route = route;
@@ -3057,13 +3424,33 @@ namespace RunecraftHelper
                 return w;
             }
 
-            double Propagated(List<int> ord)
+            // What the run is worth if charges are laid along `ord` until the budget runs out. Anchors past
+            // that point are never reached, so they propagate nothing -- and scoring them anyway is what broke
+            // this on a saturated plan: the whole tour came out over budget, J was -Infinity for EVERY order
+            // including the geometric one, `bestJ > geoJ` was false between two infinities, and the ordering
+            // silently switched itself off exactly where it mattered most. A live 19-charge map showed the
+            // symptom: Opulent sat at the tail of the chain, propagating into nothing, because geometry put it
+            // there and nothing re-scored it.
+            //
+            // Truncating keeps orders comparable AND models the placer, so front-loading a strong rune wins
+            // when the tail cannot be afforded. Recipe rewards have to be counted here for the same reason:
+            // they only cancel as a constant while every order reaches every anchor.
+            (double Value, int Charges, int Reached) Score(List<int> ord)
             {
-                double cum = 0.0, sum = 0.0;
+                double cum = 0.0, sum = 0.0, rewards = 0.0;
                 ulong seen = 0UL;
-                foreach (var g in ord)
+                float walked = 0f;
+                int charges = 0, reached = 0;
+                for (int i = 0; i < ord.Count; i++)
                 {
-                    int t = anchors[g];
+                    walked += i == 0 ? ddet[ord[0]] : dmat[ord[i - 1], ord[i]];
+                    int need = Math.Max(1, (int)Math.Ceiling(walked / effDist));
+                    if (need > inp.Budget) break;
+
+                    charges = need;
+                    reached = i + 1;
+
+                    int t = anchors[ord[i]];
                     double up = inp.TUplift[t];
                     int rid = inp.TRuneId[t];
                     if (up > 0.0 && rid >= 0 && rid < 64)
@@ -3075,16 +3462,16 @@ namespace RunecraftHelper
 
                     cum += up;
                     sum += inp.TWaves[t] * cum;
+                    rewards += inp.TReward[t];
                 }
 
-                return inp.ChainBaseEx * sum;
+                return ((inp.ChainBaseEx * sum) + rewards, charges, reached);
             }
 
             double J(List<int> ord)
             {
-                int charges = (int)Math.Ceiling(Walk(ord) / effDist);
-                if (charges > inp.Budget) return double.NegativeInfinity;   // a plan that cannot be laid
-                return Propagated(ord) - (ExpChargeOpportunityEx * charges);
+                var sc = Score(ord);
+                return sc.Value - (ExpChargeOpportunityEx * sc.Charges);
             }
 
             List<int> Climb(List<int> start)
@@ -3138,10 +3525,18 @@ namespace RunecraftHelper
             if (altJ > bestJ) { bestOrd = altOrd; bestJ = altJ; }
 
             double geoJ = J(geo);
-            int geoCharges = (int)Math.Ceiling(Walk(geo) / effDist);
-            int newCharges = (int)Math.Ceiling(Walk(bestOrd) / effDist);
-            ExpLog(inp, $"--- ORDER (chain-aware) --- geometric: rune {Propagated(geo):F0} ex over {geoCharges} chg " +
-                        $"⇒ J={geoJ:F0}  |  best: rune {Propagated(bestOrd):F0} ex over {newCharges} chg ⇒ J={bestJ:F0}");
+            var geoSc = Score(geo);
+            var bestSc = Score(bestOrd);
+            int geoFull = (int)Math.Ceiling(Walk(geo) / effDist);
+            int bestFull = (int)Math.Ceiling(Walk(bestOrd) / effDist);
+            ExpLog(inp, $"--- ORDER (chain-aware) --- budget {inp.Budget} chg" +
+                        (geoFull > inp.Budget
+                            ? $", the full tour needs {geoFull} ⇒ orders are scored on the part that fits"
+                            : string.Empty));
+            ExpLog(inp, $"  geometric: {geoSc.Value:F0} ex over {geoSc.Charges} chg reaching " +
+                        $"{geoSc.Reached}/{geo.Count} anchors ⇒ J={geoJ:F0}  |  best: {bestSc.Value:F0} ex over " +
+                        $"{bestSc.Charges} chg reaching {bestSc.Reached}/{geo.Count} ⇒ J={bestJ:F0}" +
+                        (bestFull != geoFull ? $"  (full tours {geoFull} vs {bestFull} chg)" : string.Empty));
 
             if (!(bestJ > geoJ + 1e-6))
             {
@@ -3149,8 +3544,11 @@ namespace RunecraftHelper
                 return null;
             }
 
-            ExpLog(inp, $"  REORDERED: +{Propagated(bestOrd) - Propagated(geo):F0} ex of propagation for " +
-                        $"{newCharges - geoCharges:+0;-0;0} charge(s) @ {ExpChargeOpportunityEx:F0} ex");
+            ExpLog(inp, $"  REORDERED: +{bestSc.Value - geoSc.Value:F0} ex for " +
+                        $"{bestSc.Charges - geoSc.Charges:+0;-0;0} charge(s) @ {ExpChargeOpportunityEx:F0} ex" +
+                        (bestSc.Reached != geoSc.Reached
+                            ? $", reaching {bestSc.Reached} anchors instead of {geoSc.Reached}"
+                            : string.Empty));
             return bestOrd;
         }
 
@@ -3246,6 +3644,79 @@ namespace RunecraftHelper
         // are walled off until a blast destroys the blocker. Red translucent cells = the hole a blocked blocker
         // punches in the walkable grid; a small red ring marks the blocker centre, green if already open. Shares
         // DrawExpeditionRouteLargeMap's projection. Visualization only — the route planner ignores these for now.
+        // Exploding props and the area each one would take, on the large map. This is the only way to check
+        // the planner's claim by eye: a charge that captures a monolith 60 grid away looks like a bug until the
+        // barrel's ring is visible around it. It also makes a wrong RADIUS visible -- the rule is a setting, and
+        // the number came from one measurement on one tileset, so the ring is the thing to compare against what
+        // the dig actually clears.
+        private void DrawExpeditionPropsLargeMap()
+        {
+            if (this.expProps.Count == 0) return;
+
+            var gameUi = Core.States.InGameStateObject.GameUi;
+            var largeMap = gameUi.LargeMap;
+            if (largeMap == null || !largeMap.IsVisible || gameUi.WorldMapPanel.IsVisible) return;
+
+            var area = Core.States.InGameStateObject.CurrentAreaInstance;
+            if (!this.GetTrackingPosAndHeight(out var trackingPos, out var trackingHeight)) return;
+
+            var baseRes = UiElementBaseFuncs.BaseResolution;
+            double baseDiag = Math.Sqrt(((double)baseRes.X * baseRes.X) + ((double)baseRes.Y * baseRes.Y));
+            double diag = baseDiag * largeMap.Size.Y / baseRes.Y;
+            if (diag <= 0) return;
+            float scale = this.Settings.MapValueScaleMultiplier * largeMap.Zoom * 0.187812f;
+            if (scale <= 0) return;
+            float mapScale = 240f / scale;
+            float cos = (float)(diag * Math.Cos(MapCameraAngle) / mapScale);
+            float sin = (float)(diag * Math.Sin(MapCameraAngle) / mapScale);
+            var center = largeMap.Center + largeMap.Shift + largeMap.DefaultShift;
+            center.X += 0.6f + this.Settings.MapValueXOffset;
+            center.Y += 0.3f + this.Settings.MapValueYOffset;
+
+            var heights = area.GridHeightData;
+            float HeightAt(float x, float y)
+            {
+                int gx = (int)Math.Round(x), gy = (int)Math.Round(y);
+                if (heights != null && gy >= 0 && gy < heights.Length && heights[gy] != null &&
+                    gx >= 0 && gx < heights[gy].Length)
+                    return heights[gy][gx];
+                return trackingHeight;
+            }
+
+            Vector2 Project(Vector2 g)
+            {
+                float dz = (HeightAt(g.X, g.Y) - trackingHeight) / 10.86957f;
+                float dx = g.X - trackingPos.X, dy = g.Y - trackingPos.Y;
+                return center + new Vector2((dx - dy) * cos, (dz - (dx + dy)) * sin);
+            }
+
+            var dl = ImGui.GetForegroundDrawList();
+            const uint propCol = 0xFF3CA0FFu;   // orange (ABGR)
+
+            foreach (var f in this.expProps)
+            {
+                // The ring is sampled in GRID space and projected point by point, so it comes out as the
+                // map's skewed ellipse rather than a screen circle that would lie about which side of the
+                // radius a target is on.
+                const int Segs = 28;
+                var pts = new Vector2[Segs];
+                for (int i = 0; i < Segs; i++)
+                {
+                    double a = 2.0 * Math.PI * i / Segs;
+                    pts[i] = Project(new Vector2(
+                        f.Pos.X + (float)(f.Radius * Math.Cos(a)),
+                        f.Pos.Y + (float)(f.Radius * Math.Sin(a))));
+                }
+
+                for (int i = 0; i < Segs; i++)
+                    dl.AddLine(pts[i], pts[(i + 1) % Segs], propCol, 1.5f);
+
+                var cs = Project(f.Pos);
+                dl.AddCircleFilled(cs, 4f, 0xFF000000u);
+                dl.AddCircleFilled(cs, 3f, propCol);
+            }
+        }
+
         private void DrawExpeditionGatesLargeMap()
         {
             if (this.expGates.Count == 0) return;
@@ -3326,7 +3797,15 @@ namespace RunecraftHelper
                 bool primary = false;
                 if (t.Kind == ExpKind.Monolith)
                 {
-                    if (t.Value > 0 && t.Value >= s.ExpMonolithMinEx) { w = t.Value; primary = true; }
+                    // Same rule as ExpFillRouteTargets: over the bar (joint value OR sockets) = anchor, under
+                    // both = en-route pickup. (The inventory does not replay the no-anchor fallback -- it
+                    // lists what the filter says.)
+                    if (t.Value > 0)
+                    {
+                        w = t.Value;
+                        primary = t.Value >= s.ExpMonolithMinEx ||
+                                  (s.ExpMonolithMinSockets > 0 && t.Sockets >= s.ExpMonolithMinSockets);
+                    }
                 }
                 else if (t.Kind == ExpKind.Marker)
                 {
@@ -4080,7 +4559,21 @@ namespace RunecraftHelper
 
             ImGui.InputFloat(this.L("exp.monolith_min", "Monolith min (ex)"), ref s.ExpMonolithMinEx, 1f, 10f, "%.0f");
             if (s.ExpMonolithMinEx < 0f) s.ExpMonolithMinEx = 0f;
-            ImGui.TextDisabled(this.L("exp.monolith_min_hint", "Monoliths with best reward ≥ this are routed."));
+            ImGui.TextDisabled(this.L("exp.monolith_min_hint",
+                "Value that makes a monolith worth a DETOUR -- its recipe PLUS the rune it would\n" +
+                "propagate, so a cheap monolith holding Opulent still qualifies. Under the bar it is\n" +
+                "still planned for, picked up when a blast covers it, never struck off. If nothing on\n" +
+                "the map clears the bar, the rune carriers are routed so the run still collects runes."));
+
+            ImGui.SetNextItemWidth(120f);
+            ImGui.InputInt(this.L("exp.monolith_min_sockets", "… or sockets ≥"), ref s.ExpMonolithMinSockets);
+            if (s.ExpMonolithMinSockets < 0) s.ExpMonolithMinSockets = 0;
+            if (s.ExpMonolithMinSockets > 10) s.ExpMonolithMinSockets = 10;
+            ImGui.TextDisabled(this.L("exp.monolith_min_sockets_hint",
+                "A monolith this big is a detour target whatever its recipe is worth: it spawns one\n" +
+                "wave per socket, and those waves carry every rune propagated before them, so the\n" +
+                "planner ends the chain on it. Pick a recipe that FILLS the sockets when you get\n" +
+                "there -- the waves follow the recipe length, not the hole count. 0 = off."));
 
             // Weight profiles (Reward + Buff) exist only on Grand expeditions — a normal Expedition has no
             // reward/buff tables to weight, so the controls are hidden once we know the current map is normal.
@@ -4117,6 +4610,56 @@ namespace RunecraftHelper
                 ImGui.SliderInt(this.L("exp.marker_gold", "Gold remnant chests"),    ref s.ExpMarkerWeightGold,    0, 500);
                 ImGui.SetNextItemWidth(120f);
                 ImGui.SliderInt(this.L("exp.marker_logbook", "Logbook flag (tall 2▲)"), ref s.ExpMarkerWeightLogbook, 0, 1000);
+            }
+
+            // Exploding props: destructible terrain that detonates from our blast with a much larger radius of
+            // its own. Free coverage, so the planner counts what they reach -- but it never chains FROM one (the
+            // next charge is still measured from our own previous charge), so they are area only, never a step.
+            // Rules rather than constants: every tileset ships its own barrel under its own name and radius, and
+            // only one pair has been measured, so a new map is a settings edit instead of a new build.
+            ImGui.Spacing();
+            ImGui.SeparatorText(this.L("exp.props", "Exploding props (barrels, crates)"));
+            ImGui.TextDisabled(this.L("exp.props_hint",
+                "A charge that reaches one of these sets it off, and its blast takes everything in ITS\n" +
+                "radius -- so the planner can cover a far cluster with one charge. The chain does NOT\n" +
+                "continue from the prop. Names and radii differ per tileset: Expedition Debug lists the\n" +
+                "expedition objects on the map that no rule matched, so you can add the ones that explode."));
+
+            ImGui.Checkbox(this.L("exp.props_draw", "Draw props and their radius on the map"),
+                           ref s.ShowExpeditionProps);
+
+            var rules = s.ExpPropRules;
+            if (rules != null)
+            {
+                int remove = -1;
+                for (int i = 0; i < rules.Count; i++)
+                {
+                    var r = rules[i];
+                    ImGui.PushID($"exprop{i}");
+
+                    ImGui.Checkbox("##on", ref r.Enabled);
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(200f);
+                    ImGui.InputText("##path", ref r.PathContains, 128);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(this.L("exp.props_path_tip",
+                            "Any part of the entity path, case-insensitive.\nThe tileset prefix differs per map, so match the leaf: \"ExplodingFill\"."));
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(90f);
+                    ImGui.InputFloat("##r", ref r.Radius, 1f, 5f, "%.0f");
+                    if (r.Radius < 0f) r.Radius = 0f;
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(this.L("exp.props_radius_tip",
+                            "Blast radius in grid units (our own charge is 30 normal / 37 Grand).\nToo large and the plan promises coverage the dig will not deliver."));
+                    ImGui.SameLine();
+                    if (ImGui.Button(this.L("exp.props_remove", "remove"))) remove = i;
+
+                    ImGui.PopID();
+                }
+
+                if (remove >= 0) rules.RemoveAt(remove);
+                if (ImGui.Button(this.L("exp.props_add", "Add prop rule")))
+                    rules.Add(new ExpPropRule { PathContains = string.Empty, Radius = 55f });
             }
 
             ImGui.End();

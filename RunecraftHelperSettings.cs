@@ -48,6 +48,22 @@ namespace RunecraftHelper
         public bool Avoid = false;    // never worth propagating (Wisdom / Bait) -- flagged in the UI
     }
 
+    // One "this object explodes" rule: a case-insensitive substring of the entity's metadata path and the
+    // radius (grid units) it clears AROUND ITSELF. Substring rather than full path so one entry covers every
+    // tileset's copy -- the tileset name sits in the middle of the path.
+    //
+    // The circle is centred on the OBJECT, not on the charge that reaches it (confirmed in play 2026-09-12
+    // on the Oil Derrick: placing a charge on it lights up the object's own wide area as collected). The
+    // Derrick's tooltip also promises "subsequent explosives have a larger detonation radius", and that part
+    // is real but small -- it lasts only for the charge that sets the object off, and it is deliberately NOT
+    // modelled. Do not "fix" this into a charge-centred radius; that reading was tried and is wrong.
+    public sealed class ExpPropRule
+    {
+        public string PathContains = string.Empty;
+        public float Radius = 55f;
+        public bool Enabled = true;
+    }
+
     public sealed class RunecraftHelperSettings : IPSettings
     {
         // poe.ninja PoE2 league name, stored VERBATIM as the API spells it — i.e. the `name` field of
@@ -237,6 +253,10 @@ namespace RunecraftHelper
         // for now — the route planner does not yet exploit blast-opened paths.
         public bool ShowExpeditionGates = false;
 
+        // Draw the exploding props and the radius each would clear on the large map. Off by default: on a
+        // map with many of them the rings crowd the route, and they only matter while checking a plan.
+        public bool ShowExpeditionProps = false;
+
         // Flood-fill tuning for the blocker footprint (the hole a blocked blocker punches in the walkable grid).
         // The fill starts at the blocker cell and 4-connects over non-walkable cells, bounded by these:
         //   • MaxRadius — how far (cells) from the blocker the fill may spread.
@@ -315,6 +335,44 @@ namespace RunecraftHelper
 
         // Route only monoliths whose best reward value (ex) is at or above this (0 = all priced monoliths).
         public float ExpMonolithMinEx = 0f;
+
+        // Sockets that make a monolith a route ANCHOR whatever its recipe is worth. A big monolith is where
+        // the chain pays off: it spawns one wave per socket, and every one of those waves carries the runes
+        // propagated by everything detonated before it -- so the largest monolith on the map is the last
+        // stop worth walking to even when its own recipe is junk. Without this the price gate above could
+        // drop exactly that monolith and leave the accumulated runes with nothing to multiply.
+        // 0 disables it. Inert while the price gate is 0, since then every priced monolith is an anchor.
+        public int ExpMonolithMinSockets = 7;
+
+        // Destructible expedition props that OUR blast sets off, exploding with a much wider radius of their
+        // own (live example: ExplodingFill_BoomBarrel, ~55 grid against a charge's 30/37). They are free area:
+        // no charge is spent on them, and the chain does NOT continue from one -- the next charge is still
+        // measured from our own previous charge -- so the planner treats them as coverage only, never as a
+        // route target or a reach node.
+        //
+        // A LIST because every tileset ships its own variant under its own name and radius; these are the
+        // pairs measured so far. Objects under the expedition league folder that match NO rule are listed in
+        // the expedition debug window, which is how a new one gets found.
+        //
+        // OilWell (the "Oil Derrick") is worth noticing: 112 grid around the object is wider than a Grand
+        // charge can even be placed (108), so the one charge that reaches it clears more ground than the hop
+        // that got there. Logbook_Basin carries both it and FaridunExplosive at 74, so one zone can hold
+        // several kinds at quite different radii.
+        //
+        // ObjectCreationHandling.Replace is REQUIRED on a List with a default: Newtonsoft appends to the
+        // existing instance instead of replacing it, so without this the entries double on every launch.
+        [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
+        public List<ExpPropRule> ExpPropRules = new()
+        {
+            new ExpPropRule { PathContains = "ExplodingFill", Radius = 55f },
+            new ExpPropRule { PathContains = "Objects/OilWell", Radius = 112f },
+            new ExpPropRule { PathContains = "Objects/FaridunExplosive", Radius = 74f },
+        };
+
+        // Which shipped prop rules this settings file has already been offered. A saved list is loaded whole,
+        // so a rule added in a later build would never reach an existing user; the migration adds the missing
+        // ones ONCE and records it here, which is also what makes a deliberate deletion stick.
+        public int ExpPropRulesVersion = 0;
 
         // Per reward-marker weight OVERRIDES (ex). Key = MinimapIcon.IconName from MinimapIcons.dat (the
         // "RewardChest*" family, e.g. "RewardChestCurrency"); value = the ex weight the planner gives that

@@ -74,7 +74,7 @@
   "exp.base_normal": "normal",
   "exp.targets_to_route": "Targets to route",
   "exp.monolith_min": "Monolith min (ex)",
-  "exp.monolith_min_hint": "Monoliths with best reward ≥ this are routed.",
+  "exp.monolith_min_hint": "Value that makes a monolith worth a DETOUR -- its recipe PLUS the rune it would\npropagate, so a cheap monolith holding Opulent still qualifies. Under the bar it is\nstill planned for, picked up when a blast covers it, never struck off. If nothing on\nthe map clears the bar, the rune carriers are routed so the run still collects runes.",
   "exp.weight_profiles_hint": "Weight profiles (create / edit the tables in Settings → Show route planner):",
   "exp.reward_profile_combo": "Reward profile",
   "exp.buff_profile_combo": "Buff profile",
@@ -117,5 +117,13 @@
   "exp.run_hotkey_hint": "Rebuilds the route without the mouse, and works while the planner window is\ncollapsed. It listens only during an expedition, before the detonator is\npressed, so a key the game uses elsewhere (Shift) is usually fine here.",
   "exp.run_tip_hotkey": "Hotkey: {0}",
   "mono.show_holes_on_map": "Show socket count",
-  "mono.show_holes_hint": "Prefixes the label with the socket count: \"[5] 49 ex\""
+  "mono.show_holes_hint": "Prefixes the label with the socket count: \"[5] 49 ex\"",
+  "exp.monolith_min_sockets_hint": "A monolith this big is a detour target whatever its recipe is worth: it spawns one\nwave per socket, and those waves carry every rune propagated before them, so the\nplanner ends the chain on it. Pick a recipe that FILLS the sockets when you get\nthere -- the waves follow the recipe length, not the hole count. 0 = off.",
+  "exp.props": "Exploding props (barrels, crates)",
+  "exp.props_hint": "A charge that reaches one of these sets it off, and its blast takes everything in ITS\nradius -- so the planner can cover a far cluster with one charge. The chain does NOT\ncontinue from the prop. Names and radii differ per tileset: Expedition Debug lists the\nexpedition objects on the map that no rule matched, so you can add the ones that explode.",
+  "exp.props_draw": "Draw props and their radius on the map",
+  "exp.props_path_tip": "Any part of the entity path, case-insensitive.\nThe tileset prefix differs per map, so match the leaf: \"ExplodingFill\".",
+  "exp.props_radius_tip": "Blast radius in grid units (our own charge is 30 normal / 37 Grand).\nToo large and the plan promises coverage the dig will not deliver.",
+  "exp.props_remove": "remove",
+  "exp.props_add": "Add prop rule"
 }
