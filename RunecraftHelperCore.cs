@@ -327,6 +327,14 @@ namespace RunecraftHelper
                     ImGui.Indent();
                     ImGui.Checkbox(this.L("mono.show_holes_on_map", "Show socket count"), ref this.Settings.ShowHoleCountOnMap);
                     ImGui.TextDisabled(this.L("mono.show_holes_hint", "Prefixes the label with the socket count: \"[5] 49 ex\""));
+                    ImGui.Spacing();
+                    ImGui.Checkbox(this.L("mono.chosen_rune_on_map", "Name the committed rune"),
+                                   ref this.Settings.ShowChosenRuneOnMap);
+                    ImGui.TextDisabled(this.L("mono.chosen_rune_hint",
+                        "A monolith whose chosen recipe is not its best-paying one was taken for the rune,\n" +
+                        "so the label names that rune instead of a price that undersells it: \"[5] Opulent\".\n" +
+                        "A monolith sealed by a currency reroll shows both, since neither can change any\n" +
+                        "more and its recipe was force-picked at random: \"[5] 49 ex | Opulent\"."));
                     ImGui.Unindent();
                 }
 

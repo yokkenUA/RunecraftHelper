@@ -196,6 +196,17 @@ namespace RunecraftHelper
         // map position (the same place Radar shows the socket count). Tinted by MonolithHighlightThreshold.
         public bool DrawMonolithValueOnMap = false;
 
+        // Name the committed rune on the on-map label. Two shapes, because the two situations differ:
+        //   • the PLAYER picked a recipe that is not the monolith's best-paying offer -- it was taken for
+        //     the rune, so the price is the least interesting thing about it and a small number next to it
+        //     actively argues against walking there. The rune REPLACES the price: "[5] Opulent".
+        //   • the monolith is SEALED by a currency reroll -- the recipe was force-picked at random, so no
+        //     intent can be read out of it, but price and rune are both pinned now and neither can change.
+        //     BOTH are shown: "[5] 49 ex | Opulent".
+        // On by default: the label this changes is misleading exactly where the rune modes fire, so
+        // leaving it off would preserve a bug rather than preserve a habit.
+        public bool ShowChosenRuneOnMap = true;
+
         // Prefix the on-map label with the monolith's socket count in brackets: "[5] 49 ex" = 5 sockets,
         // best reward 49 ex (community request). Socket count is the first thing that decides whether a
         // monolith is worth walking to, so it belongs on the same line as the price rather than in the

@@ -350,8 +350,22 @@ namespace RunecraftHelper
                 if (!v.HasPos) continue;
                 if (v.Activated == 5) continue;   // standalone foreigner already running — its price is moot, hide the label
 
-                bool hasPrice = showPrice && v.Best > 0;
-                bool hasGlow = showGlow && v.GlowRuneLabels.Count > 0;
+                // The rune goes into the PRICE row, never onto the glow row above it: a committed
+                // monolith's glow row can only ever list runes of that same committed recipe, so the two
+                // would say the same thing twice. The price row is also the better home -- it carries the
+                // socket count, and it is drawn even when the rune is not worth propagating (the glow row
+                // filters those out, and "what was chosen" is a fact either way). So the glow row is
+                // suppressed whenever the price row took the rune over.
+                string runeName = string.Empty;
+                uint runeCol = 0;
+                var runeMode = showPrice && this.Settings.ShowChosenRuneOnMap
+                    ? this.ResolveMapRune(v, out runeName, out runeCol)
+                    : MapRuneMode.None;
+
+                // A monolith whose committed recipe has no price at all now draws a label too, where before
+                // it drew nothing: naming the rune is exactly the case this feature exists for.
+                bool hasPrice = showPrice && (runeMode == MapRuneMode.Replace || v.Best > 0);
+                bool hasGlow = showGlow && runeMode == MapRuneMode.None && v.GlowRuneLabels.Count > 0;
                 if (!hasPrice && !hasGlow) continue;
 
                 // DeltaInWorldToMapDelta replicated (Radar.Helper).
@@ -365,18 +379,55 @@ namespace RunecraftHelper
 
                 if (hasPrice)
                 {
-                    // Same tint as the rewards-window header (shared helper); untinted → white on the map.
-                    uint col = this.MonolithValueColor(v.Best, maxBest, out _);
-                    // "[5] 49 ex" -- sockets in brackets ahead of the price. Dropped when HoleCount is
-                    // unresolved (0): a bracketed zero would claim the monolith HAS no sockets.
-                    var text = this.Settings.ShowHoleCountOnMap && v.HoleCount > 0
-                        ? $"[{v.HoleCount}] {v.Best:F0} ex"
-                        : $"{v.Best:F0} ex";
-                    var ts = ImGui.CalcTextSize(text) * k;
-                    var at = new Vector2(screen.X - (ts.X * 0.5f), priceTopY);
+                    // Built as coloured SEGMENTS rather than as one string: a sealed monolith's label
+                    // carries a price AND a rune, and each wants its own tint -- the price relative to the
+                    // best on screen, the rune by its chain class. A single colour for both would make one
+                    // of them lie. The plate and the centring are computed over the joined width, so the
+                    // one-segment case stays pixel-identical to the label this replaced.
+                    //
+                    // "[5] 49 ex" / "[5] Opulent" / "[5] 49 ex | Opulent" -- sockets in brackets ahead of
+                    // the body, dropped when HoleCount is unresolved (0): a bracketed zero would claim the
+                    // monolith HAS no sockets, which is a different statement from "we could not read it".
+                    var parts = this.mapLabelParts;
+                    parts.Clear();
+                    string head = this.Settings.ShowHoleCountOnMap && v.HoleCount > 0
+                        ? $"[{v.HoleCount}] "
+                        : string.Empty;
+
+                    if (runeMode == MapRuneMode.Replace)
+                    {
+                        // The price is absent here, not merely recoloured: it is the thing that misleads.
+                        var t = head + runeName;
+                        parts.Add((t, runeCol, ImGui.CalcTextSize(t).X * k));
+                    }
+                    else
+                    {
+                        // Same tint as the rewards-window header (shared helper); untinted → white.
+                        var t = $"{head}{v.Best:F0} ex";
+                        parts.Add((t, this.MonolithValueColor(v.Best, maxBest, out _),
+                                   ImGui.CalcTextSize(t).X * k));
+                        if (runeMode == MapRuneMode.Append)
+                        {
+                            parts.Add((MapLabelSeparator, ColorRuneNeutral,
+                                       ImGui.CalcTextSize(MapLabelSeparator).X * k));
+                            parts.Add((runeName, runeCol, ImGui.CalcTextSize(runeName).X * k));
+                        }
+                    }
+
+                    float wide = 0f;
+                    foreach (var part in parts) wide += part.Width;
+                    var ts = new Vector2(wide, fontPx);
+                    var at = new Vector2(screen.X - (wide * 0.5f), priceTopY);
                     dl.AddRectFilled(at - pad, at + ts + pad, monoBg, 2f);
-                    dl.AddText(font, fontPx, at + new Vector2(1f, 1f), ColorShadow, text);
-                    dl.AddText(font, fontPx, at, col, text);
+
+                    float penX = at.X;
+                    foreach (var part in parts)
+                    {
+                        var origin = new Vector2(penX, at.Y);
+                        dl.AddText(font, fontPx, origin + new Vector2(1f, 1f), ColorShadow, part.Text);
+                        dl.AddText(font, fontPx, origin, part.Col, part.Text);
+                        penX += part.Width;
+                    }
                 }
 
                 if (hasGlow)
@@ -393,6 +444,15 @@ namespace RunecraftHelper
                 }
             }
         }
+
+        // Segments of one map label: text, its tint, and its measured width at the label's font size.
+        // Reused across monoliths and frames -- this runs in the draw loop, and a per-label allocation
+        // there is a per-frame allocation.
+        private readonly List<(string Text, uint Col, float Width)> mapLabelParts = new();
+
+        // Between the price and the rune on a sealed monolith's label. Spaced, because the two halves are
+        // different KINDS of fact and should not read as one phrase.
+        private const string MapLabelSeparator = " | ";
 
         private void DrawMonolithRewardsWindow()
         {
@@ -880,6 +940,12 @@ namespace RunecraftHelper
                             r => string.Equals(r.id, selId, StringComparison.Ordinal));
                         if (sel != null)
                         {
+                            // What the monolith was worth BEFORE the choice, so the map can tell a player
+                            // who took the money from one who gave it up for a rune. Read here because the
+                            // next line is the only moment both are known.
+                            foreach (var c in v.Candidates)
+                                if (c.Priced) v.BestOffered = Math.Max(v.BestOffered, c.UnitEx * c.Count);
+
                             v.Candidates.Clear();
                             this.AddCandidate(v, sel);
                             if (v.AnchorIdx < 0) v.StationDiag = string.Empty; // locked recipe is enough
@@ -1263,7 +1329,12 @@ namespace RunecraftHelper
             // feature from the scouting labels — read them when either wants them, but only run the watch-table
             // matching (the labels) when scouting is actually on.
             bool wantLabels = this.Settings.ShowGlowRunes;
-            if ((!wantLabels && !this.Settings.RuneChainEnabled) || station == IntPtr.Zero) return;
+            // The map's "chosen rune instead of the price" label reads GlowSockets too, so it has to be
+            // able to ask for the scan on its own -- otherwise the label silently dies for anyone with
+            // both rune features off, which is exactly the player the label is most useful to.
+            bool wantForMapLabel = this.Settings.DrawMonolithValueOnMap && this.Settings.ShowChosenRuneOnMap;
+            if ((!wantLabels && !this.Settings.RuneChainEnabled && !wantForMapLabel) ||
+                station == IntPtr.Zero) return;
 
             IntPtr gFirst = this.ReadPtr(station + 0x40);
             IntPtr gLast = this.ReadPtr(station + 0x48);
@@ -1324,6 +1395,60 @@ namespace RunecraftHelper
             matched.Sort((a, b) => b.Mult.CompareTo(a.Mult));   // best first
             for (int i = 0; i < matched.Count && i < MaxGlowRuneLabels; i++)
                 v.GlowRuneLabels.Add(matched[i].Name);
+        }
+
+        // How a committed monolith's rune should appear on the map label.
+        private enum MapRuneMode
+        {
+            // Nothing committed, nothing propagating, or the player simply took the best-paying recipe --
+            // the price says it all.
+            None = 0,
+
+            // The player gave up reward value for this rune, so the price lies by omission: it reports a
+            // small number for a monolith that is worth walking to. The rune takes the price's place.
+            Replace,
+
+            // Sealed by a currency reroll. Both the price and the rune are pinned and neither can change,
+            // so both are shown -- "49 ex | Opulent". No intent can be read out of a rerolled monolith
+            // (the reroll force-picks at random), which is exactly why neither number gets to speak for
+            // the other.
+            Append,
+        }
+
+        // Which of the three the map label should use, plus the rune and its tint.
+        //
+        // The preconditions common to both rune modes, and why each is load-bearing:
+        //   • a recipe is committed (station+0x60) -- nothing is "chosen" before that;
+        //   • the recipe actually drops a rune on a GOLD socket, i.e. something propagates. Modes 0/3
+        //     render no gold frame at all (RuneChainHighlightActive), so there is no chosen rune to name.
+        // Then Append if the monolith is sealed, else Replace only when the choice cost reward value:
+        // equal or better means the player took the money, and the money is what the label should say.
+        //
+        // Tinted exactly like the panel's rune label -- amber above 1.0, grey at it, red below -- so a
+        // monolith committed to a worthless rune is not dressed up as a recommendation.
+        private MapRuneMode ResolveMapRune(MonoView v, out string rune, out uint color)
+        {
+            rune = string.Empty;
+            color = ColorGlowRune;
+            if (string.IsNullOrEmpty(v.SelectedRecipeId)) return MapRuneMode.None;
+            if (!RuneChainHighlightActive(v) || v.GlowSockets.Count == 0) return MapRuneMode.None;
+
+            var rec = this.monolithRecipes.Find(
+                r => string.Equals(r.id, v.SelectedRecipeId, StringComparison.Ordinal));
+            if (rec == null) return MapRuneMode.None;
+
+            rune = this.RuneChainPropagatedRune(v, rec);
+            if (string.IsNullOrEmpty(rune)) return MapRuneMode.None;
+
+            double mult = this.RuneChainEffMultAt(v.EntityId, rune, v.RunesEmpowered);
+            color = mult > 1.0 ? ColorGlowRune : mult < 1.0 ? ColorRed : ColorRuneNeutral;
+
+            // Sealed: show both -- but an unpriced reward has no price to show, and "[5]  | Opulent" would
+            // read as a rendering fault rather than as missing data, so that case falls back to the rune
+            // alone (which is also all the old label could have drawn there: nothing).
+            if (v.IsRerolled) return v.Best > 0 ? MapRuneMode.Append : MapRuneMode.Replace;
+
+            return v.BestOffered > 0 && v.Best < v.BestOffered ? MapRuneMode.Replace : MapRuneMode.None;
         }
 
         // For the open Combinations panel: the name of the rune a given recipe would drop on the open
@@ -1441,6 +1566,11 @@ namespace RunecraftHelper
             public float TerrainHeight;    // monolith terrain height (for the radar-map projection)
             public bool HasPos;            // GridPos/TerrainHeight were read
             public double Best;            // best priced reward total (header tint + map label)
+            // Best priced total among the offers this monolith HAD, captured just before a committed
+            // recipe replaces the candidate list. Best then names the committed recipe alone, so the PAIR
+            // is what says whether reward value was traded away -- which is the map label's cue that the
+            // player was after the rune, not the money.
+            public double BestOffered;
             public int HoleCount;          // N — authoritative, from station +0x38
             public int SocketsState = -1;  // StateMachine "sockets" value (for debug; can under-read N)
             public int AreaLevel;
