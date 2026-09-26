@@ -3,9 +3,10 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <Version>0.5.5</Version>
-    <!-- Tracks the GAME build this data/offset set was verified against. An assembly version must be a
-         numeric quad, so the letter lives here; the bug report prints this one. -->
-    <InformationalVersion>0.5.5b</InformationalVersion>
+    <!-- Tracks the GAME build this data/offset set was verified against, and the letter is bumped again
+         for a plugin release made against that same build. An assembly version must be a numeric quad,
+         so the letter lives here; the bug report prints this one. -->
+    <InformationalVersion>0.5.5c</InformationalVersion>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
