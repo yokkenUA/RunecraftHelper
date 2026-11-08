@@ -141,7 +141,7 @@ namespace RunecraftHelper
         // Live: an Expedition logbook area holds exactly one entry, 54 — the tag the logbook recipe
         // requires. NB this sits in AreaInstance’s early region, the one that took -8 in 0.5.5, so
         // re-derive it rather than shifting it blindly on the next patch.
-        private const int AreaContentTagsVecOffset = 0xF8;
+        private const int AreaContentTagsVecOffset = 0x100;  // 2026-11-07 patch: 0xF8 -> 0x100 (early region +8), verified live
 
         private readonly HashSet<int> areaContentTags = new();
         private string areaContentTagsHash = string.Empty;   // area hash the set was read for

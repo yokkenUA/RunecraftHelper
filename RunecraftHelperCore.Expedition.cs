@@ -105,7 +105,7 @@ namespace RunecraftHelper
         // Verified live in Stagnant Basin: the triple sits at +0x150/+0x158/+0x160 spanning 0x110 = 34
         // {i32 statId, i32 value} pairs, and it contains 13471 = 35 -- the +35% explosive radius this
         // very map advertises.
-        private const int AreaMapModsVecOffset = 0x150;
+        private const int AreaMapModsVecOffset = 0x158;  // 2026-11-07 patch: 0x150 -> 0x158 (early region +8), verified live
 
         // row 13470 map_expedition_explosion_radius_+% (+1). Confirmed live: 35 on a +35% zone.
         private const int StatMapExpeditionExplosiveRadiusPct = 13471;
